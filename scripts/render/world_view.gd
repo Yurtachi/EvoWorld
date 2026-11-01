@@ -4,6 +4,8 @@ const Texto = preload("res://scripts/core/textos.gd")
 const FoodShapes = preload("res://scripts/render/food_shapes.gd")
 const World = preload("res://scripts/world/sim_world.gd")
 var world: World
+var teaching_snapshot: Dictionary = {}
+var teaching_target := Vector2.INF
 var selected_id := -1
 var tool := "select"
 var pointer := Vector2.ZERO
@@ -90,6 +92,7 @@ func _draw() -> void:
 		draw_arc(command_target, 10, 0, TAU, 24, Color("8fd5dd"), 1.5, true)
 		draw_line(command_target - Vector2(14, 0), command_target + Vector2(14, 0), Color("8fd5dd"), 1, true)
 		draw_line(command_target - Vector2(0, 14), command_target + Vector2(0, 14), Color("8fd5dd"), 1, true)
+	_draw_teaching()
 	if show_pointer and tool != "select" and Rect2(Vector2.ZERO, world.size).has_point(pointer):
 		var radius := 30.0 if tool == "water" else (24.0 if tool == "obstacle" else (13.0 if tool == "creature" else 7.0))
 		draw_circle(pointer, radius, Color(0.96, 0.91, 0.68, 0.18))
@@ -208,3 +211,28 @@ func _sensor(creature) -> void:
 		points.append(creature.pos + Vector2.from_angle(angle) * creature.genome.vision_range)
 	draw_colored_polygon(points, Color(0.94, 0.91, 0.63, 0.08))
 	draw_polyline(points, Color(0.94, 0.91, 0.63, 0.25), 1, true)
+
+
+func _draw_teaching() -> void:
+	if not world.creatures.has(selected_id):
+		return
+	var active: Dictionary = teaching_snapshot.get("active", {})
+	var point := teaching_target
+	var assisted: bool = active.get("status") == "active" and active.get("assisted", false)
+	if active.get("skill") == "ir_ate_local" and active.get("status") == "active":
+		point = Vector2(active.target[0], active.target[1])
+	if active.get("skill") == "buscar_agua" and active.get("status") == "active":
+		# No omniscient water target. The overlay labels assistance at the body.
+		point = Vector2.INF
+	var zoom := maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	var creature = world.creatures[selected_id]
+	var color := Color("ffe29a")
+	if point.is_finite():
+		draw_arc(point, 12 / zoom, 0, TAU, 32, color, 2 / zoom, true)
+		draw_line(point - Vector2(17, 0) / zoom, point + Vector2(17, 0) / zoom, color, 2 / zoom)
+		draw_line(point - Vector2(0, 17) / zoom, point + Vector2(0, 17) / zoom, color, 2 / zoom)
+		draw_string(ThemeDB.fallback_font, point + Vector2(18, -14) / zoom, Texto.texto("te_marker"), HORIZONTAL_ALIGNMENT_LEFT, -1, int(12 / zoom), color)
+	if assisted:
+		if point.is_finite():
+			draw_dashed_line(creature.pos, point, color, 2 / zoom, 8 / zoom, true)
+		draw_string(ThemeDB.fallback_font, creature.pos + Vector2(-30, -30) / zoom, Texto.texto("te_route"), HORIZONTAL_ALIGNMENT_LEFT, -1, int(12 / zoom), color)

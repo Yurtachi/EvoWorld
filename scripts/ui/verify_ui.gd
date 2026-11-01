@@ -236,6 +236,7 @@ func _verify() -> void:
 	_expect(main.world.to_dict() == automatic_snapshot, "primeiro quadro pausado não sobrescreve a ordem restaurada")
 	await _verify_e1(main, folder)
 	await _verify_e2(main, folder)
+	await _verify_e3(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
 	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog]:
 		dialog.popup_centered()
@@ -335,6 +336,117 @@ func _free_point(world, radius: float) -> Vector2:
 			if clear:
 				return point
 	return Vector2(-1, -1)
+
+func _verify_e3(main, folder: String) -> void:
+	# Same open-terrain fixture as SIM tests; never runs the efficacy experiments.
+	main.world = preload("res://tests/unit/test_sim_e3.gd").new().scene(51)
+	main.selected_id = main.world.pet_id
+	main._reset_session()
+	main.view.set_world(main.world)
+	main._refresh()
+	main.teaching_button.pressed.emit()
+	var panel = main.teaching
+	var creature = main.world.creatures[main.selected_id]
+	_expect(main.teaching_scroll.visible and not main.caregiver_scroll.visible and not main.lab_scroll.visible, "Ensinar acessível no painel real")
+	_expect(panel.skill.item_count == 2 and panel.show_button.disabled and panel.reward_button.disabled, "duas habilidades; local exige alvo e conclusão")
+	var original: Dictionary = main.world.to_dict()
+	panel.refresh(true)
+	_expect(main.world.to_dict() == original, "snapshot de ensino é somente leitura")
+	panel.mark_button.pressed.emit()
+	main._apply_tool(Vector2(500, 300))
+	_expect(panel.target == Vector2(500, 300) and main.view.teaching_target == panel.target, "clique marca alvo próprio de ensino")
+	panel.show_button.pressed.emit()
+	_expect(creature.ensino.active.assisted and creature.ensino.active.policy == "q", "Mostrar usa assistência real com política Q")
+	_expect(creature.pos == Vector2(400, 300) and panel.reward_button.disabled, "Mostrar não teleporta e não permite prêmio antecipado")
+	panel.mark(Vector2(-1, -1))
+	_expect(panel.target == Vector2(500, 300) and panel.receipt.text.contains("Alvo recusado"), "alvo recusado preserva marcador físico anterior")
+	main.world.step()
+	panel.refresh(true)
+	panel.observe_button.pressed.emit()
+	_expect(not creature.ensino.active.assisted and creature.ensino.active.assistance > 0, "Observar desliga guia sem apagar assistência anterior")
+	panel.show_button.pressed.emit()
+	panel.mark(Vector2(510, 300))
+	_expect(creature.ensino.attempts.back().status == "cancelled" and creature.ensino.active.target == [510.0, 300.0], "novo alvo cancela evidência anterior pela API")
+	for i in range(200):
+		main.world.step()
+		if not creature.ensino.running():
+			break
+	panel.refresh(true)
+	_expect(creature.ensino.active.status == "success" and not panel.reward_button.disabled, "chegada física libera Recompensar")
+	var energy: float = creature.energy
+	var hydration: float = creature.hydration
+	var position: Vector2 = creature.pos
+	panel.reward_button.pressed.emit()
+	_expect(creature.ensino.active.rewarded and panel.reward_button.disabled and creature.brain.goal_updates > 0, "recompensa atualiza aprendizado uma única vez")
+	_expect(creature.energy == energy and creature.hydration == hydration and creature.pos == position, "recompensa não repõe recursos nem posição")
+	_expect(panel.badge.text == Texto.texto("not_learned") and panel.chart.rates.is_empty(), "assistência não conta como sucesso autônomo")
+	_expect(panel.events.text.contains("Recompensa registrada") and panel.comparison.text.contains("Antes da sessão"), "eventos e comparação traduzidos")
+	panel.reset_button.pressed.emit()
+	_expect(panel.reset_dialog.visible and creature.brain.goal_updates > 0, "reinício espera confirmação")
+	panel.reset_dialog.hide()
+	_expect(creature.brain.goal_updates > 0, "fechar confirmação preserva aprendizado")
+	panel.reset_button.pressed.emit()
+	panel.reset_dialog.confirmed.emit()
+	panel.reset_dialog.hide()
+	_expect(creature.brain.goal_updates == 0 and panel.snapshot.attempts.is_empty(), "confirmação limpa só ensino")
+	# Real autonomous attempts at nearby targets exercise the statistical badge.
+	# This fixture verifies presentation, not generalization or efficacy.
+	for i in range(5):
+		panel.mark(creature.pos)
+		panel.observe_button.pressed.emit()
+		main.world.step()
+		panel.refresh(true)
+	_expect(panel.badge.text == Texto.texto("learned") and panel.chart.rates.size() == 5 and panel.metrics.text.contains("100%"), "selo e gráfico vêm de cinco desfechos reais sem assistência")
+	main.store.save_world(main.world, "e3", {"name": "E3 salvo"})
+	var saved: Dictionary = main.world.to_dict()
+	main._load("e3")
+	_expect(main.world.to_dict() == saved and panel.badge.text == Texto.texto("learned"), "UI restaura ensino e selo no save v6")
+	creature = main.world.creatures[main.selected_id]
+	panel.skill.select(1)
+	panel.skill.item_selected.emit(1)
+	creature.hydration = 65
+	main.world.place_water(creature.pos + Vector2(55, 0), 20)
+	panel.show_button.pressed.emit()
+	for i in range(200):
+		main.world.step()
+		if not creature.ensino.running():
+			break
+	panel.refresh(true)
+	_expect(creature.ensino.active.status == "success" and panel.events.text.contains("Bebida confirmada"), "Buscar água exige bebida física e exibe evento")
+	main.selected_id = -1
+	main._refresh()
+	_expect(panel.reward_button.disabled and panel.events.text.is_empty(), "seleção ausente apaga dados anteriores e bloqueia ações")
+	main.selected_id = main.world.pet_id
+	main._refresh()
+	main._show_teaching()
+	await process_frame
+	await process_frame
+	_expect(panel.size.x <= main.teaching_scroll.size.x, "painel Ensinar cabe na largura mínima")
+	for button in [panel.show_button, panel.observe_button, main.teaching_button, main.lab_button]:
+		_expect(button.get_global_rect().end.x <= 1100 - 20, "botões Ensinar cabem na janela mínima")
+	_expect(Texto.razao("teaching.assisted") == Texto.texto("assisted"), "razão E3 traduzida")
+	panel.skill.select(0)
+	panel.skill.item_selected.emit(0)
+	panel.mark(creature.pos + Vector2(80, 0))
+	panel.show_button.pressed.emit()
+	main.chat_input.text = "parar"
+	main._send_chat()
+	_expect(panel.snapshot.active.status == "cancelled", "ordem de diálogo atualiza cancelamento mesmo no mundo pausado")
+	var legacy := World.from_dict(JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/world_v3.json")))
+	main.world = legacy
+	main.selected_id = legacy.pet_id
+	main._reset_session()
+	main.view.set_world(legacy)
+	main._refresh()
+	panel.skill.select(1)
+	panel.skill.item_selected.emit(1)
+	panel.show_button.pressed.emit()
+	_expect(panel.receipt.text.contains("sede desativada") and panel.reward_button.disabled, "save legado recusa habilidade hídrica sem inventar fisiologia")
+	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var path := folder.path_join("e3.json" + suffix)
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
+	main._show_lab(false)
 
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
