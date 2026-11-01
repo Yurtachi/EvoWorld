@@ -15,7 +15,10 @@ const Genealogy = preload("res://scripts/evolution/genealogy.gd")
 const Text = preload("res://scripts/core/textos.gd")
 const Signals = preload("res://scripts/communication/signal_channel.gd")
 const Commands = preload("res://scripts/communication/comandos.gd")
-const SAVE_VERSION := 3
+const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
+const Water = preload("res://scripts/environment/water_rules.gd")
+const SAVE_VERSION := 4
+const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
 	"reproduction_cooldown": 300, "max_age": 12000, "mutation_rate": 0.3, "mutation_scale": 0.025
@@ -24,7 +27,7 @@ const REPRODUCTION_ENERGY_FRACTION := 0.9
 const OFFSPRING_ENERGY_FRACTION := 0.4
 const TICK_DT := 0.1
 const EVENT_LIMIT := 256
-const FOOD_ENERGY := 32.0
+const FOOD_ENERGY := FoodCatalog.PARAMETERS.legacy.nutrition
 
 var tick: int = 0
 var seed: int = 1
@@ -32,6 +35,8 @@ var size := Vector2(1200.0, 760.0)
 var creatures: Dictionary = {}
 var foods: Array = []
 var obstacles: Array = []
+var waters: Array = []
+var water_enabled := false
 var events: Array = []
 var pet_id: int = -1
 var food_regrow: bool = true
@@ -57,12 +62,21 @@ var signal_log: Array = []
 var rng: Rng
 var ids := Ids.new()
 var _food_grid := Grid.new()
+var _water_grid := Grid.new()
+var _water_by_id: Dictionary = {}
+var _max_water_radius := 0.0
 var _creature_grid := Grid.new()
 var _obstacle_grid := Grid.new()
 var _food_by_id: Dictionary = {}
 var _max_obstacle_radius := 0.0
 var _in_step := false
 
+
+## Product entry point. The low-level constructor retains historical experiment defaults.
+static func new_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
+	var initial := config.duplicate(true)
+	initial.merge({"creature_count": NEW_WORLD_CREATURE_COUNT, "water_enabled": true, "water_count": 3}, false)
+	return load("res://scripts/world/sim_world.gd").new(world_seed, initial)
 
 func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	seed = world_seed
@@ -93,10 +107,15 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	max_age = clampi(max_age, 1, 10000000)
 	mutation_rate = snappedf(clampf(mutation_rate, 0.0, 1.0), 0.000001)
 	mutation_scale = snappedf(clampf(mutation_scale, 0.0, 0.1), 0.000001)
+	water_enabled = config.get("water_enabled", false) == true
+	for index in range(clampi(int(config.get("water_count", 0)), 0, Water.MAX_REGIONS)):
+		var radius := minf(rng.between(18.0, 48.0), minf(size.x, size.y) * 0.2)
+		place_water(_random_position(radius), radius)
 	for index in range(clampi(int(config.get("obstacle_count", 8)), 0, 1000)):
 		place_obstacle(_random_position(30.0), rng.between(16.0, 30.0))
 	for index in range(clampi(int(config.get("food_count", 80)), 0, food_capacity)):
-		place_food(_free_position(3.0))
+		var food_type: String = ["fruta", "semente", "folha", "cogumelo"][index % 4] if water_enabled else "legacy"
+		place_food(_free_position(3.0), food_type)
 	for index in range(clampi(int(config.get("creature_count", 16)), 0, max_population)):
 		var creature_id := spawn_creature(_free_position(16.0))
 		if pet_id == -1:
@@ -191,15 +210,54 @@ func genetic_diversity() -> Dictionary:
 		result[gene] = maxf(0.0, squared / maxi(1, count))
 	return result
 
-func place_food(pos: Vector2) -> int:
-	if not pos.is_finite() or foods.size() >= food_capacity:
+func place_food(pos: Vector2, tipo: String = "legacy") -> int:
+	if not FoodCatalog.valid_type(tipo) or not pos.is_finite() or foods.size() >= food_capacity:
 		return -1
 	var location := _inside(pos, 3.0)
 	if not _clear(location, 3.0):
 		return -1
 	var food_id := ids.take()
-	foods.append({"id": food_id, "pos": location, "energy": FOOD_ENERGY})
+	foods.append({"id": food_id, "pos": location, "energy": FoodCatalog.PARAMETERS[tipo]["nutrition"], "food_type": tipo})
 	return food_id
+
+## Place an offer just beyond ingestion reach; only later physical ingestion has effects.
+func oferecer_alimento(creature_id: int, tipo: String = "fruta") -> int:
+	if not FoodCatalog.valid_type(tipo) or not creatures.has(creature_id) or not creatures[creature_id].alive:
+		return -1
+	var creature: Creature = creatures[creature_id]
+	var distance := Obs.reach(creature) + creature.genome.speed * TICK_DT + 2.0
+	for index in range(16):
+		var pos := creature.pos + Vector2.from_angle(creature.heading + index * TAU / 16.0) * distance
+		if pos != _inside(pos, 3.0) or _occluded(creature.pos, pos, 3.0):
+			continue
+		var food_id := place_food(pos, tipo)
+		if food_id != -1:
+			return food_id
+	return -1
+
+## Right/bottom expansion changes only bounds. No RNG, IDs, relocation or generation.
+func expand(side: String, amount: Variant) -> bool:
+	if not Data.number(amount) or float(amount) <= 0.0 or side not in ["right", "bottom", "direita", "inferior"]:
+		return false
+	var axis := 0 if side in ["right", "direita"] else 1
+	var extent := size[axis] + float(amount)
+	if not is_finite(extent) or extent > 100000.0:
+		return false
+	var expanded := size
+	expanded[axis] = extent
+	if expanded[axis] <= size[axis]:
+		return false
+	size = expanded
+	return true
+
+func place_water(pos: Vector2, radius: float = 30.0) -> int:
+	if not pos.is_finite() or not is_finite(radius) or radius < 1.0 or radius > Water.MAX_RADIUS or waters.size() >= Water.MAX_REGIONS:
+		return -1
+	if radius * 2.0 > minf(size.x, size.y) or pos != _inside(pos, radius):
+		return -1
+	var water_id := ids.take()
+	waters.append({"id": water_id, "pos": pos, "radius": snappedf(radius, 0.000001)})
+	return water_id
 
 func place_obstacle(pos: Vector2, radius: float) -> void:
 	if not pos.is_finite() or not is_finite(radius) or radius <= 0.0:
@@ -235,10 +293,18 @@ func step() -> void:
 	_in_step = false
 	if food_regrow and tick % food_regrow_interval == 0:
 		for index in range(mini(food_regrow_batch, food_capacity - foods.size())):
-			place_food(_free_position(3.0))
+			var food_type: String = ["fruta", "semente", "folha", "cogumelo"][(tick / food_regrow_interval + index) % 4] if water_enabled else "legacy"
+			place_food(_free_position(3.0), food_type)
 
 func _rebuild_spatial() -> void:
 	_food_grid = Grid.new()
+	_water_grid = Grid.new()
+	_water_by_id.clear()
+	_max_water_radius = 0.0
+	for water in waters:
+		_water_grid.insert(int(water["id"]), water["pos"])
+		_water_by_id[int(water["id"])] = water
+		_max_water_radius = maxf(_max_water_radius, water["radius"])
 	_creature_grid = Grid.new()
 	_obstacle_grid = Grid.new()
 	_food_by_id.clear()
@@ -260,6 +326,18 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 	var result := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger}
 	result["signal"] = creature.last_signal.duplicate(true) if signal_enabled and not creature.last_signal.is_empty() and tick - int(creature.last_signal["tick"]) <= signal_ttl else {}
 	result["action_count"] = Actions.SIGNAL_FIRST + signal_count if signal_enabled else Actions.SIGNAL_FIRST
+	if water_enabled:
+		result.merge({"waters": [], "hydration": creature.hydration, "thirst": creature.thirst, "water_enabled": true})
+		var allowed: Array = range(int(result["action_count"]))
+		allowed.append(Actions.DRINK)
+		result["allowed_actions"] = allowed
+		result["action_count"] = Actions.COUNT
+		var water_extent := Vector2.ONE * (creature.genome.vision_range + _max_water_radius)
+		for water_id in _water_grid.query(creature.pos - water_extent, creature.pos + water_extent):
+			var water: Dictionary = _water_by_id[water_id]
+			var shore := Water.shore(water, creature.pos)
+			if _visible(creature, shore) and not _occluded(creature.pos, shore):
+				result["waters"].append({"id": water_id, "pos": shore, "center": water["pos"], "radius": water["radius"]})
 	var extent := Vector2.ONE * creature.genome.vision_range
 	var low := creature.pos - extent
 	var high := creature.pos + extent
@@ -288,17 +366,21 @@ func _update_creature(creature: Creature) -> void:
 		_die(creature, "age")
 		return
 	creature.energy = clampf(creature.energy, 0.0, creature.max_energy)
+	creature.hydration = clampf(creature.hydration, 0.0, Water.CAPACITY)
 	var sensors := sense(creature, false)
 	var closest: Dictionary = {}
 	var closest_distance := INF
+	var best_score := INF
 	for food in sensors["foods"]:
 		var distance: float = creature.pos.distance_to(food["pos"])
-		if distance < closest_distance:
+		var score: float = (distance + 1.0) / float(FoodCatalog.PARAMETERS[food.get("food_type", "legacy")]["palatability"])
+		if score < best_score:
+			best_score = score
 			closest = food
 			closest_distance = distance
 	var moving := false
 	var order: Dictionary = comandos.acao_pendente(creature, self)
-	if order["ativo"]:
+	if order["ativo"] and not (water_enabled and creature.thirst > Water.THIRST_THRESHOLD):
 		# Never assign the consequences of player actions to a pending Q transition.
 		if creature.brain != null and creature.brain.has_method("suspend_transition"):
 			creature.brain.suspend_transition()
@@ -307,6 +389,8 @@ func _update_creature(creature: Creature) -> void:
 		moving = _apply_action(creature, sensors, int(order["acao"]))
 	elif creature.brain != null:
 		moving = _act_with_brain(creature, sensors)
+	elif water_enabled and creature.thirst > Water.THIRST_THRESHOLD:
+		moving = _seek_water(creature, sensors)
 	elif not closest.is_empty() and closest_distance <= creature.genome.size + 5.0 and creature.hunger > 0.05:
 		_eat(creature, int(closest["id"]))
 	elif creature.hunger < 0.12 or (creature.age % 120 < 12 and closest.is_empty()):
@@ -328,6 +412,10 @@ func _update_creature(creature: Creature) -> void:
 	var cost: float = creature.genome.metabolism * (0.52 + creature.genome.size * 0.022) * TICK_DT
 	if moving:
 		cost += creature.genome.speed * creature.genome.size * 0.0005 * TICK_DT
+	if water_enabled:
+		creature.hydration = snappedf(clampf(creature.hydration - Water.LOSS_PER_SECOND * creature.genome.metabolism * TICK_DT, 0.0, Water.CAPACITY), 0.000001)
+		if creature.hydration <= 0.0:
+			cost += Water.DEHYDRATION_ENERGY_PER_SECOND * TICK_DT
 	creature.energy = snappedf(clampf(creature.energy - cost, 0.0, creature.max_energy), 0.000001)
 	creature.heading = snappedf(wrapf(creature.heading, -PI, PI), 0.000001)
 	if creature.energy <= 0.0:
@@ -353,11 +441,15 @@ func _act_with_brain(creature: Creature, sensors: Dictionary) -> bool:
 	return _apply_action(creature, sensors, action)
 
 func _apply_action(creature: Creature, sensors: Dictionary, action: int) -> bool:
-	if action >= Actions.SIGNAL_FIRST and action < Actions.COUNT:
+	if action >= Actions.SIGNAL_FIRST and action < Actions.DRINK:
 		creature.last_reason = "signal.emitted" if emitir_sinal(creature.id, action - Actions.SIGNAL_FIRST) else "signal.rejected"
 		return false
 	var obs: Dictionary = Obs.features(creature, sensors, size)
 	match action:
+		Actions.DRINK:
+			if not water_enabled or not _drink(creature, int(obs["water_id"])):
+				creature.last_reason = "ecology.drink_empty"
+			return false
 		Actions.EAT:
 			if int(obs["food_id"]) != -1 and float(obs["food_distance"]) <= Obs.reach(creature):
 				_eat(creature, int(obs["food_id"]))
@@ -385,20 +477,74 @@ func emitir_sinal(creature_id: int, symbol: int) -> bool:
 	return Signals.emit(self, creature_id, symbol)
 
 func _eat(creature: Creature, food_id: int) -> void:
+	if not creature.alive:
+		return
 	for index in range(foods.size()):
-		if int(foods[index]["id"]) != food_id:
+		var food: Dictionary = foods[index]
+		if int(food["id"]) != food_id:
 			continue
-		var gained := minf(float(foods[index]["energy"]), creature.max_energy - creature.energy)
-		creature.energy += gained
+		if creature.pos.distance_to(food["pos"]) > Obs.reach(creature) or _occluded(creature.pos, food["pos"]):
+			return
+		var params: Dictionary = FoodCatalog.PARAMETERS[food.get("food_type", "legacy")]
+		var before := creature.energy
+		creature.energy = snappedf(clampf(minf(creature.max_energy, creature.energy + float(food["energy"])) - float(params["toxicity"]), 0.0, creature.max_energy), 0.000001)
+		if water_enabled:
+			creature.hydration = snappedf(clampf(creature.hydration + float(params["hydration"]), 0.0, Water.CAPACITY), 0.000001)
+		var gained := creature.energy - before
 		foods.remove_at(index)
 		_food_grid.remove(food_id)
 		_food_by_id.erase(food_id)
 		creature.last_action = "eat"
-		creature.last_reason = "Ate visible food %d; gained %.1f energy" % [food_id, gained]
-		var event := {"type": "eat", "creature_id": creature.id, "food_id": food_id, "energy": snappedf(gained, 0.000001)}
-		_record(event)
-		creature.remember(events.back())
+		creature.last_reason = "ecology.food_toxic" if gained < 0.0 else "Ate visible food %d; gained %.1f energy" % [food_id, gained]
+		# Zero benefit ingestion consumes the item but is never reported as a meal.
+		if gained > 0.0:
+			var event := {"type": "eat", "creature_id": creature.id, "food_id": food_id, "energy": snappedf(maxf(0.0, gained), 0.000001)}
+			_record(event)
+			creature.remember(events.back())
 		return
+
+func _seek_water(creature: Creature, sensors: Dictionary) -> bool:
+	var nearest: Dictionary = {}
+	var distance := INF
+	for water in sensors.get("waters", []):
+		var candidate: float = creature.pos.distance_to(water["pos"])
+		if candidate < distance:
+			nearest = water
+			distance = candidate
+	if not nearest.is_empty():
+		if distance <= Obs.reach(creature):
+			_drink(creature, int(nearest["id"]))
+			return false
+		creature.heading = (nearest["pos"] - creature.pos).angle()
+		creature.last_action = "seek_water"
+		creature.last_reason = "ecology.seek_water"
+	else:
+		if creature.age % 15 == 0:
+			creature.heading += rng.between(-0.9, 0.9)
+		creature.last_action = "explore"
+		creature.last_reason = "ecology.no_water"
+	return _move(creature, sensors["obstacles"])
+
+## Sensors select the resource, but physiology always checks physical reach again.
+func _drink(creature: Creature, water_id: int) -> bool:
+	if not water_enabled or not creature.alive:
+		return false
+	for water in waters:
+		if int(water["id"]) != water_id:
+			continue
+		var shore := Water.shore(water, creature.pos)
+		if creature.pos.distance_to(shore) > Obs.reach(creature) or _occluded(creature.pos, shore):
+			return false
+		var gained := snappedf(minf(Water.DRINK_AMOUNT, Water.CAPACITY - creature.hydration), 0.000001)
+		if gained <= 0.0:
+			return false
+		creature.hydration = snappedf(creature.hydration + gained, 0.000001)
+		creature.last_action = "drink"
+		creature.last_reason = "ecology.drink"
+		_record({"type": "drink", "creature_id": creature.id, "water_id": water_id, "hydration": gained})
+		creature.remember(events.back())
+		return true
+	return false
 
 func _move(creature: Creature, visible_obstacles: Array) -> bool:
 	var distance: float = creature.genome.speed * TICK_DT
@@ -476,12 +622,15 @@ func to_dict() -> Dictionary:
 		saved_creatures.append(creatures[creature_id].to_dict())
 	var saved_foods: Array = []
 	for food in foods:
-		saved_foods.append({"id": food["id"], "pos": Data.pack_vector(food["pos"]), "energy": food["energy"]})
+		saved_foods.append({"id": food["id"], "pos": Data.pack_vector(food["pos"]), "energy": food["energy"], "food_type": food["food_type"]})
 	var saved_obstacles: Array = []
 	for obstacle in obstacles:
 		saved_obstacles.append({"pos": Data.pack_vector(obstacle["pos"]), "radius": obstacle["radius"]})
+	var saved_waters: Array = []
+	for water in waters:
+		saved_waters.append({"id": water["id"], "pos": Data.pack_vector(water["pos"]), "radius": water["radius"]})
 	var saved_config := {"food_regrow": food_regrow, "food_capacity": food_capacity,
-		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch}
+		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch, "water_enabled": water_enabled}
 	for key in EVOLUTION_DEFAULTS:
 		saved_config[key] = get(key)
 	for key in Signals.DEFAULTS:
@@ -490,14 +639,14 @@ func to_dict() -> Dictionary:
 		"save_version": SAVE_VERSION, "world_seed": str(seed), "tick": tick,
 		"size": Data.pack_vector(size), "pet_id": pet_id, "next_id": ids.next_id,
 		"rng_state": rng.to_dict(), "creatures": saved_creatures, "foods": saved_foods,
-		"obstacles": saved_obstacles, "events": Data.restore_precision(events),
+		"obstacles": saved_obstacles, "waters": saved_waters, "events": Data.restore_precision(events),
 		"config": saved_config, "genealogy": genealogy.to_array(),
 		"signal_log": Data.restore_precision(signal_log), "commands": comandos.to_dict(self)
 	}
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -505,6 +654,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			return null
 	if int(data["save_version"]) == 2:
 		data = _migrate_v2(data)
+		if data.is_empty():
+			return null
+	if int(data["save_version"]) == 3:
+		data = _migrate_v3(data)
 		if data.is_empty():
 			return null
 	if not Data.integer_text(data.get("world_seed")):
@@ -529,6 +682,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	for key in ["mutation_rate", "mutation_scale"]:
 		if not Data.number(config.get(key)) or float(config[key]) < 0.0 or float(config[key]) > (1.0 if key == "mutation_rate" else 0.1):
 			return null
+	if not config.get("water_enabled") is bool:
+		return null
 	if not config.get("food_regrow") is bool:
 		return null
 	if not Data.integer(config.get("food_capacity")) or int(config["food_capacity"]) > 10000:
@@ -537,17 +692,19 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		return null
 	if not Data.integer_text(data["rng_state"].get("state")):
 		return null
-	for field in ["creatures", "foods", "obstacles", "events"]:
+	for field in ["creatures", "foods", "obstacles", "events", "waters"]:
 		if not data.get(field) is Array:
 			return null
 	if data["creatures"].size() > int(config["max_population"]) or data["foods"].size() > int(config["food_capacity"]) or data["obstacles"].size() > 1000:
+		return null
+	if data["waters"].size() > Water.MAX_REGIONS:
 		return null
 	if data["events"].size() > EVENT_LIMIT or not Data.json_data(data["events"]):
 		return null
 	for event in data["events"]:
 		if not Data.event(event, int(data["tick"]), int(data["next_id"])):
 			return null
-	config.merge({"size": saved_size, "creature_count": 0, "food_count": 0, "obstacle_count": 0}, true)
+	config.merge({"size": saved_size, "creature_count": 0, "food_count": 0, "obstacle_count": 0, "water_count": 0}, true)
 	var result = load("res://scripts/world/sim_world.gd").new(int(data["world_seed"]), config)
 	result.tick = int(data["tick"])
 	result.pet_id = int(data["pet_id"])
@@ -566,6 +723,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		result.obstacles.append({"pos": pos, "radius": radius})
 	for entry in data["creatures"]:
 		if not entry is Dictionary:
+			return null
+		if not entry.has("hydration"):
 			return null
 		var creature := Creature.from_dict(entry)
 		if creature == null or not creature.alive or used_ids.has(creature.id) or used_ids.has(creature.genome.id) or creature.id == creature.genome.id or creature.genome.id < 1:
@@ -603,14 +762,27 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		for receiver_id in row["receivers"]:
 			if not ancestry.records.has(int(receiver_id)):
 				return null
+	for water in data["waters"]:
+		if not water is Dictionary or water.size() != 3 or not Data.integer(water.get("id"), 1) or used_ids.has(int(water.get("id", -1))) or not Data.vector(water.get("pos")) or not Data.number(water.get("radius")):
+			return null
+		var pos := Data.unpack_vector(water["pos"])
+		var radius := float(water["radius"])
+		if radius < 1.0 or radius > Water.MAX_RADIUS or radius * 2.0 > minf(saved_size.x, saved_size.y) or pos != result._inside(pos, radius):
+			return null
+		used_ids[int(water["id"])] = true
+		result.waters.append({"id": int(water["id"]), "pos": pos, "radius": snappedf(radius, 0.000001)})
 	for food in data["foods"]:
 		if not food is Dictionary or not Data.integer(food.get("id"), 1) or used_ids.has(int(food.get("id", -1))) or not Data.vector(food.get("pos")) or not Data.number(food.get("energy")):
+			return null
+		if not FoodCatalog.valid_type(food.get("food_type")):
+			return null
+		if food["food_type"] != "legacy" and float(food["energy"]) != float(FoodCatalog.PARAMETERS[food["food_type"]]["nutrition"]):
 			return null
 		var pos := Data.unpack_vector(food["pos"])
 		if float(food["energy"]) < 0.000001 or float(food["energy"]) > 10000.0 or pos != result._inside(pos, 3.0) or not result._clear(pos, 3.0):
 			return null
 		used_ids[int(food["id"])] = true
-		result.foods.append({"id": int(food["id"]), "pos": pos, "energy": snappedf(float(food["energy"]), 0.000001)})
+		result.foods.append({"id": int(food["id"]), "pos": pos, "energy": snappedf(float(food["energy"]), 0.000001), "food_type": food["food_type"]})
 	for used_id in used_ids:
 		if used_id >= int(data["next_id"]):
 			return null
@@ -657,5 +829,25 @@ static func _migrate_v2(data: Dictionary) -> Dictionary:
 	migrated["config"]["signal_enabled"] = false
 	migrated["signal_log"] = []
 	migrated["commands"] = {"order": {}, "protection_requested": false}
+	migrated["save_version"] = 3
+	return migrated
+
+## Migration never consumes RNG/IDs and never invents water in historical worlds.
+static func _migrate_v3(data: Dictionary) -> Dictionary:
+	if Data.integer(data.get("save_version")) and int(data["save_version"]) == SAVE_VERSION:
+		return data.duplicate(true)
+	if not data.get("config") is Dictionary or not data.get("creatures") is Array or not data.get("foods") is Array:
+		return {}
+	var migrated := data.duplicate(true)
+	migrated["config"]["water_enabled"] = false
+	migrated["waters"] = []
+	for entry in migrated["creatures"]:
+		if not entry is Dictionary:
+			return {}
+		entry["hydration"] = Water.INITIAL
+	for food in migrated["foods"]:
+		if not food is Dictionary:
+			return {}
+		food["food_type"] = "legacy"
 	migrated["save_version"] = SAVE_VERSION
 	return migrated

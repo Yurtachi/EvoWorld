@@ -160,7 +160,7 @@ func _persistence(f: Array) -> void:
 	for key in Signals.DEFAULTS:
 		legacy.config.erase(key)
 	var migrated = World.from_dict(legacy)
-	_check(migrated != null and migrated.to_dict().save_version == 3 and not migrated.signal_enabled and migrated.signal_log.is_empty(), "Migração v2 falhou", f)
+	_check(migrated != null and migrated.to_dict().save_version == World.SAVE_VERSION and not migrated.signal_enabled and migrated.signal_log.is_empty(), "Migração v2 falhou", f)
 	for key in ["signal_cost", "signal_noise", "signal_range", "signal_count", "signal_ttl"]:
 		var bad := saved.duplicate(true)
 		bad.config[key] = "inválido"

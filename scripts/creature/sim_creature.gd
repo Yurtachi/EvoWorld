@@ -13,6 +13,10 @@ var pos := Vector2.ZERO
 var heading: float = 0.0
 var energy: float = 80.0
 var max_energy: float = 100.0
+var hydration: float = 100.0
+var thirst: float:
+	get:
+		return clampf(1.0 - hydration / 100.0, 0.0, 1.0)
 var age: int = 0
 var reproduction_cooldown: int = 0
 var alive: bool = true
@@ -35,7 +39,7 @@ func remember(event: Dictionary) -> void:
 func to_dict() -> Dictionary:
 	var result := {
 		"version": 1, "id": id, "name": name, "pos": Data.pack_vector(pos),
-		"heading": heading, "energy": energy, "max_energy": max_energy,
+		"heading": heading, "energy": energy, "max_energy": max_energy, "hydration": hydration,
 		"age": age, "reproduction_cooldown": reproduction_cooldown, "alive": alive, "genome": genome.to_dict(),
 		"last_action": last_action, "last_reason": last_reason, "memory": Data.restore_precision(memory)
 	}
@@ -47,6 +51,8 @@ func to_dict() -> Dictionary:
 	return result
 
 static func from_dict(data: Dictionary) -> SimCreature:
+	if not Data.number(data.get("hydration", 100.0)) or float(data.get("hydration", 100.0)) < 0.0 or float(data.get("hydration", 100.0)) > 100.0:
+		return null
 	if not Signals.valid_received(data.get("last_signal", {})):
 		return null
 	if not Data.integer(data.get("reproduction_cooldown", 0)):
@@ -87,6 +93,7 @@ static func from_dict(data: Dictionary) -> SimCreature:
 	result.max_energy = snappedf(float(data["max_energy"]), 0.000001)
 	if not is_finite(result.energy) or not is_finite(result.max_energy) or result.max_energy <= 0.0 or result.energy > result.max_energy:
 		return null
+	result.hydration = snappedf(float(data.get("hydration", 100.0)), 0.000001)
 	result.age = int(data["age"])
 	result.reproduction_cooldown = int(data.get("reproduction_cooldown", 0))
 	result.alive = data["alive"]
