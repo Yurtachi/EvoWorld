@@ -2,6 +2,7 @@ extends SceneTree
 ## End-to-end scene/controls smoke check; uses an isolated checkpoint directory.
 ## godot --headless --path . -s scripts/ui/verify_ui.gd
 const Store = preload("res://scripts/persistence/save_store.gd")
+const Texto = preload("res://scripts/core/textos.gd")
 var errors: Array[String] = []
 
 func _init() -> void:
@@ -13,13 +14,14 @@ func _verify() -> void:
 	await process_frame
 	await process_frame
 	_expect(main.new_dialog.visible, "first launch offers new-world naming")
-	main.world_input.text = "Test garden"
-	main.pet_input.text = "Clover"
+	_verify_edit_menu(main.pet_input.get_menu())
+	main.world_input.text = "Jardim de Verificação"
+	main.pet_input.text = "Trevo"
 	main.seed_input.text = "12345"
 	main.new_dialog.confirmed.emit()
 	_expect(not main.new_dialog.visible, "valid new-world form closes")
-	_expect(main.world.creatures[main.world.pet_id].name == "Clover", "pet naming reaches real SimWorld")
-	_expect(main.world.seed == 12345 and main.world_name == "Test garden", "world name and seed applied")
+	_expect(main.world.creatures[main.world.pet_id].name == "Trevo", "pet naming reaches real SimWorld")
+	_expect(main.world.seed == 12345 and main.world_name == "Jardim de Verificação", "world name and seed applied")
 	_expect(main.paused and main.world.tick == 0, "new world starts paused")
 	# Tool selection travels through actual toolbar signals.
 	main.tool_buttons.food.pressed.emit()
@@ -40,8 +42,9 @@ func _verify() -> void:
 	main._apply_tool(main.world.creatures[main.world.pet_id].pos)
 	_expect(main.selected_id == main.world.pet_id, "world picking selects the pet")
 	main._refresh()
-	_expect(main.pet_name.text == "Clover", "inspector displays selected identity")
-	_expect(main.reason_text.text == main.world.creatures[main.selected_id].last_reason, "inspector reason comes from simulation")
+	_expect(main.pet_name.text == "Trevo", "inspector displays selected identity")
+	_expect(main.reason_text.text == Texto.razao(main.world.creatures[main.selected_id].last_reason), "inspector translates actual simulation reason")
+	_expect(main.action_text.text == Texto.acao(main.world.creatures[main.selected_id].last_action), "inspector translates actual action")
 	await process_frame
 	await process_frame
 	var inspector: Control = main.pet_name.get_parent()
@@ -62,7 +65,15 @@ func _verify() -> void:
 	main.world.step()
 	main._load()
 	_expect(main.world.to_dict() == snapshot, "UI save/load restores exact checkpoint")
-	_expect(main.world_name == "Test garden" and main.paused, "load restores name and pauses")
+	_expect(main.world_name == "Jardim de Verificação" and main.paused, "load restores name and pauses")
+	_expect(main.status.text == Texto.texto("load_ok"), "load result is in Portuguese")
+	# Arquivos inválidos exercitam a persistência real sem tocar no slot do jogador.
+	var invalid := FileAccess.open(folder.path_join("world.json"), FileAccess.WRITE)
+	invalid.store_string("{invalid")
+	invalid.close()
+	main._load()
+	_expect(main.status.text == Texto.texto("load_invalid", [Texto.texto("json_invalid")]), "invalid load error is in Portuguese")
+	_expect(main.world.to_dict() == snapshot, "invalid load preserves the current world")
 	# Zoom and camera paths are exercised with the actual input handler.
 	var zoom_before: Vector2 = main.camera.zoom
 	var wheel := InputEventMouseButton.new()
@@ -83,6 +94,14 @@ func _verify() -> void:
 	main._input(shortcut)
 	_expect(main.paused != was_paused, "Space toggles playback through global input")
 	main.paused = true
+	# Verifica também a largura mínima suportada com os textos traduzidos.
+	root.size = Vector2i(1100, 680)
+	await process_frame
+	await process_frame
+	for button in main.tool_buttons.values():
+		_expect(button.get_global_rect().end.x < main.get_viewport_rect().size.x - main.SIDEBAR - 30, "Portuguese tool buttons fit at minimum width")
+	_expect(main.follow_button.get_global_rect().end.x <= 1100, "follow button fits at minimum width")
+	_expect(main.status.get_global_rect().end.y < 680, "long load error fits at minimum height")
 	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
 		var path := folder.path_join("world.json" + suffix)
 		if FileAccess.file_exists(path):
@@ -116,3 +135,12 @@ func _free_point(world, radius: float) -> Vector2:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		errors.append(message)
+
+func _verify_edit_menu(menu: PopupMenu) -> void:
+	for index in range(menu.item_count):
+		if not menu.is_item_separator(index):
+			var code: String = Texto.MENUS.get(menu.get_item_id(index), "text_unknown")
+			_expect(code != "text_unknown" and menu.get_item_text(index) == Texto.texto(code), "native editing menu and submenus are translated")
+		var submenu := menu.get_item_submenu_node(index)
+		if submenu != null:
+			_verify_edit_menu(submenu)

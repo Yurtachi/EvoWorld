@@ -2,10 +2,11 @@ extends Node2D
 const World = preload("res://scripts/world/sim_world.gd")
 const Store = preload("res://scripts/persistence/save_store.gd")
 const GardenTheme = preload("res://scripts/ui/garden_theme.gd")
+const Texto = preload("res://scripts/core/textos.gd")
 const SIDEBAR := 308.0
 var world: World
 var store := Store.new()
-var world_name := "Moss garden"
+var world_name := Texto.texto("world_default")
 var selected_id := -1
 var paused := true
 var speed := 1.0
@@ -43,7 +44,7 @@ func _ready() -> void:
 	get_window().min_size = Vector2i(1100, 680)
 	_build_ui()
 	_build_new_dialog()
-	create_world("Moss garden", "Pip", 7421)
+	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
 	get_viewport().size_changed.connect(_fit_world)
 	# Reproducible capture mode uses this same running scene and real SimWorld.
 	var capture_path := ""
@@ -67,7 +68,7 @@ func create_world(garden_name: String, creature_name: String, world_seed: int) -
 	_set_tool("select")
 	_fit_world()
 	_refresh()
-	_notify("Meet %s. Place food nearby, then press Play to observe." % creature_name)
+	_notify(Texto.texto("welcome", [creature_name]))
 
 func _process(delta: float) -> void:
 	if world == null:
@@ -98,13 +99,13 @@ func _build_ui() -> void:
 	var branding := VBoxContainer.new()
 	branding.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header_row.add_child(branding)
-	title = _label(branding, "EVO WORLD   /   Moss garden", 23)
+	title = _label(branding, Texto.texto("title", [world_name]), 23)
 	title.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	stats = _label(branding, "", 13, Color("acbfad"))
 	stats.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	_button(header_row, "New world", _open_new_world).tooltip_text = "Name a pet and begin a seeded garden. Replaces the current unsaved world."
-	_button(header_row, "Save", _save).tooltip_text = "Save the current world, pet and random state to the local checkpoint. Ctrl+S"
-	_button(header_row, "Load", _load).tooltip_text = "Replace this world with the saved checkpoint, or recover its backup. Ctrl+L"
+	_button(header_row, Texto.texto("new_world"), _open_new_world).tooltip_text = Texto.texto("new_tooltip")
+	_button(header_row, Texto.texto("save"), _save).tooltip_text = Texto.texto("save_tooltip")
+	_button(header_row, Texto.texto("load"), _load).tooltip_text = Texto.texto("load_tooltip")
 	var sidebar := _panel(ui, Vector4(-SIDEBAR - 20, 116, -20, -20), Vector4(1, 0, 1, 1))
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -113,85 +114,91 @@ func _build_ui() -> void:
 	inspector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inspector.add_theme_constant_override("separation", 5)
 	scroll.add_child(inspector)
-	_label(inspector, "FIELD NOTES", 12, Color("bccc98"))
-	pet_name = _label(inspector, "Pip", 28)
+	_label(inspector, Texto.texto("field_notes"), 12, Color("bccc98"))
+	pet_name = _label(inspector, Texto.texto("pet_default"), 28)
 	pet_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	identity = _label(inspector, "", 13, Color("acbfad"))
 	identity.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_separator(inspector)
-	energy_text = _label(inspector, "Energy", 15)
+	energy_text = _label(inspector, Texto.texto("energy"), 15)
 	energy_bar = ProgressBar.new()
 	energy_bar.custom_minimum_size.y = 9
 	energy_bar.show_percentage = false
 	inspector.add_child(energy_bar)
 	age_text = _label(inspector, "", 14, Color("acbfad"))
 	_separator(inspector)
-	_label(inspector, "CURRENT ACTION", 12, Color("bccc98"))
-	action_text = _label(inspector, "Rest", 20)
+	_label(inspector, Texto.texto("current_action"), 12, Color("bccc98"))
+	action_text = _label(inspector, Texto.acao("rest"), 20)
+	action_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	reason_text = _label(inspector, "", 14, Color("c8d1bf"))
 	reason_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	reason_text.custom_minimum_size.y = 24
-	_label(inspector, "GENOME", 12, Color("bccc98"))
+	_label(inspector, Texto.texto("genome"), 12, Color("bccc98"))
 	genes_text = _label(inspector, "", 13, Color("acbfad"))
 	genes_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_separator(inspector)
 	var actions := HBoxContainer.new()
 	inspector.add_child(actions)
-	_button(actions, "Find pet", _find_pet).size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	follow_button = _button(actions, "Follow", _toggle_follow)
+	_button(actions, Texto.texto("find_pet"), _find_pet).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	follow_button = _button(actions, Texto.texto("follow"), _toggle_follow)
 	follow_button.toggle_mode = true
-	var sensor_button := _button(inspector, "Show vision range", func(): view.show_sensors = not view.show_sensors)
+	var sensor_button := _button(inspector, Texto.texto("vision"), func(): view.show_sensors = not view.show_sensors)
 	sensor_button.toggle_mode = true
-	sensor_button.tooltip_text = "Geometric range and field of view. Rocks may occlude objects within this area."
+	sensor_button.tooltip_text = Texto.texto("vision_tooltip")
 	var filler := Control.new()
 	filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	inspector.add_child(filler)
 	_separator(inspector)
-	var note := _label(inspector, "SURVIVAL GARDEN\nCreatures use a fixed foraging policy.\nEnergy can run out; pets can die.", 12, Color("a8baa6"))
+	var note := _label(inspector, Texto.texto("survival_note"), 12, Color("a8baa6"))
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var bottom := _panel(ui, Vector4(20, -126, -SIDEBAR - 36, -20), Vector4(0, 1, 1, 1))
+	var bottom := _panel(ui, Vector4(20, -190, -SIDEBAR - 36, -20), Vector4(0, 1, 1, 1))
 	var bottom_col := VBoxContainer.new()
 	bottom.add_child(bottom_col)
 	var toolbar := HBoxContainer.new()
 	bottom_col.add_child(toolbar)
-	for entry in [["select", "Inspect"], ["food", "+ Food"], ["obstacle", "+ Rock"], ["creature", "+ Creature"]]:
-		var key: String = entry[0]
-		var button := _button(toolbar, entry[1], _set_tool.bind(key))
+	for key in ["select", "food", "obstacle", "creature"]:
+		var button := _button(toolbar, Texto.texto("tool_" + key), _set_tool.bind(key))
 		button.toggle_mode = true
 		tool_buttons[key] = button
+	var playback := HBoxContainer.new()
+	bottom_col.add_child(playback)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	toolbar.add_child(spacer)
-	pause_button = _button(toolbar, "Play", _toggle_pause)
+	playback.add_child(spacer)
+	pause_button = _button(playback, Texto.texto("play"), _toggle_pause)
 	for multiplier in [1, 2, 5]:
-		var button := _button(toolbar, "%dx" % multiplier, _set_speed.bind(float(multiplier)))
+		var button := _button(playback, Texto.texto("speed", [multiplier]), _set_speed.bind(float(multiplier)))
 		button.toggle_mode = true
 		button.button_pressed = multiplier == 1
 		speed_buttons[float(multiplier)] = button
 	status = _label(bottom_col, "", 12, Color("c2cdb5"))
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var hint := _label(ui, "Scroll to zoom   /   Middle-drag or WASD to pan   /   F to fit   /   Space to pause   /   F12 screenshot", 12, Color("bfd0b5"))
-	hint.position = Vector2(28, 112)
+	var hint := _label(ui, Texto.texto("shortcuts"), 12, Color("bfd0b5"))
+	hint.anchor_right = 1
+	hint.offset_left = 28
+	hint.offset_right = -SIDEBAR - 36
+	hint.offset_top = 112
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func _build_new_dialog() -> void:
 	new_dialog = ConfirmationDialog.new()
-	new_dialog.title = "A small world, a new companion"
-	new_dialog.ok_button_text = "Create garden"
-	new_dialog.cancel_button_text = "Keep exploring"
-	new_dialog.min_size = Vector2i(460, 400)
+	new_dialog.title = Texto.texto("dialog_title")
+	new_dialog.ok_button_text = Texto.texto("create_garden")
+	new_dialog.cancel_button_text = Texto.texto("keep_exploring")
+	new_dialog.min_size = Vector2i(540, 430)
 	new_dialog.theme = ui.theme
 	new_dialog.dialog_hide_on_ok = false
 	ui.add_child(new_dialog)
 	var column := VBoxContainer.new()
 	new_dialog.add_child(column)
-	_label(column, "Begin with a name.", 24)
-	var intro := _label(column, "A seeded ecosystem with 16 autonomous creatures.\nCreating a garden replaces the unsaved world.", 14, Color("b7c7b1"))
+	_label(column, Texto.texto("begin_name"), 24)
+	var intro := _label(column, Texto.texto("dialog_intro"), 14, Color("b7c7b1"))
 	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	world_input = _field(column, "Garden name", "Moss garden", 48)
-	pet_input = _field(column, "Your pet's name", "Pip", 32)
-	seed_input = _field(column, "World seed  /  repeat a seed to repeat the starting world", "7421", 10)
-	dialog_error = _label(column, "Pets share the same survival rules as other creatures.", 12, Color("d4d6ab"))
+	world_input = _field(column, Texto.texto("garden_name"), Texto.texto("world_default"), 48)
+	pet_input = _field(column, Texto.texto("pet_name"), Texto.texto("pet_default"), 32)
+	seed_input = _field(column, Texto.texto("seed_caption"), Texto.texto("seed_default"), 10)
+	dialog_error = _label(column, Texto.texto("pet_rules"), 12, Color("d4d6ab"))
 	dialog_error.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	new_dialog.confirmed.connect(_confirm_new_world)
 	new_dialog.canceled.connect(func(): paused = dialog_was_paused)
@@ -205,13 +212,13 @@ func _open_new_world() -> void:
 
 func _confirm_new_world() -> void:
 	if world_input.text.strip_edges().is_empty() or pet_input.text.strip_edges().is_empty():
-		dialog_error.text = "Give both the garden and your pet a name."
+		dialog_error.text = Texto.texto("names_required")
 		return
 	if not seed_input.text.is_valid_int() or seed_input.text.to_int() < 0 or seed_input.text.to_int() > 2147483647:
-		dialog_error.text = "Use a whole-number seed from 0 to 2147483647."
+		dialog_error.text = Texto.texto("seed_invalid")
 		return
 	new_dialog.hide()
-	dialog_error.text = "Pets share the same survival rules as other creatures."
+	dialog_error.text = Texto.texto("pet_rules")
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -265,7 +272,7 @@ func _physics_process(delta: float) -> void:
 
 func _apply_tool(pos: Vector2) -> void:
 	if not Rect2(Vector2.ZERO, world.size).has_point(pos):
-		_notify("Choose a spot inside the garden boundary.")
+		_notify(Texto.texto("inside_boundary"))
 		return
 	match tool:
 		"select":
@@ -279,49 +286,50 @@ func _apply_tool(pos: Vector2) -> void:
 			follow = false
 		"food":
 			var id := world.place_food(pos)
-			_notify("Food planted. Creatures must perceive it before seeking it." if id >= 0 else "Cannot place food here: blocked or food capacity reached.")
+			_notify(Texto.texto("food_placed" if id >= 0 else "food_blocked"))
 		"obstacle":
 			var before: int = world.obstacles.size()
 			world.place_obstacle(pos, 24.0)
-			_notify("Rock placed." if world.obstacles.size() > before else "Leave room around creatures and food to place a rock.")
+			_notify(Texto.texto("rock_placed" if world.obstacles.size() > before else "rock_blocked"))
 		"creature":
 			if world.creatures.size() >= 150:
-				_notify("This garden is limited to 150 creatures for responsive observation.")
+				_notify(Texto.texto("population_limit"))
 				return
 			var id := world.spawn_creature(pos)
 			if id >= 0:
 				selected_id = id
-			_notify("New creature introduced." if id >= 0 else "There is no clear space for a creature.")
+			_notify(Texto.texto("creature_placed" if id >= 0 else "creature_blocked"))
 	_refresh()
 
 func _refresh() -> void:
-	title.text = "EVO WORLD   /   %s" % world_name
-	stats.text = "SEED %d    •    TICK %d    •    %d FPS    •    %d entities  /  %d creatures  /  %d food" % [world.seed, world.tick,
-		Engine.get_frames_per_second(), world.creatures.size() + world.foods.size() + world.obstacles.size(), world.creatures.size(), world.foods.size()]
-	pause_button.text = "Play" if paused else "Pause"
+	title.text = Texto.texto("title", [Texto.nome_mundo(world_name)])
+	stats.text = Texto.texto("stats", [world.seed, world.tick,
+		Engine.get_frames_per_second(), world.creatures.size() + world.foods.size() + world.obstacles.size(), world.creatures.size(), world.foods.size()])
+	pause_button.text = Texto.texto("play" if paused else "pause")
 	follow_button.button_pressed = follow
 	if status_time <= 0:
-		status.text = "Click to inspect a creature." if tool == "select" else "Click in the garden to place %s.  Escape returns to Inspect." % tool
+		status.text = Texto.texto("inspect_hint") if tool == "select" else Texto.texto("place_hint", [Texto.texto("place_" + tool)])
 	if not world.creatures.has(selected_id):
-		pet_name.text = "No creature selected"
-		identity.text = "Click a creature or use Find pet."
-		energy_text.text = "Energy —"
+		pet_name.text = Texto.texto("no_selection")
+		identity.text = Texto.texto("select_hint")
+		energy_text.text = Texto.texto("no_energy")
 		energy_bar.value = 0
 		age_text.text = ""
-		action_text.text = "Observe the garden"
-		reason_text.text = "The selected creature is no longer alive." if selected_id >= 0 else "Select an organism to see its current action and the recorded reason."
+		action_text.text = Texto.texto("observe")
+		reason_text.text = Texto.texto("selected_dead" if selected_id >= 0 else "reason_hint")
 		genes_text.text = ""
 		return
 	var creature = world.creatures[selected_id]
-	pet_name.text = creature.name
-	identity.text = "%s  /  ID %d  /  generation %d" % ["YOUR PET" if selected_id == world.pet_id else "ORGANISM", creature.id, creature.genome.generation]
-	energy_text.text = "Energy     %.1f / %.1f" % [creature.energy, creature.max_energy]
+	pet_name.text = Texto.nome_criatura(creature.name)
+	identity.text = Texto.texto("identity", [Texto.texto("your_pet" if selected_id == world.pet_id else "organism"), creature.id, creature.genome.generation])
+	energy_text.text = Texto.texto("energy_value", [Texto.numero(creature.energy), Texto.numero(creature.max_energy)])
 	energy_bar.value = creature.energy / creature.max_energy * 100
-	age_text.text = "Age  %.1f seconds  /  %d ticks" % [creature.age * World.TICK_DT, creature.age]
-	action_text.text = creature.last_action.replace("_", " ").capitalize()
-	reason_text.text = creature.last_reason
-	genes_text.text = "Size  %.1f     Speed  %.1f\nVision  %.0f     Metabolism  %.2f\nHue  %.2f  /  expressed in body color" % [creature.genome.size, creature.genome.speed,
-		creature.genome.vision_range, creature.genome.metabolism, creature.genome.hue]
+	age_text.text = Texto.texto("age_value", [Texto.numero(creature.age * World.TICK_DT), creature.age])
+	age_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	action_text.text = Texto.acao(creature.last_action)
+	reason_text.text = Texto.razao(creature.last_reason)
+	genes_text.text = Texto.texto("genes", [Texto.numero(creature.genome.size), Texto.numero(creature.genome.speed),
+		Texto.numero(creature.genome.vision_range, 0), Texto.numero(creature.genome.metabolism, 2), Texto.numero(creature.genome.hue, 2)])
 
 func _set_tool(value: String) -> void:
 	tool = value
@@ -347,15 +355,15 @@ func _find_pet() -> void:
 		selected_id = world.pet_id
 		camera.position = world.creatures[selected_id].pos + _camera_bias()
 	else:
-		_notify("Your pet is no longer alive in this garden. Load a checkpoint or start a new world.")
+		_notify(Texto.texto("pet_dead"))
 
 func _camera_bias() -> Vector2:
-	return Vector2((SIDEBAR + 16) * 0.5, 5) / camera.zoom
+	return Vector2((SIDEBAR + 16) * 0.5, 25) / camera.zoom
 
 func _fit_world() -> void:
 	if world == null:
 		return
-	var available := get_viewport_rect().size - Vector2(SIDEBAR + 100, 290)
+	var available := get_viewport_rect().size - Vector2(SIDEBAR + 100, 370)
 	var zoom_level := minf(available.x / world.size.x, available.y / world.size.y)
 	camera.zoom = Vector2.ONE * clampf(zoom_level, 0.05, 2.0)
 	camera.position = world.size * 0.5 + _camera_bias()
@@ -363,17 +371,17 @@ func _fit_world() -> void:
 
 func _over_world(pos: Vector2) -> bool:
 	var size := get_viewport_rect().size
-	return pos.x < size.x - SIDEBAR - 36 and pos.y > 138 and pos.y < size.y - 138
+	return pos.x < size.x - SIDEBAR - 36 and pos.y > 150 and pos.y < size.y - 200
 
 func _save() -> void:
 	var result := store.save_world(world, "world", {"name": world_name})
-	_notify(result.message, 8)
+	_notify(Texto.mensagem(result.message), 8)
 
 func _load() -> void:
 	var result := store.load_world("world")
 	if result.ok:
 		world = result.world
-		var name_value = result.metadata.get("name", "Restored garden")
+		var name_value = result.metadata.get("name", Texto.texto("world_restored"))
 		world_name = str(name_value).left(48)
 		selected_id = world.pet_id
 		paused = true
@@ -382,7 +390,7 @@ func _load() -> void:
 		_set_tool("select")
 		_fit_world()
 		_refresh()
-	_notify(result.message, 10)
+	_notify(Texto.mensagem(result.message), 10)
 
 func _notify(message: String, seconds: float = 5.0) -> void:
 	status.text = message
@@ -390,7 +398,7 @@ func _notify(message: String, seconds: float = 5.0) -> void:
 
 func capture_screenshot(path: String = "") -> void:
 	if DisplayServer.get_name() == "headless":
-		_notify("Screenshots require a graphical window.")
+		_notify(Texto.texto("screenshot_graphics"))
 		return
 	if path.is_empty():
 		DirAccess.make_dir_recursive_absolute("user://screenshots")
@@ -398,21 +406,65 @@ func capture_screenshot(path: String = "") -> void:
 	await RenderingServer.frame_post_draw
 	var error := get_viewport().get_texture().get_image().save_png(path)
 	if error == OK:
-		_notify("Screenshot saved: %s" % ProjectSettings.globalize_path(path), 8)
-		print("Screenshot: ", ProjectSettings.globalize_path(path))
+		_notify(Texto.texto("screenshot_saved", [ProjectSettings.globalize_path(path)]), 8)
+		print(Texto.texto("screenshot_saved", [ProjectSettings.globalize_path(path)]))
 	else:
-		_notify("Screenshot failed: %s" % error_string(error))
+		_notify(Texto.texto("screenshot_failed", [error]))
 
 func _capture_demo(path: String) -> void:
-	for i in range(120):
-		world.step()
+	var arguments := OS.get_cmdline_user_args()
+	if "--capture-minimum" in arguments:
+		get_window().size = Vector2i(1100, 680)
+		await get_tree().process_frame
+		_fit_world()
+	var state := "inspect"
+	for argument in arguments:
+		if argument.begins_with("--capture-state="):
+			state = argument.trim_prefix("--capture-state=")
+	if "--show-new-world" not in arguments:
+		for i in range(120):
+			world.step()
 	_refresh()
-	if "--show-new-world" in OS.get_cmdline_user_args():
+	var folder := "user://saves/i18n_capture_%d" % OS.get_process_id()
+	if state in ["save", "load", "invalid-load"]:
+		# Cenários reais, sempre isolados do salvamento do jogador.
+		store = Store.new(folder)
+		if state == "invalid-load":
+			DirAccess.make_dir_recursive_absolute(folder)
+			var invalid := FileAccess.open(folder.path_join("world.json"), FileAccess.WRITE)
+			invalid.store_string("{invalid")
+			invalid.close()
+			_load()
+		else:
+			_save()
+			if state == "load":
+				world.step()
+				_load()
+	if state == "tools":
+		_set_tool("food")
+		view.show_sensors = true
+	if state == "creature":
+		for creature in world.creatures.values():
+			if creature.id != world.pet_id:
+				selected_id = creature.id
+				break
+	if "--show-new-world" in arguments:
 		_open_new_world()
+		if state == "menu":
+			var menu := pet_input.get_menu()
+			_localize_edit_menu(menu)
+			menu.position = new_dialog.position + Vector2i(70, 220)
+			menu.popup()
 	var warmup_until := Time.get_ticks_msec() + 1500
 	while Time.get_ticks_msec() < warmup_until:
 		await get_tree().process_frame
 	await capture_screenshot(path)
+	if state in ["save", "load", "invalid-load"]:
+		for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+			var fixture := folder.path_join("world.json" + suffix)
+			if FileAccess.file_exists(fixture):
+				DirAccess.remove_absolute(fixture)
+		DirAccess.remove_absolute(folder)
 	get_tree().quit()
 
 func _panel(parent: Node, offsets: Vector4, anchors: Vector4) -> PanelContainer:
@@ -455,4 +507,15 @@ func _field(parent: Node, caption: String, value: String, limit: int) -> LineEdi
 	input.text = value
 	input.max_length = limit
 	parent.add_child(input)
+	var menu := input.get_menu()
+	_localize_edit_menu(menu)
+	menu.about_to_popup.connect(_localize_edit_menu.bind(menu))
 	return input
+
+func _localize_edit_menu(menu: PopupMenu) -> void:
+	for index in range(menu.item_count):
+		if not menu.is_item_separator(index):
+			menu.set_item_text(index, Texto.texto(Texto.MENUS.get(menu.get_item_id(index), "text_unknown")))
+		var submenu := menu.get_item_submenu_node(index)
+		if submenu != null:
+			_localize_edit_menu(submenu)
