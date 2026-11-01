@@ -32,6 +32,12 @@ func _verify() -> void:
 	_expect(main.world.creatures[main.world.pet_id].name == "Trevo", "pet naming reaches real SimWorld")
 	_expect(main.world.seed == 12345 and main.world_name == "Jardim de Verificação", "world name and seed applied")
 	_expect(main.paused and main.world.tick == 0, "new world starts paused")
+	_expect(main.world.creatures.size() == 12 and main.new_population.value == 12, "novo jardim usa padrão de 12 sem perder seletor")
+	_expect(main.world.water_enabled and main.world.waters.size() == 3, "novo jardim usa new_world com três regiões de água")
+	var food_types: Dictionary = {}
+	for food in main.world.foods:
+		food_types[food.food_type] = true
+	_expect(food_types.size() == 4, "novo mundo contém os quatro alimentos reais")
 	# Tool selection travels through actual toolbar signals.
 	main.tool_buttons.food.pressed.emit()
 	var food_count: int = main.world.foods.size()
@@ -227,8 +233,9 @@ func _verify() -> void:
 	_expect(main.command_target == Vector2(300, 300), "carregar preserva o alvo persistente de seguir")
 	main._process(0.05)
 	_expect(main.world.to_dict() == automatic_snapshot, "primeiro quadro pausado não sobrescreve a ordem restaurada")
+	await _verify_e1(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
-	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog]:
+	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog]:
 		dialog.popup_centered()
 		await process_frame
 		await process_frame
@@ -278,3 +285,125 @@ func _verify_edit_menu(menu: PopupMenu) -> void:
 		var submenu := menu.get_item_submenu_node(index)
 		if submenu != null:
 			_verify_edit_menu(submenu)
+
+
+func _verify_e1(main, folder: String) -> void:
+	main.initial_population = 12
+	main.create_world("Jardim E1", "Lótus", 7421)
+	for kind in ["fruta", "semente", "folha", "cogumelo"]:
+		main.food_buttons[kind].pressed.emit()
+		var count: int = main.world.foods.size()
+		main._apply_tool(_free_point(main.world, 8))
+		_expect(main.world.foods.size() == count + 1 and main.world.foods.back().food_type == kind, "botão planta " + kind)
+		_expect(main.food_buttons[kind].icon != null, "ícone próprio: " + kind)
+	_expect(main.food_warning.visible and main.food_profile.text.contains("palatabilidade"), "toxicidade e palatabilidade visíveis")
+	main.tool_buttons.water.pressed.emit()
+	var waters: int = main.world.waters.size()
+	main._apply_tool(Vector2(600, 380))
+	_expect(main.world.waters.size() == waters + 1, "ferramenta usa place_water real")
+	main._set_tool("select")
+	var ids: Array = main.world.creatures.keys()
+	main.roster.item_selected.emit(1)
+	_expect(main.selected_id == ids[1], "lista seleciona criatura real")
+	var creature = main.world.creatures[main.selected_id]
+	await process_frame
+	await process_frame
+	var label_point: Vector2 = main.view._label_rect(creature).get_center()
+	main.selected_id = -1
+	main._apply_tool(label_point)
+	_expect(main.selected_id == creature.id, "nome no terreno é clicável")
+	var before: Dictionary = main.world.to_dict()
+	main._open_expand()
+	main.expand_side.select(0)
+	main.expand_amount.value = 300
+	main._update_expand_preview()
+	_expect(main.expand_preview.text.contains("Custo: 0") and main.expand_preview.text.contains("100.000"), "confirmação explica custo e limite")
+	var old_zoom: Vector2 = main.camera.zoom
+	main.expand_dialog.confirmed.emit()
+	var expected: Dictionary = before.duplicate(true)
+	expected.size[0] += 300
+	_expect(main.world.to_dict() == expected, "expandir direita só altera tamanho no estado real")
+	_expect(main.camera.zoom.x <= old_zoom.x and not main.expand_dialog.visible, "expansão reenquadra e fecha confirmação")
+	main.expand_side.select(1)
+	main.expand_amount.value = 200
+	main._confirm_expand()
+	expected.size[1] += 200
+	_expect(main.world.to_dict() == expected, "expandir inferior preserva entidades, IDs e RNG")
+	main.expand_amount.value = 100000
+	main._update_expand_preview()
+	_expect(main.expand_dialog.get_ok_button().disabled, "limite bloqueia confirmação")
+	main._confirm_expand()
+	_expect(main.world.to_dict() == expected, "expansão inválida não modifica mundo")
+	main.expand_amount.value = 97000
+	main.expand_side.select(0)
+	main._confirm_expand()
+	_expect(main.camera.zoom.x * main.world.size.x <= 1100 - main.SIDEBAR - 100 + 1, "câmera também enquadra expansão próxima ao limite")
+	await process_frame
+	await process_frame
+	main.expand_amount.value = 300
+	# Oferta real com fome e sem recursos concorrentes; sem teletransporte.
+	main.world = World.new_world(551, {"creature_count": 1, "food_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false})
+	main.selected_id = main.world.pet_id
+	main._reset_session()
+	main.view.set_world(main.world)
+	creature = main.world.creatures[main.selected_id]
+	creature.energy = 40
+	main._choose_food("fruta")
+	var energy: float = creature.energy
+	var hydration: float = creature.hydration
+	var position: Vector2 = creature.pos
+	main.offer_button.pressed.emit()
+	_expect(creature.energy == energy and creature.hydration == hydration and creature.pos == position, "oferta não injeta energia, água ou posição")
+	_expect(main.pending_offers.size() == 1 and main.world.foods.size() == 1, "oferta registra ID real e espera")
+	for i in range(120):
+		main.world.step()
+		main._observe_physical_events()
+		if main.pending_offers.is_empty():
+			break
+	var receipt_log := "\n".join(main.receipt_rows)
+	_expect(receipt_log.contains("aproximou-se") and receipt_log.contains("ganho confirmado"), "recibo exige aproximação medida e evento eat positivo")
+	# Água exige alcance e evento com ganho positivo; zero não entra no recibo.
+	creature.hydration = 25
+	main.world.place_water(creature.pos, 10)
+	main.world.step()
+	main._observe_physical_events()
+	main._refresh()
+	_expect(creature.hydration > 25 and "\n".join(main.receipt_rows).contains("bebeu"), "bebida física chega ao recibo em português")
+	_expect(main.hydration_text.text.contains("Hidratação") and main.last_event_text.text.contains("bebeu"), "inspector apresenta hidratação e último evento real")
+	_expect(Texto.acao("drink") == "Beber" and Texto.razao("ecology.thirst") != Texto.texto("reason_unknown"), "formatadores consomem catálogo E1")
+	creature.hydration = 25
+	main._refresh()
+	_expect(main.thirst_note.visible, "aviso de sede vem do estado real")
+	# Ganho zero: ofereça a uma criatura saciada e execute ingestão ao alcance.
+	main.world = World.new_world(551, {"creature_count": 1, "food_count": 0, "obstacle_count": 0, "water_count": 0, "food_regrow": false, "reproduction_enabled": false})
+	main.selected_id = main.world.pet_id
+	main._reset_session()
+	main.view.set_world(main.world)
+	creature = main.world.creatures[main.selected_id]
+	creature.energy = creature.max_energy
+	main._offer_food()
+	var item: Dictionary = main.world.foods.back()
+	# A chamada física revalida alcance; fixture move só o alimento ao corpo.
+	item.pos = creature.pos
+	main.world._eat(creature, item.id)
+	main._observe_physical_events()
+	_expect(not "\n".join(main.receipt_rows).contains("ganho confirmado"), "ingestão de ganho zero não vira refeição no recibo")
+	_expect("\n".join(main.receipt_rows).contains("nenhuma refeição"), "recibo explica desaparecimento sem ganho confirmado")
+	# Save v3 real (três criaturas): carregar não chama new_world.
+	var legacy_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/fixtures/world_v3.json"))
+	var legacy = World.from_dict(legacy_data)
+	_expect(legacy != null, "fixture v3 migra")
+	main.store.save_world(legacy, "legacy", {"name": "Jardim antigo"})
+	main.initial_population = 12
+	main._load("legacy")
+	_expect(main.world.creatures.size() == 3 and not main.world.water_enabled, "carregar mantém população e fisiologia do save v3")
+	_expect(main.hydration_text.text == Texto.texto("hydration_off"), "inspector explica fisiologia legada")
+	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var file := folder.path_join("legacy.json" + suffix)
+		if FileAccess.file_exists(file):
+			DirAccess.remove_absolute(file)
+	await process_frame
+	await process_frame
+	_expect(main.fps_chart.samples.size() > 0, "mini gráfico amostra quadros reais")
+	for button in main.food_buttons.values():
+		_expect(button.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "quatro alimentos cabem na janela mínima")

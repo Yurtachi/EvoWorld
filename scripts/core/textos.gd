@@ -343,7 +343,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
-	var modelo: String = CATALOGO.get(codigo, CATALOGO.text_unknown)
+	var modelo: String = E1_UI.get(codigo, E1_CATALOGO.get(codigo, CATALOGO.get(codigo, CATALOGO.text_unknown)))
 	return modelo if valores.is_empty() else modelo % valores
 
 static func numero(valor: float, casas: int = 1) -> String:
@@ -378,6 +378,8 @@ static func evento(event: Dictionary) -> String:
 		"death":
 			var cause := "death_" + str(event.get("reason", "unknown"))
 			return texto("event_death", [tick, id, texto(cause if CATALOGO.has(cause) else "death_unknown")])
+		"drink":
+			return texto("event_drink", [tick, id, int(event.get("water_id", -1)), numero(float(event.get("hydration", 0)))])
 		"eat":
 			return texto("event_eat", [tick, id, int(event.get("food_id", -1)), numero(float(event.get("energy", 0)))])
 		"mutation":
@@ -390,9 +392,11 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
-	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) else texto("action_unknown")
+	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) else texto("action_unknown")
 
 static func razao(original: String) -> String:
+	if E1_RAZOES.has(original):
+		return texto(E1_RAZOES[original])
 	if RAZOES.has(original):
 		return texto(RAZOES[original])
 	var busca := RegEx.new()
@@ -449,4 +453,33 @@ const E1_RAZOES := {
 	"ecology.seek_water": "reason_seek_water", "ecology.drink": "reason_drink",
 	"ecology.drink_empty": "reason_drink_empty", "ecology.no_water": "reason_no_water",
 	"ecology.thirst": "reason_thirst", "ecology.food_toxic": "reason_food_toxic"
+}
+
+
+# Apresentação E1: valores e eventos observados no mundo.
+const E1_UI := {
+ "tool_water": "+ Água", "tool_expand": "Expandir terreno", "place_water": "água",
+ "tool_fruta": "Fruta", "tool_semente": "Semente", "tool_folha": "Folha", "tool_cogumelo": "Cogumelo",
+ "water_placed": "Água colocada. Beber exige alcançar a margem; nenhum ganho é imediato.",
+ "water_blocked": "Água recusada: mantenha a região dentro do terreno (máximo de 256 regiões).",
+ "water_legacy": "Save legado: água visível não ativa sede retroativamente.",
+ "hydration_value": "Hidratação %s / 100 · Sede %s%%", "hydration_off": "Sede desativada neste mundo legado.",
+ "thirst_warning": "Sede alta: buscar água tem prioridade sobre pedidos. Coloque água ao alcance da visão.",
+ "food_warning": "Cogumelo: toxicidade 8; pode reduzir energia. Valores fictícios da simulação.",
+ "food_profile": "%s · palatabilidade %s\nNutrição %s · hidratação %s · toxicidade %s\nSem preferência individual registrada nesta etapa.",
+ "food_choice": "Alimento para plantar ou oferecer", "roster": "Criaturas do jardim (%d)",
+ "offer": "Oferecer alimento à seleção", "offer_none": "Selecione uma criatura viva para oferecer alimento.",
+ "offer_placed": "Passo %d: oferta #%d de %s para %s; aguardando aproximação e ingestão.",
+ "offer_blocked": "Oferta recusada: sem posição livre próxima ou limite de alimento.",
+ "offer_approached": "Passo %d: %s aproximou-se da oferta #%d (distância %s → %s).",
+ "offer_eaten": "Passo %d: %s comeu a oferta #%d; ganho confirmado de %s de energia.",
+ "offer_no_meal": "Passo %d: oferta #%d indisponível; nenhuma refeição com ganho positivo confirmada para o destinatário.",
+ "receipt_title": "RECIBOS E EVENTOS FÍSICOS", "receipt_empty": "Nenhuma oferta nesta sessão. Colocar não significa consumir.",
+ "last_event": "Último evento: %s", "last_event_none": "Último evento: nenhum registrado para esta criatura.",
+ "expand_title": "Expandir terreno", "expand_side": "Borda", "expand_right": "Direita", "expand_bottom": "Inferior",
+ "expand_amount": "Quantidade (unidades)", "expand_confirm": "Confirmar expansão", "expand_preview": "Atual: %s × %s → %s × %s\nÁrea acrescentada: %s unidades². Custo: 0 (sem moeda nesta etapa).\nLimite: 100.000 por eixo. Posições e recursos existentes são preservados.",
+ "expand_ok": "Terreno expandido para %s × %s; câmera reenquadrada.", "expand_invalid": "Expansão recusada: quantidade inválida ou limite de 100.000 por eixo.",
+ "protection_active": "Proteção: pausa preventiva por energia/idade.", "care_notes": "SEU JARDIM", "garden_stats": "%d criaturas · %d alimentos · %d águas · passo %d · %d quadros/s",
+ "drink_badge": "Bebeu +%s", "fps_unit": "quadros/s", "fps_title": "Quadros/s · últimos 120 quadros", "fps_sample": "%d criaturas · média %s · mínimo %s quadros/s",
+ "help_body": "1. Crie o jardim e nomeie o companheiro. O padrão é 12 criaturas e três águas; você pode escolher outra população. Começa pausado.\n\n2. Use Iniciar e selecione por clique, nome no terreno ou lista do Cuidador. Confira energia, hidratação, sede e último evento.\n\n3. Escolha Fruta, Semente, Folha ou Cogumelo e clique no terreno. Cogumelo tem toxicidade. + Água coloca uma região: beber exige alcançar a margem.\n\n4. Oferecer alimento à seleção coloca o tipo escolhido perto dela. O recibo acompanha aproximação e refeição; só ganho positivo confirma refeição.\n\n5. Expandir terreno permite direita ou inferior. Confira quantidade, custo zero e limite antes de confirmar. A câmera reenquadra. Laboratório mantém genes, famílias e sinais.\n\n6. Ctrl+S salva; Ctrl+L carrega e pausa. Ajustes controla população do próximo jardim, proteção e automático. Saves antigos preservam população e fisiologia.\n\nRoda: ampliar · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: capturar.\n\nA proteção pausa por energia baixa ou idade limite; não repõe reservas. Sobrevivência permite morte permanente."
 }
