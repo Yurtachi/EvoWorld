@@ -1,0 +1,11 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+test_behavior_learn.gd: ok
+test_dialogo.gd: ok
+test_evolution.gd: ok
+test_save_store.gd: ok
+test_signal_channel.gd: ok
+test_sim_review.gd: ok
+test_sim_world.gd: ok
+test_smoke.gd: ok
+test_textos.gd: ok

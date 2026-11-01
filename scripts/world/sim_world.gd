@@ -13,7 +13,9 @@ const Grid = preload("res://scripts/core/spatial_grid.gd")
 const Inheritance = preload("res://scripts/evolution/inheritance.gd")
 const Genealogy = preload("res://scripts/evolution/genealogy.gd")
 const Text = preload("res://scripts/core/textos.gd")
-const SAVE_VERSION := 2
+const Signals = preload("res://scripts/communication/signal_channel.gd")
+const Commands = preload("res://scripts/communication/comandos.gd")
+const SAVE_VERSION := 3
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
 	"reproduction_cooldown": 300, "max_age": 12000, "mutation_rate": 0.3, "mutation_scale": 0.025
@@ -44,6 +46,14 @@ var max_age := 12000
 var mutation_rate := 0.3
 var mutation_scale := 0.025
 var genealogy := Genealogy.new()
+var comandos := Commands.new()
+var signal_enabled := false
+var signal_count := 4
+var signal_range := 180.0
+var signal_noise := 0.05
+var signal_cost := 0.3
+var signal_ttl := 10
+var signal_log: Array = []
 var rng: Rng
 var ids := Ids.new()
 var _food_grid := Grid.new()
@@ -57,6 +67,15 @@ var _in_step := false
 func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	seed = world_seed
 	rng = Rng.new(seed)
+	var signal_config: Dictionary = Signals.DEFAULTS.duplicate()
+	for key in Signals.DEFAULTS:
+		signal_config[key] = config.get(key, Signals.DEFAULTS[key])
+	if not Signals.valid_config(signal_config):
+		signal_config = Signals.DEFAULTS.duplicate()
+	for key in Signals.DEFAULTS:
+		set(key, signal_config[key])
+	for key in ["signal_range", "signal_noise", "signal_cost"]:
+		set(key, snappedf(float(get(key)), 0.000001))
 	if config.get("size") is Vector2:
 		size = config["size"]
 		if not size.is_finite():
@@ -239,6 +258,8 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 	if not _in_step:
 		_rebuild_spatial()
 	var result := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger}
+	result["signal"] = creature.last_signal.duplicate(true) if signal_enabled and not creature.last_signal.is_empty() and tick - int(creature.last_signal["tick"]) <= signal_ttl else {}
+	result["action_count"] = Actions.SIGNAL_FIRST + signal_count if signal_enabled else Actions.SIGNAL_FIRST
 	var extent := Vector2.ONE * creature.genome.vision_range
 	var low := creature.pos - extent
 	var high := creature.pos + extent
@@ -276,7 +297,15 @@ func _update_creature(creature: Creature) -> void:
 			closest = food
 			closest_distance = distance
 	var moving := false
-	if creature.brain != null:
+	var order: Dictionary = comandos.acao_pendente(creature, self)
+	if order["ativo"]:
+		# Never assign the consequences of player actions to a pending Q transition.
+		if creature.brain != null and creature.brain.has_method("suspend_transition"):
+			creature.brain.suspend_transition()
+		creature.last_action = Actions.name_of(int(order["acao"]))
+		creature.last_reason = order["razao"]
+		moving = _apply_action(creature, sensors, int(order["acao"]))
+	elif creature.brain != null:
 		moving = _act_with_brain(creature, sensors)
 	elif not closest.is_empty() and closest_distance <= creature.genome.size + 5.0 and creature.hunger > 0.05:
 		_eat(creature, int(closest["id"]))
@@ -294,6 +323,7 @@ func _update_creature(creature: Creature) -> void:
 			creature.last_action = "explore"
 			creature.last_reason = "No food within vision; exploring"
 		moving = _move(creature, sensors["obstacles"])
+	Signals.record_reaction(self, creature)
 	# Rest reduces the activity cost, never creates nutritional energy.
 	var cost: float = creature.genome.metabolism * (0.52 + creature.genome.size * 0.022) * TICK_DT
 	if moving:
@@ -320,6 +350,13 @@ func _act_with_brain(creature: Creature, sensors: Dictionary) -> bool:
 	var action: int = creature.brain.decide(creature, obs, rng)
 	creature.last_action = Actions.name_of(action)
 	creature.last_reason = creature.brain.last_reason
+	return _apply_action(creature, sensors, action)
+
+func _apply_action(creature: Creature, sensors: Dictionary, action: int) -> bool:
+	if action >= Actions.SIGNAL_FIRST and action < Actions.COUNT:
+		creature.last_reason = "signal.emitted" if emitir_sinal(creature.id, action - Actions.SIGNAL_FIRST) else "signal.rejected"
+		return false
+	var obs: Dictionary = Obs.features(creature, sensors, size)
 	match action:
 		Actions.EAT:
 			if int(obs["food_id"]) != -1 and float(obs["food_distance"]) <= Obs.reach(creature):
@@ -343,6 +380,9 @@ func _act_with_brain(creature: Creature, sensors: Dictionary) -> bool:
 		return false
 	creature.pos = target
 	return true
+
+func emitir_sinal(creature_id: int, symbol: int) -> bool:
+	return Signals.emit(self, creature_id, symbol)
 
 func _eat(creature: Creature, food_id: int) -> void:
 	for index in range(foods.size()):
@@ -444,20 +484,27 @@ func to_dict() -> Dictionary:
 		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch}
 	for key in EVOLUTION_DEFAULTS:
 		saved_config[key] = get(key)
+	for key in Signals.DEFAULTS:
+		saved_config[key] = get(key)
 	return {
 		"save_version": SAVE_VERSION, "world_seed": str(seed), "tick": tick,
 		"size": Data.pack_vector(size), "pet_id": pet_id, "next_id": ids.next_id,
 		"rng_state": rng.to_dict(), "creatures": saved_creatures, "foods": saved_foods,
 		"obstacles": saved_obstacles, "events": Data.restore_precision(events),
-		"config": saved_config, "genealogy": genealogy.to_array()
+		"config": saved_config, "genealogy": genealogy.to_array(),
+		"signal_log": Data.restore_precision(signal_log), "commands": comandos.to_dict(self)
 	}
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
+		if data.is_empty():
+			return null
+	if int(data["save_version"]) == 2:
+		data = _migrate_v2(data)
 		if data.is_empty():
 			return null
 	if not Data.integer_text(data.get("world_seed")):
@@ -472,6 +519,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	if not data.get("config") is Dictionary or not data.get("rng_state") is Dictionary:
 		return null
 	var config: Dictionary = data["config"].duplicate()
+	if not Signals.valid_config(config) or not Signals.valid_log(data.get("signal_log"), int(data["tick"]), int(data["next_id"]), int(config["signal_count"])):
+		return null
 	if not config.get("reproduction_enabled") is bool:
 		return null
 	for key in ["max_population", "min_reproduction_age", "reproduction_cooldown", "max_age"]:
@@ -521,6 +570,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		var creature := Creature.from_dict(entry)
 		if creature == null or not creature.alive or used_ids.has(creature.id) or used_ids.has(creature.genome.id) or creature.id == creature.genome.id or creature.genome.id < 1:
 			return null
+		if not Signals.valid_received(creature.last_signal, result.tick, int(data["next_id"]), result.signal_count):
+			return null
 		if creature.pos != result._inside(creature.pos, creature.genome.size) or not result._clear(creature.pos, creature.genome.size):
 			return null
 		for event in creature.memory:
@@ -543,6 +594,15 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	for creature_id in result.creatures:
 		if not ancestry.records.has(creature_id):
 			return null
+		var heard: Dictionary = result.creatures[creature_id].last_signal
+		if not heard.is_empty() and (int(heard["emitter"]) == creature_id or not ancestry.records.has(int(heard["emitter"]))):
+			return null
+	for row in data["signal_log"]:
+		if not ancestry.records.has(int(row["emitter"])):
+			return null
+		for receiver_id in row["receivers"]:
+			if not ancestry.records.has(int(receiver_id)):
+				return null
 	for food in data["foods"]:
 		if not food is Dictionary or not Data.integer(food.get("id"), 1) or used_ids.has(int(food.get("id", -1))) or not Data.vector(food.get("pos")) or not Data.number(food.get("energy")):
 			return null
@@ -559,6 +619,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	result.events = Data.restore_precision(data["events"])
 	result.ids.next_id = int(data["next_id"])
 	result.rng.restore(data["rng_state"])
+	result.signal_log = Data.restore_precision(data["signal_log"])
+	if not result.comandos.restore(data.get("commands"), result):
+		return null
 	return result
 
 ## v1 had no reproductive history: reconstruct the surviving founders only.
@@ -582,5 +645,17 @@ static func _migrate_v1(data: Dictionary) -> Dictionary:
 		return {}
 	migrated["config"]["max_population"] = maxi(int(migrated["config"]["max_population"]), migrated["creatures"].size())
 	migrated["genealogy"] = history.to_array()
+	migrated["save_version"] = 2
+	return migrated
+
+## Earlier worlds keep the channel disabled until explicitly enabled by the player.
+static func _migrate_v2(data: Dictionary) -> Dictionary:
+	if not data.get("config") is Dictionary:
+		return {}
+	var migrated := data.duplicate(true)
+	migrated["config"].merge(Signals.DEFAULTS, false)
+	migrated["config"]["signal_enabled"] = false
+	migrated["signal_log"] = []
+	migrated["commands"] = {"order": {}, "protection_requested": false}
 	migrated["save_version"] = SAVE_VERSION
 	return migrated

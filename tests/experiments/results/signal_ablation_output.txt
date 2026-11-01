@@ -1,0 +1,21 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Treino passagem=0 semente=2101 alimento=15.000 sobrevivência=982.8
+Treino passagem=0 semente=2102 alimento=19.250 sobrevivência=1383.0
+Treino passagem=0 semente=2103 alimento=21.375 sobrevivência=1401.0
+Treino passagem=0 semente=2104 alimento=22.625 sobrevivência=1305.5
+Treino passagem=0 semente=2105 alimento=20.125 sobrevivência=1285.9
+Treino passagem=0 semente=2106 alimento=22.750 sobrevivência=1487.5
+Treino passagem=1 semente=2101 alimento=21.750 sobrevivência=1423.3
+Treino passagem=1 semente=2102 alimento=22.625 sobrevivência=1300.8
+Treino passagem=1 semente=2103 alimento=21.750 sobrevivência=1393.5
+Treino passagem=1 semente=2104 alimento=23.250 sobrevivência=1500.0
+Treino passagem=1 semente=2105 alimento=22.500 sobrevivência=1426.3
+Treino passagem=1 semente=2106 alimento=22.125 sobrevivência=1266.3
+Avaliação train/enabled: {"action_change_fraction":0.0,"emissions":0.0,"food_mean":21.875,"receptions":0.0,"survival_mean":1475.875,"synchronization":0.437102574078387}
+Avaliação train/disabled: {"action_change_fraction":0.0,"emissions":0.0,"food_mean":21.875,"receptions":0.0,"survival_mean":1475.875,"synchronization":0.437102574078387}
+Avaliação train/muted: {"action_change_fraction":0.0,"emissions":0.0,"food_mean":21.875,"receptions":0.0,"survival_mean":1475.875,"synchronization":0.437102574078387}
+Avaliação holdout/enabled: {"action_change_fraction":0.0,"emissions":0.0,"food_mean":22.1625,"receptions":0.0,"survival_mean":1476.4,"synchronization":0.464043362471569}
+Avaliação holdout/disabled: {"action_change_fraction":0.0,"emissions":0.0,"food_mean":22.1625,"receptions":0.0,"survival_mean":1476.4,"synchronization":0.464043362471569}
+Avaliação holdout/muted: {"action_change_fraction":0.0,"emissions":0.0,"food_mean":22.1625,"receptions":0.0,"survival_mean":1476.4,"synchronization":0.464043362471569}
+Critério pré-registrado: false; vitórias=0/10; razão sobrevivência=1.0000; diferença sincronização=0.0000

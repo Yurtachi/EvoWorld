@@ -8,7 +8,10 @@ extends RefCounted
 const FOOD_BUCKETS := 8
 const ENERGY_BUCKETS := 3
 const OBSTACLE_BUCKETS := 2
-const STATE_COUNT := FOOD_BUCKETS * ENERGY_BUCKETS * OBSTACLE_BUCKETS
+const BASE_STATE_COUNT := FOOD_BUCKETS * ENERGY_BUCKETS * OBSTACLE_BUCKETS
+# No signal, or one of eight neutral symbols × three directions × two distances.
+const SIGNAL_BUCKETS := 1 + 8 * 3 * 2
+const STATE_COUNT := BASE_STATE_COUNT * SIGNAL_BUCKETS
 const AHEAD_ANGLE := 0.25
 const NEAR_DISTANCE := 60.0
 const LOW_ENERGY := 0.35
@@ -24,6 +27,7 @@ static func state_index(food_bucket: int, energy_bucket: int, obstacle_ahead: bo
 	return (food_bucket * ENERGY_BUCKETS + energy_bucket) * OBSTACLE_BUCKETS + (1 if obstacle_ahead else 0)
 
 static func describe_state(state: int) -> String:
+	state = state % BASE_STATE_COUNT
 	var obstacle := state % OBSTACLE_BUCKETS
 	var energy := (state / OBSTACLE_BUCKETS) % ENERGY_BUCKETS
 	var food := state / (OBSTACLE_BUCKETS * ENERGY_BUCKETS)
@@ -50,8 +54,14 @@ static func features(creature, sensors: Dictionary, world_size: Vector2) -> Dict
 	var ratio: float = creature.energy / creature.max_energy
 	var energy_bucket := 0 if ratio < LOW_ENERGY else (1 if ratio < HIGH_ENERGY else 2)
 	var obstacle_ahead := _obstacle_ahead(creature, sensors.get("obstacles", []), world_size)
+	var heard: Dictionary = sensors.get("signal", {})
+	var signal_bucket := 0
+	if not heard.is_empty():
+		signal_bucket = 1 + (int(heard["symbol"]) * 3 + int(heard["direction_bucket"])) * 2 + int(heard["distance_bucket"])
 	return {
-		"state": state_index(food_bucket, energy_bucket, obstacle_ahead),
+		"state": state_index(food_bucket, energy_bucket, obstacle_ahead) + BASE_STATE_COUNT * signal_bucket,
+		"signal": heard.duplicate(true), "signal_bucket": signal_bucket,
+		"action_count": sensors.get("action_count", 5),
 		"food_bucket": food_bucket, "energy_bucket": energy_bucket, "obstacle_ahead": obstacle_ahead,
 		"food_id": closest_id, "food_distance": closest_distance
 	}

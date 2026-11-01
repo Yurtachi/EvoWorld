@@ -2,7 +2,6 @@ class_name Dialogo
 extends RefCounted
 ## Intenções delimitadas e narração somente de fatos observáveis. Sem rede ou RNG.
 const SimCreature = preload("res://scripts/creature/sim_creature.gd")
-const SimWorld = preload("res://scripts/world/sim_world.gd")
 const Textos = preload("res://scripts/communication/dialogo_textos.gd")
 const Base = preload("res://scripts/core/textos.gd")
 const BAIXA_ENERGIA := 0.35
@@ -41,7 +40,7 @@ static func _normalizar(texto: String) -> String:
 
 ## Aceita o dicionário de interpretar ou um identificador já validado pela UI.
 ## Não aplica comandos nem altera estado, memória ou eventos.
-static func responder(intent: Variant, criatura: SimCreature, mundo: SimWorld) -> Dictionary:
+static func responder(intent: Variant, criatura: SimCreature, mundo) -> Dictionary:
 	var codigo := codigo_intent(intent)
 	if codigo not in INTENTS:
 		return {"texto": Textos.texto("desconhecido"), "evidencias": [], "comando": {}}
@@ -54,7 +53,7 @@ static func responder(intent: Variant, criatura: SimCreature, mundo: SimWorld) -
 	var fracao := criatura.energy / criatura.max_energy
 	frases.append(Textos.texto("energia_baixa" if fracao < BAIXA_ENERGIA else "energia_regular", [Base.numero(criatura.energy), Base.numero(criatura.max_energy)]))
 	evidencias.append({"fonte": "creature", "creature_id": criatura.id, "campo": "energy", "valor": criatura.energy, "max_energy": criatura.max_energy, "limiar_baixo": BAIXA_ENERGIA, "tick": mundo.tick})
-	frases.append(Textos.texto("fome", [Base.numero(criatura.hunger * 100.0), criatura.age, Base.numero(criatura.age * SimWorld.TICK_DT)]))
+	frases.append(Textos.texto("fome", [Base.numero(criatura.hunger * 100.0), criatura.age, Base.numero(criatura.age * float(mundo.TICK_DT))]))
 	evidencias.append({"fonte": "creature", "campo": "hunger", "valor": criatura.hunger})
 	evidencias.append({"fonte": "creature", "campo": "age", "valor": criatura.age})
 	frases.append(Textos.texto("acao", [Textos.acao(criatura.last_action), Base.razao(criatura.last_reason)]))
