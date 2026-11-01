@@ -2,7 +2,8 @@ class_name SimData
 extends RefCounted
 ## Data-only validation shared by save readers. No resources or scripts are loaded.
 const GENE_SPANS := {"size": 10.0, "speed": 47.0, "vision_range": 195.0,
-	"vision_fov": TAU - PI / 3.0, "metabolism": 1.3, "hue": 1.0}
+	"vision_fov": TAU - PI / 3.0, "metabolism": 1.3, "hue": 1.0,
+	"curiosity": 1.0, "caution": 1.0, "sociability": 1.0, "impulsivity": 1.0}
 
 static func mutation(value: Variant) -> bool:
 	return value is Dictionary and value.size() == 2 and value.get("gene") is String and GENE_SPANS.has(value["gene"]) and number(value.get("delta")) and float(value["delta"]) != 0.0 and absf(float(value["delta"])) <= float(GENE_SPANS[value["gene"]])

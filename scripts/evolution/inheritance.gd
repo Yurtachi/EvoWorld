@@ -21,4 +21,12 @@ static func inherit(parent: Genes, parent_id: int, rng, rate: float, scale: floa
 		var actual := snappedf(float(child.get(gene)) - float(parent.get(gene)), 0.000001)
 		if actual != 0.0:
 			mutations.append({"gene": gene, "delta": actual})
+	for disposition in (Genes.TEMPERAMENT_KEYS if not parent.temperament.is_empty() else []):
+		var value: float = parent.temperament[disposition]
+		if rate > 0.0 and rng.between(0.0, 1.0) < rate:
+			value += clampf(rng.gaussian(scale), -3.0 * scale, 3.0 * scale)
+		child.temperament[disposition] = snappedf(clampf(value, 0.0, 1.0), 0.000001)
+		var delta := snappedf(float(child.temperament[disposition]) - float(parent.temperament[disposition]), 0.000001)
+		if delta != 0.0:
+			mutations.append({"gene": disposition, "delta": delta})
 	return {"genome": child, "mutations": mutations}

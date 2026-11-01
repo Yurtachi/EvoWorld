@@ -483,3 +483,24 @@ const E1_UI := {
  "drink_badge": "Bebeu +%s", "fps_unit": "quadros/s", "fps_title": "Quadros/s · últimos 120 quadros", "fps_sample": "%d criaturas · média %s · mínimo %s quadros/s",
  "help_body": "1. Crie o jardim e nomeie o companheiro. O padrão é 12 criaturas e três águas; você pode escolher outra população. Começa pausado.\n\n2. Use Iniciar e selecione por clique, nome no terreno ou lista do Cuidador. Confira energia, hidratação, sede e último evento.\n\n3. Escolha Fruta, Semente, Folha ou Cogumelo e clique no terreno. Cogumelo tem toxicidade. + Água coloca uma região: beber exige alcançar a margem.\n\n4. Oferecer alimento à seleção coloca o tipo escolhido perto dela. O recibo acompanha aproximação e refeição; só ganho positivo confirma refeição.\n\n5. Expandir terreno permite direita ou inferior. Confira quantidade, custo zero e limite antes de confirmar. A câmera reenquadra. Laboratório mantém genes, famílias e sinais.\n\n6. Ctrl+S salva; Ctrl+L carrega e pausa. Ajustes controla população do próximo jardim, proteção e automático. Saves antigos preservam população e fisiologia.\n\nRoda: ampliar · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: capturar.\n\nA proteção pausa por energia baixa ou idade limite; não repõe reservas. Sobrevivência permite morte permanente."
 }
+
+# E2-SIM — chaves aditivas; integração nos formatadores pertence à UI.
+const E2_CATALOGO := {
+	"fatigue": "Fadiga", "boredom": "Necessidade de estímulo", "loneliness": "Necessidade de contato",
+	"gene_curiosity": "Curiosidade", "gene_caution": "Cautela",
+	"gene_sociability": "Sociabilidade", "gene_impulsivity": "Impulsividade",
+	"action_seek_contact": "Aproximar-se de outra criatura", "action_social_contact": "Contato com outra criatura",
+	"action_player_contact": "Contato com o cuidador",
+	"reason_fatigue": "Fadiga elevada; descansa e reduz o gasto de energia.",
+	"reason_curiosity": "Busca estímulo por movimento e exploração do ambiente.",
+	"reason_contact": "Busca contato com uma criatura percebida.",
+	"reason_survival": "Fome ou sede crítica; prioriza recursos físicos.",
+	"expression_valence": "Valência observada", "expression_arousal": "Ativação observada",
+	"expression_note": "A expressão aparente deriva das necessidades e dos eventos registrados.",
+	"episodic_memory": "Memória episódica", "familiarity": "Familiaridade",
+	"food_preference": "Preferência alimentar aprendida"
+}
+const E2_RAZOES := {
+	"personality.fatigue": "reason_fatigue", "personality.curiosity": "reason_curiosity",
+	"personality.contact": "reason_contact", "personality.survival": "reason_survival"
+}

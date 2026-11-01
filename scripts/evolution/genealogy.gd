@@ -87,7 +87,7 @@ static func from_array(entries: Variant, tick: int, next_id: int):
 				return null
 		elif Data.restore_precision(entry["parents"]) != genome.parents:
 			return null
-		if not entry.get("mutations") is Array or entry["mutations"].size() > Genes.BOUNDS.size():
+		if not entry.get("mutations") is Array or entry["mutations"].size() > Genes.BOUNDS.size() + Genes.TEMPERAMENT_KEYS.size():
 			return null
 		var mutated: Dictionary = {}
 		for mutation in entry["mutations"]:
@@ -120,6 +120,17 @@ static func from_array(entries: Variant, tick: int, next_id: int):
 		var deltas: Dictionary = {}
 		for mutation in entry["mutations"]:
 			deltas[mutation["gene"]] = mutation["delta"]
+		var traits: Dictionary = entry["genome"].get("temperament", {})
+		var parent_traits: Dictionary = parent["genome"].get("temperament", {})
+		if traits.is_empty() != parent_traits.is_empty():
+			return null
+		for changed_gene in deltas:
+			if not Genes.BOUNDS.has(changed_gene) and not traits.has(changed_gene):
+				return null
+		for disposition in traits:
+			var change := snappedf(float(traits[disposition]) - float(parent_traits[disposition]), 0.000001)
+			if not is_equal_approx(change, float(deltas.get(disposition, 0.0))):
+				return null
 		for gene in Genes.BOUNDS:
 			var actual := snappedf(float(entry["genome"][gene]) - float(parent["genome"][gene]), 0.000001)
 			if not is_equal_approx(actual, float(deltas.get(gene, 0.0))):
