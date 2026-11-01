@@ -1,0 +1,9 @@
+.godot/
+*.import
+export/
+builds/
+.env
+*.log
+__pycache__/
+.venv/
+saves/
