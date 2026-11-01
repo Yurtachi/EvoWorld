@@ -3,6 +3,17 @@ extends RefCounted
 ## Catálogo da apresentação. Identificadores e dados salvos continuam intactos.
 
 const CATALOGO := {
+	"reason_age": "Morte por idade: chegou ao limite de vida deste mundo.",
+	"reason_external": "A criatura foi marcada como sem vida por uma intervenção externa.",
+	"evolution_generations": "Gerações alcançadas",
+	"evolution_diversity": "Diversidade genética (variância por gene)",
+	"evolution_population": "População",
+	"evolution_births": "Nascimentos",
+	"evolution_ancestry": "Linhagem",
+	"evolution_sample": "Cenário %s | semente %d | passo %d | geração máxima %d | população %d | nascimentos %d | diversidade %s",
+	"evolution_result": "Resultados do experimento de evolução: %s",
+	"evolution_ticks_invalid": "Use --ticks seguido de um inteiro entre 1 e 100000.",
+	"evolution_save_invalid": "O mundo do experimento divergiu após salvar e carregar.",
 	"world_default": "Jardim de Musgo",
 	"world_restored": "Jardim restaurado",
 	"pet_default": "Pip",
@@ -170,6 +181,8 @@ const MENUS := {
 }
 
 const RAZOES := {
+	"evolution.age": "reason_age",
+	"evolution.external": "reason_external",
 	"brain.q_explore": "reason_q_explore",
 	"brain.q_greedy": "reason_q_greedy",
 	"brain.q_frozen": "reason_q_frozen",

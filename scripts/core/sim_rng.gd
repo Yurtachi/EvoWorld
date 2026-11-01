@@ -10,6 +10,9 @@ func _init(world_seed: int = 1) -> void:
 func between(low: float, high: float) -> float:
 	return generator.randf_range(low, high)
 
+func gaussian(deviation: float) -> float:
+	return generator.randfn(0.0, deviation)
+
 func to_dict() -> Dictionary:
 	return {"state": str(generator.state)}
 

@@ -1,6 +1,11 @@
 class_name SimData
 extends RefCounted
 ## Data-only validation shared by save readers. No resources or scripts are loaded.
+const GENE_SPANS := {"size": 10.0, "speed": 47.0, "vision_range": 195.0,
+	"vision_fov": TAU - PI / 3.0, "metabolism": 1.3, "hue": 1.0}
+
+static func mutation(value: Variant) -> bool:
+	return value is Dictionary and value.size() == 2 and value.get("gene") is String and GENE_SPANS.has(value["gene"]) and number(value.get("delta")) and float(value["delta"]) != 0.0 and absf(float(value["delta"])) <= float(GENE_SPANS[value["gene"]])
 
 static func number(value: Variant) -> bool:
 	return (value is int or value is float) and is_finite(float(value)) and absf(float(value)) <= 2147483647.0
@@ -78,5 +83,9 @@ static func event(value: Variant, max_tick: int = 2147483647, next_id: int = 214
 		"eat":
 			return value.size() == 5 and integer(value.get("food_id"), 1) and int(value["food_id"]) < next_id and number(value.get("energy")) and float(value["energy"]) >= 0.0 and float(value["energy"]) <= 10000.0
 		"death":
-			return value.size() == 4 and value.get("reason") is String and value["reason"] == "starvation"
+			return value.size() == 4 and value.get("reason") is String and value["reason"] in ["starvation", "age", "external"]
+		"birth":
+			return value.size() == 6 and integer(value.get("parent_id"), 1) and int(value["parent_id"]) < int(value["creature_id"]) and integer(value.get("generation"), 1) and number(value.get("energy")) and float(value["energy"]) > 0.0 and float(value["energy"]) <= 10000.0
+		"mutation":
+			return value.size() == 6 and integer(value.get("parent_id"), 1) and int(value["parent_id"]) < int(value["creature_id"]) and mutation({"gene": value.get("gene"), "delta": value.get("delta")})
 	return false

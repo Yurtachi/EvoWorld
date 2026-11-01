@@ -25,7 +25,7 @@ class ExhaustiveWorld extends World:
 
 func _init() -> void:
 	for count in [30, 100, 300, 1000]:
-		var config := {"creature_count": count, "food_count": 80, "obstacle_count": 8}
+		var config := {"creature_count": count, "max_population": count, "reproduction_enabled": false, "food_count": 80, "obstacle_count": 8}
 		var indexed := World.new(17431, config)
 		var reference := ExhaustiveWorld.new(17431, config)
 		var started := Time.get_ticks_usec()
