@@ -10,7 +10,16 @@ const Creature = preload("res://scripts/creature/sim_creature.gd")
 const Obs = preload("res://scripts/behavior/observation.gd")
 const Actions = preload("res://scripts/behavior/actions.gd")
 const Grid = preload("res://scripts/core/spatial_grid.gd")
-const SAVE_VERSION := 1
+const Inheritance = preload("res://scripts/evolution/inheritance.gd")
+const Genealogy = preload("res://scripts/evolution/genealogy.gd")
+const Text = preload("res://scripts/core/textos.gd")
+const SAVE_VERSION := 2
+const EVOLUTION_DEFAULTS := {
+	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
+	"reproduction_cooldown": 300, "max_age": 12000, "mutation_rate": 0.3, "mutation_scale": 0.025
+}
+const REPRODUCTION_ENERGY_FRACTION := 0.9
+const OFFSPRING_ENERGY_FRACTION := 0.4
 const TICK_DT := 0.1
 const EVENT_LIMIT := 256
 const FOOD_ENERGY := 32.0
@@ -27,6 +36,14 @@ var food_regrow: bool = true
 var food_capacity: int = 100
 var food_regrow_interval: int = 10
 var food_regrow_batch: int = 2
+var reproduction_enabled := true
+var max_population := 150
+var min_reproduction_age := 300
+var reproduction_cooldown := 300
+var max_age := 12000
+var mutation_rate := 0.3
+var mutation_scale := 0.025
+var genealogy := Genealogy.new()
 var rng: Rng
 var ids := Ids.new()
 var _food_grid := Grid.new()
@@ -49,17 +66,25 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	food_capacity = clampi(int(config.get("food_capacity", 100)), 0, 10000)
 	food_regrow_interval = maxi(1, int(config.get("food_regrow_interval", 10)))
 	food_regrow_batch = clampi(int(config.get("food_regrow_batch", 2)), 0, 1000)
+	for key in EVOLUTION_DEFAULTS:
+		set(key, config.get(key, EVOLUTION_DEFAULTS[key]))
+	max_population = clampi(max_population, 1, 10000)
+	min_reproduction_age = clampi(min_reproduction_age, 1, 10000000)
+	reproduction_cooldown = clampi(reproduction_cooldown, 1, 10000000)
+	max_age = clampi(max_age, 1, 10000000)
+	mutation_rate = snappedf(clampf(mutation_rate, 0.0, 1.0), 0.000001)
+	mutation_scale = snappedf(clampf(mutation_scale, 0.0, 0.1), 0.000001)
 	for index in range(clampi(int(config.get("obstacle_count", 8)), 0, 1000)):
 		place_obstacle(_random_position(30.0), rng.between(16.0, 30.0))
 	for index in range(clampi(int(config.get("food_count", 80)), 0, food_capacity)):
 		place_food(_free_position(3.0))
-	for index in range(clampi(int(config.get("creature_count", 16)), 0, 1000)):
+	for index in range(clampi(int(config.get("creature_count", 16)), 0, max_population)):
 		var creature_id := spawn_creature(_free_position(16.0))
 		if pet_id == -1:
 			pet_id = creature_id
 
 func spawn_creature(pos: Vector2, creature_name: String = "", genome = null) -> int:
-	if not pos.is_finite():
+	if not pos.is_finite() or creatures.size() >= max_population or genealogy.records.size() >= Genealogy.MAX_RECORDS:
 		return -1
 	var genes: Genes
 	if genome == null:
@@ -73,6 +98,12 @@ func spawn_creature(pos: Vector2, creature_name: String = "", genome = null) -> 
 		if genes == null:
 			return -1
 	genes.bound_genes()
+	# Introductions are founders; reproductive ancestry only comes from reproduce().
+	genes.parents = []
+	genes.generation = 0
+	return _spawn(pos, creature_name, genes)
+
+func _spawn(pos: Vector2, creature_name: String, genes: Genes, initial_energy: float = -1.0, mutations: Array = []) -> int:
 	var location := _inside(pos, genes.size)
 	if not _clear(location, genes.size):
 		location = _free_position(genes.size)
@@ -82,14 +113,64 @@ func spawn_creature(pos: Vector2, creature_name: String = "", genome = null) -> 
 	var creature := Creature.new()
 	creature.id = ids.take()
 	creature.genome = genes
-	creature.name = creature_name.left(64) if not creature_name.is_empty() else "Creature %d" % creature.id
+	creature.name = creature_name.left(64) if not creature_name.is_empty() else Text.texto("creature_default", [creature.id])
 	creature.pos = location
 	creature.heading = snappedf(rng.between(-PI, PI), 0.000001)
 	creature.max_energy = snappedf(80.0 + genes.size * 2.0, 0.000001)
-	creature.energy = snappedf(creature.max_energy * 0.8, 0.000001)
+	creature.energy = snappedf(creature.max_energy * 0.8, 0.000001) if initial_energy < 0.0 else initial_energy
 	creatures[creature.id] = creature
+	genealogy.register(creature, tick, mutations)
+	if _in_step:
+		_creature_grid.insert(creature.id, creature.pos)
 	_record({"type": "spawn", "creature_id": creature.id, "name": creature.name})
 	return creature.id
+
+## Returns the newborn ID, or -1 without charging energy when ineligible.
+func reproduce(creature_id: int) -> int:
+	if not reproduction_enabled or not creatures.has(creature_id) or creatures.size() >= max_population or genealogy.records.size() >= Genealogy.MAX_RECORDS:
+		return -1
+	var parent: Creature = creatures[creature_id]
+	if not parent.alive or parent.age < min_reproduction_age or parent.age >= max_age or parent.reproduction_cooldown > 0 or parent.energy < parent.max_energy * REPRODUCTION_ENERGY_FRACTION:
+		return -1
+	var inherited: Dictionary = Inheritance.inherit(parent.genome, parent.id, rng, mutation_rate, mutation_scale)
+	var genes: Genes = inherited["genome"]
+	var child_capacity := snappedf(80.0 + genes.size * 2.0, 0.000001)
+	var transferred := snappedf(minf(parent.max_energy * OFFSPRING_ENERGY_FRACTION, child_capacity), 0.000001)
+	var position := parent.pos + Vector2.from_angle(rng.between(-PI, PI)) * (parent.genome.size + genes.size + 2.0)
+	var child_id := _spawn(position, "", genes, transferred, inherited["mutations"])
+	if child_id == -1:
+		return -1
+	parent.energy = snappedf(parent.energy - transferred, 0.000001)
+	parent.reproduction_cooldown = reproduction_cooldown
+	_record({"type": "birth", "creature_id": child_id, "parent_id": parent.id, "generation": genes.generation, "energy": transferred})
+	creatures[child_id].remember(events.back())
+	for mutation in inherited["mutations"]:
+		_record({"type": "mutation", "creature_id": child_id, "parent_id": parent.id, "gene": mutation["gene"], "delta": mutation["delta"]})
+	return child_id
+
+## Copies protect permanent ancestry against UI/analysis mutations.
+func lineage(creature_id: int) -> Array:
+	return genealogy.lineage(creature_id)
+
+func descendants(creature_id: int) -> Array:
+	return genealogy.descendants(creature_id)
+
+## Population variance of living organisms (zero for empty/singleton populations).
+func genetic_diversity() -> Dictionary:
+	var result: Dictionary = {}
+	for gene in Genes.BOUNDS:
+		var mean := 0.0
+		var squared := 0.0
+		var count := 0
+		for creature in creatures.values():
+			if not creature.alive:
+				continue
+			count += 1
+			var delta: float = float(creature.genome.get(gene)) - mean
+			mean += delta / count
+			squared += delta * (float(creature.genome.get(gene)) - mean)
+		result[gene] = maxf(0.0, squared / maxi(1, count))
+	return result
 
 func place_food(pos: Vector2) -> int:
 	if not pos.is_finite() or foods.size() >= food_capacity:
@@ -130,6 +211,8 @@ func step() -> void:
 			creatures.erase(creature_id)
 			if pet_id == creature_id:
 				pet_id = -1
+		else:
+			reproduce(creature_id)
 	_in_step = false
 	if food_regrow and tick % food_regrow_interval == 0:
 		for index in range(mini(food_regrow_batch, food_capacity - foods.size())):
@@ -175,7 +258,14 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 	return result
 
 func _update_creature(creature: Creature) -> void:
+	if not creature.alive:
+		_die(creature, "external")
+		return
 	creature.age += 1
+	creature.reproduction_cooldown = maxi(0, creature.reproduction_cooldown - 1)
+	if creature.age >= max_age:
+		_die(creature, "age")
+		return
 	creature.energy = clampf(creature.energy, 0.0, creature.max_energy)
 	var sensors := sense(creature, false)
 	var closest: Dictionary = {}
@@ -211,12 +301,16 @@ func _update_creature(creature: Creature) -> void:
 	creature.energy = snappedf(clampf(creature.energy - cost, 0.0, creature.max_energy), 0.000001)
 	creature.heading = snappedf(wrapf(creature.heading, -PI, PI), 0.000001)
 	if creature.energy <= 0.0:
-		creature.alive = false
-		creature.last_action = "dead"
-		creature.last_reason = "Starvation: energy exhausted"
-		if creature.brain != null:
-			creature.brain.on_death(creature)
-		_record({"type": "death", "creature_id": creature.id, "reason": "starvation"})
+		_die(creature, "starvation")
+
+func _die(creature: Creature, reason: String) -> void:
+	creature.alive = false
+	creature.last_action = "dead"
+	creature.last_reason = "Starvation: energy exhausted" if reason == "starvation" else "evolution." + reason
+	if creature.brain != null:
+		creature.brain.on_death(creature)
+	genealogy.mark_dead(creature.id, tick, reason)
+	_record({"type": "death", "creature_id": creature.id, "reason": reason})
 
 ## Pluggable-policy path: the brain chooses a discrete action from discretized limited
 ## observations; the world applies the same physics/costs as the heuristic. No reflexive
@@ -346,18 +440,27 @@ func to_dict() -> Dictionary:
 	var saved_obstacles: Array = []
 	for obstacle in obstacles:
 		saved_obstacles.append({"pos": Data.pack_vector(obstacle["pos"]), "radius": obstacle["radius"]})
+	var saved_config := {"food_regrow": food_regrow, "food_capacity": food_capacity,
+		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch}
+	for key in EVOLUTION_DEFAULTS:
+		saved_config[key] = get(key)
 	return {
 		"save_version": SAVE_VERSION, "world_seed": str(seed), "tick": tick,
 		"size": Data.pack_vector(size), "pet_id": pet_id, "next_id": ids.next_id,
 		"rng_state": rng.to_dict(), "creatures": saved_creatures, "foods": saved_foods,
 		"obstacles": saved_obstacles, "events": Data.restore_precision(events),
-		"config": {"food_regrow": food_regrow, "food_capacity": food_capacity,
-			"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch}
+		"config": saved_config, "genealogy": genealogy.to_array()
 	}
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) != SAVE_VERSION or not Data.integer_text(data.get("world_seed")):
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, SAVE_VERSION]:
+		return null
+	if int(data["save_version"]) == 1:
+		data = _migrate_v1(data)
+		if data.is_empty():
+			return null
+	if not Data.integer_text(data.get("world_seed")):
 		return null
 	if not Data.integer(data.get("tick")) or not Data.integer(data.get("next_id"), 1) or not Data.integer(data.get("pet_id"), -1):
 		return null
@@ -369,6 +472,14 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	if not data.get("config") is Dictionary or not data.get("rng_state") is Dictionary:
 		return null
 	var config: Dictionary = data["config"].duplicate()
+	if not config.get("reproduction_enabled") is bool:
+		return null
+	for key in ["max_population", "min_reproduction_age", "reproduction_cooldown", "max_age"]:
+		if not Data.integer(config.get(key), 1) or int(config[key]) > (10000 if key == "max_population" else 10000000):
+			return null
+	for key in ["mutation_rate", "mutation_scale"]:
+		if not Data.number(config.get(key)) or float(config[key]) < 0.0 or float(config[key]) > (1.0 if key == "mutation_rate" else 0.1):
+			return null
 	if not config.get("food_regrow") is bool:
 		return null
 	if not Data.integer(config.get("food_capacity")) or int(config["food_capacity"]) > 10000:
@@ -380,7 +491,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	for field in ["creatures", "foods", "obstacles", "events"]:
 		if not data.get(field) is Array:
 			return null
-	if data["creatures"].size() > 10000 or data["foods"].size() > int(config["food_capacity"]) or data["obstacles"].size() > 1000:
+	if data["creatures"].size() > int(config["max_population"]) or data["foods"].size() > int(config["food_capacity"]) or data["obstacles"].size() > 1000:
 		return null
 	if data["events"].size() > EVENT_LIMIT or not Data.json_data(data["events"]):
 		return null
@@ -391,6 +502,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	var result = load("res://scripts/world/sim_world.gd").new(int(data["world_seed"]), config)
 	result.tick = int(data["tick"])
 	result.pet_id = int(data["pet_id"])
+	var ancestry = Genealogy.from_array(data.get("genealogy"), result.tick, int(data["next_id"]))
+	if ancestry == null:
+		return null
+	result.genealogy = ancestry
 	var used_ids: Dictionary = {}
 	for obstacle in data["obstacles"]:
 		if not obstacle is Dictionary or not Data.vector(obstacle.get("pos")) or not Data.number(obstacle.get("radius")):
@@ -414,6 +529,20 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		used_ids[creature.id] = true
 		used_ids[creature.genome.id] = true
 		result.creatures[creature.id] = creature
+	for ancestor_id in ancestry.records:
+		var ancestor: Dictionary = ancestry.records[ancestor_id]
+		var genome_id := int(ancestor["genome"]["id"])
+		if result.creatures.has(ancestor_id):
+			if int(ancestor["death_tick"]) != -1 or ancestor["genome"] != result.creatures[ancestor_id].genome.to_dict():
+				return null
+		else:
+			if int(ancestor["death_tick"]) == -1 or used_ids.has(ancestor_id) or used_ids.has(genome_id):
+				return null
+			used_ids[ancestor_id] = true
+			used_ids[genome_id] = true
+	for creature_id in result.creatures:
+		if not ancestry.records.has(creature_id):
+			return null
 	for food in data["foods"]:
 		if not food is Dictionary or not Data.integer(food.get("id"), 1) or used_ids.has(int(food.get("id", -1))) or not Data.vector(food.get("pos")) or not Data.number(food.get("energy")):
 			return null
@@ -431,3 +560,27 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	result.ids.next_id = int(data["next_id"])
 	result.rng.restore(data["rng_state"])
 	return result
+
+## v1 had no reproductive history: reconstruct the surviving founders only.
+## Preserve all old fields, including brains/RNG; no dead ancestors are invented.
+static func _migrate_v1(data: Dictionary) -> Dictionary:
+	if not data.get("config") is Dictionary or not data.get("creatures") is Array or not Data.integer(data.get("tick")):
+		return {}
+	var migrated := data.duplicate(true)
+	var history := Genealogy.new()
+	for entry in migrated["creatures"]:
+		if not entry is Dictionary:
+			return {}
+		var creature := Creature.from_dict(entry)
+		if creature == null:
+			return {}
+		entry["reproduction_cooldown"] = creature.reproduction_cooldown
+		history.register(creature, maxi(0, int(data["tick"]) - creature.age), [], not creature.genome.parents.is_empty() or creature.genome.generation != 0)
+	migrated["config"].merge(EVOLUTION_DEFAULTS, false)
+	# v1 allowed up to 10000 imported creatures, so migration must retain them.
+	if not Data.integer(migrated["config"]["max_population"], 1):
+		return {}
+	migrated["config"]["max_population"] = maxi(int(migrated["config"]["max_population"]), migrated["creatures"].size())
+	migrated["genealogy"] = history.to_array()
+	migrated["save_version"] = SAVE_VERSION
+	return migrated

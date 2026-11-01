@@ -1,0 +1,1946 @@
+{
+	"config": {
+		"creature_count": 12,
+		"food_capacity": 160,
+		"food_count": 120,
+		"food_regrow_batch": 4,
+		"food_regrow_interval": 10,
+		"max_age": 3000,
+		"max_population": 60,
+		"min_reproduction_age": 120,
+		"mutation_rate": 0.3,
+		"mutation_scale": 0.025,
+		"obstacle_count": 5,
+		"reproduction_cooldown": 200,
+		"size": [
+			600.0,
+			420.0
+		]
+	},
+	"engine": "4.7.2-stable (official)",
+	"runs": [
+		{
+			"final_lineage_example": [
+				{
+					"birth_tick": 0,
+					"creature_id": 124,
+					"death_reason": "age",
+					"death_tick": 3000,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.686634,
+						"id": 123,
+						"metabolism": 0.8436349999999999,
+						"parents": [],
+						"size": 11.950277,
+						"speed": 63.800438,
+						"version": 1,
+						"vision_fov": 5.880889,
+						"vision_range": 99.15415999999999
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 124",
+					"parents": []
+				},
+				{
+					"birth_tick": 120,
+					"creature_id": 192,
+					"death_reason": "age",
+					"death_tick": 3120,
+					"generation": 1,
+					"genome": {
+						"generation": 1,
+						"hue": 0.6477459999999999,
+						"id": 191,
+						"metabolism": 0.8436349999999999,
+						"parents": [
+							124
+						],
+						"size": 11.950277,
+						"speed": 63.800438,
+						"version": 1,
+						"vision_fov": 5.880889,
+						"vision_range": 99.15415999999999
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": -0.038888,
+							"gene": "hue"
+						}
+					],
+					"name": "Criatura 192",
+					"parents": [
+						124
+					]
+				},
+				{
+					"birth_tick": 240,
+					"creature_id": 264,
+					"death_reason": "age",
+					"death_tick": 3240,
+					"generation": 2,
+					"genome": {
+						"generation": 2,
+						"hue": 0.6477459999999999,
+						"id": 263,
+						"metabolism": 0.8491029999999999,
+						"parents": [
+							192
+						],
+						"size": 11.950277,
+						"speed": 63.800438,
+						"version": 1,
+						"vision_fov": 5.880889,
+						"vision_range": 92.711719
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": -6.442441,
+							"gene": "vision_range"
+						},
+						{
+							"delta": 0.005468,
+							"gene": "metabolism"
+						}
+					],
+					"name": "Criatura 264",
+					"parents": [
+						192
+					]
+				},
+				{
+					"birth_tick": 360,
+					"creature_id": 360,
+					"death_reason": "age",
+					"death_tick": 3360,
+					"generation": 3,
+					"genome": {
+						"generation": 3,
+						"hue": 0.6477459999999999,
+						"id": 359,
+						"metabolism": 0.8491029999999999,
+						"parents": [
+							264
+						],
+						"size": 11.888463999999999,
+						"speed": 63.800438,
+						"version": 1,
+						"vision_fov": 5.880889,
+						"vision_range": 92.711719
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": -0.061813,
+							"gene": "size"
+						}
+					],
+					"name": "Criatura 360",
+					"parents": [
+						264
+					]
+				},
+				{
+					"birth_tick": 3240,
+					"creature_id": 1508,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 4,
+					"genome": {
+						"generation": 4,
+						"hue": 0.6477459999999999,
+						"id": 1507,
+						"metabolism": 0.903295,
+						"parents": [
+							360
+						],
+						"size": 11.62741,
+						"speed": 63.063029,
+						"version": 1,
+						"vision_fov": 5.880889,
+						"vision_range": 103.793748
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": -0.261054,
+							"gene": "size"
+						},
+						{
+							"delta": -0.737409,
+							"gene": "speed"
+						},
+						{
+							"delta": 11.082029,
+							"gene": "vision_range"
+						},
+						{
+							"delta": 0.054192,
+							"gene": "metabolism"
+						}
+					],
+					"name": "Criatura 1508",
+					"parents": [
+						360
+					]
+				}
+			],
+			"no_food_energy_nonincreasing": null,
+			"samples": [
+				{
+					"births": 0,
+					"body_energy": 945.4395470000001,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.04897578557522222,
+						"metabolism": 0.09965317787835415,
+						"size": 3.4614600686859096,
+						"speed": 238.45934742630047,
+						"vision_fov": 2.3479280888274157,
+						"vision_range": 3290.480280501741
+					},
+					"foods": 120,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 0
+				},
+				{
+					"births": 48,
+					"body_energy": 5348.019875000001,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.04787323020565416,
+						"metabolism": 0.10116370741623888,
+						"size": 3.4954655349718426,
+						"speed": 242.4859953361152,
+						"vision_fov": 2.371525477920743,
+						"vision_range": 3305.246115836269
+					},
+					"foods": 95,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 500
+				},
+				{
+					"births": 48,
+					"body_energy": 5526.9453379999995,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.04787323020565416,
+						"metabolism": 0.10116370741623888,
+						"size": 3.4954655349718426,
+						"speed": 242.4859953361152,
+						"vision_fov": 2.371525477920743,
+						"vision_range": 3305.246115836269
+					},
+					"foods": 130,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 1000
+				},
+				{
+					"births": 48,
+					"body_energy": 5557.98505,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.04787323020565416,
+						"metabolism": 0.10116370741623888,
+						"size": 3.4954655349718426,
+						"speed": 242.4859953361152,
+						"vision_fov": 2.371525477920743,
+						"vision_range": 3305.246115836269
+					},
+					"foods": 157,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 1500
+				},
+				{
+					"births": 48,
+					"body_energy": 5562.0108279999995,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.04787323020565416,
+						"metabolism": 0.10116370741623888,
+						"size": 3.4954655349718426,
+						"speed": 242.4859953361152,
+						"vision_fov": 2.371525477920743,
+						"vision_range": 3305.246115836269
+					},
+					"foods": 159,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 2000
+				},
+				{
+					"births": 48,
+					"body_energy": 5486.5742569999975,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.04787323020565416,
+						"metabolism": 0.10116370741623888,
+						"size": 3.4954655349718426,
+						"speed": 242.4859953361152,
+						"vision_fov": 2.371525477920743,
+						"vision_range": 3305.246115836269
+					},
+					"foods": 158,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 2500
+				},
+				{
+					"births": 60,
+					"body_energy": 4449.115964,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.04863593729149416,
+						"metabolism": 0.10137542408207886,
+						"size": 3.4301249584796096,
+						"speed": 247.78560693128244,
+						"vision_fov": 2.4428746079508126,
+						"vision_range": 3406.042731582507
+					},
+					"foods": 159,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 3000
+				},
+				{
+					"births": 108,
+					"body_energy": 5035.681629000001,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.04958209166046222,
+						"metabolism": 0.10123113568787888,
+						"size": 3.48639725995528,
+						"speed": 267.85096220235135,
+						"vision_fov": 2.62117385209007,
+						"vision_range": 3599.2242801983743
+					},
+					"foods": 58,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 3500
+				},
+				{
+					"births": 108,
+					"body_energy": 5519.318535000001,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.04958209166046222,
+						"metabolism": 0.10123113568787888,
+						"size": 3.48639725995528,
+						"speed": 267.85096220235135,
+						"vision_fov": 2.62117385209007,
+						"vision_range": 3599.2242801983743
+					},
+					"foods": 84,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 4000
+				},
+				{
+					"births": 108,
+					"body_energy": 5535.5232259999975,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.04958209166046222,
+						"metabolism": 0.10123113568787888,
+						"size": 3.48639725995528,
+						"speed": 267.85096220235135,
+						"vision_fov": 2.62117385209007,
+						"vision_range": 3599.2242801983743
+					},
+					"foods": 117,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 4500
+				},
+				{
+					"births": 108,
+					"body_energy": 5564.0261329999985,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.04958209166046222,
+						"metabolism": 0.10123113568787888,
+						"size": 3.48639725995528,
+						"speed": 267.85096220235135,
+						"vision_fov": 2.62117385209007,
+						"vision_range": 3599.2242801983743
+					},
+					"foods": 147,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 5000
+				},
+				{
+					"births": 108,
+					"body_energy": 5503.737585,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.04958209166046222,
+						"metabolism": 0.10123113568787888,
+						"size": 3.48639725995528,
+						"speed": 267.85096220235135,
+						"vision_fov": 2.62117385209007,
+						"vision_range": 3599.2242801983743
+					},
+					"foods": 160,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 5500
+				},
+				{
+					"births": 120,
+					"body_energy": 4426.219172000001,
+					"deaths": 72,
+					"diversity": {
+						"hue": 0.04747073786060971,
+						"metabolism": 0.10298060020134972,
+						"size": 3.594370989929062,
+						"speed": 263.5589495312394,
+						"vision_fov": 2.4708804842638825,
+						"vision_range": 3536.4741355523333
+					},
+					"foods": 158,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 6000
+				}
+			],
+			"save_round_trip_equal": true,
+			"scenario": "recursos_renováveis",
+			"seed": 7421
+		},
+		{
+			"final_lineage_example": [
+				{
+					"birth_tick": 0,
+					"creature_id": 124,
+					"death_reason": "age",
+					"death_tick": 3000,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.125711,
+						"id": 123,
+						"metabolism": 1.059705,
+						"parents": [],
+						"size": 8.302969,
+						"speed": 53.144614999999995,
+						"version": 1,
+						"vision_fov": 5.678197,
+						"vision_range": 140.65623499999998
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 124",
+					"parents": []
+				},
+				{
+					"birth_tick": 120,
+					"creature_id": 192,
+					"death_reason": "age",
+					"death_tick": 3120,
+					"generation": 1,
+					"genome": {
+						"generation": 1,
+						"hue": 0.125711,
+						"id": 191,
+						"metabolism": 1.059705,
+						"parents": [
+							124
+						],
+						"size": 8.302969,
+						"speed": 53.144614999999995,
+						"version": 1,
+						"vision_fov": 5.678197,
+						"vision_range": 140.65623499999998
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 192",
+					"parents": [
+						124
+					]
+				},
+				{
+					"birth_tick": 240,
+					"creature_id": 264,
+					"death_reason": "age",
+					"death_tick": 3240,
+					"generation": 2,
+					"genome": {
+						"generation": 2,
+						"hue": 0.125711,
+						"id": 263,
+						"metabolism": 1.059705,
+						"parents": [
+							192
+						],
+						"size": 8.302969,
+						"speed": 53.144614999999995,
+						"version": 1,
+						"vision_fov": 5.678197,
+						"vision_range": 140.65623499999998
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 264",
+					"parents": [
+						192
+					]
+				},
+				{
+					"birth_tick": 360,
+					"creature_id": 358,
+					"death_reason": "age",
+					"death_tick": 3360,
+					"generation": 3,
+					"genome": {
+						"generation": 3,
+						"hue": 0.125711,
+						"id": 357,
+						"metabolism": 1.059705,
+						"parents": [
+							264
+						],
+						"size": 8.502400999999999,
+						"speed": 53.144614999999995,
+						"version": 1,
+						"vision_fov": 5.678197,
+						"vision_range": 140.65623499999998
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": 0.199432,
+							"gene": "size"
+						}
+					],
+					"name": "Criatura 358",
+					"parents": [
+						264
+					]
+				},
+				{
+					"birth_tick": 3240,
+					"creature_id": 1594,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 4,
+					"genome": {
+						"generation": 4,
+						"hue": 0.125711,
+						"id": 1593,
+						"metabolism": 1.119271,
+						"parents": [
+							358
+						],
+						"size": 8.502400999999999,
+						"speed": 53.144614999999995,
+						"version": 1,
+						"vision_fov": 5.678197,
+						"vision_range": 145.39653099999998
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": 4.740296,
+							"gene": "vision_range"
+						},
+						{
+							"delta": 0.059565999999999994,
+							"gene": "metabolism"
+						}
+					],
+					"name": "Criatura 1594",
+					"parents": [
+						358
+					]
+				}
+			],
+			"no_food_energy_nonincreasing": null,
+			"samples": [
+				{
+					"births": 0,
+					"body_energy": 982.4001679999999,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.13285441378418747,
+						"metabolism": 0.07933562747805555,
+						"size": 8.561120793946076,
+						"speed": 169.10821511012156,
+						"vision_fov": 2.0561637084371385,
+						"vision_range": 2557.932226830635
+					},
+					"foods": 120,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 0
+				},
+				{
+					"births": 48,
+					"body_energy": 5474.663387,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.13389368419032663,
+						"metabolism": 0.08306911654556554,
+						"size": 9.015888313979849,
+						"speed": 173.88015541681605,
+						"vision_fov": 2.0677303785806154,
+						"vision_range": 2610.8778516312204
+					},
+					"foods": 81,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 500
+				},
+				{
+					"births": 48,
+					"body_energy": 5688.719703000001,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.13389368419032663,
+						"metabolism": 0.08306911654556554,
+						"size": 9.015888313979849,
+						"speed": 173.88015541681605,
+						"vision_fov": 2.0677303785806154,
+						"vision_range": 2610.8778516312204
+					},
+					"foods": 88,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 1000
+				},
+				{
+					"births": 48,
+					"body_energy": 5759.249201999999,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.13389368419032663,
+						"metabolism": 0.08306911654556554,
+						"size": 9.015888313979849,
+						"speed": 173.88015541681605,
+						"vision_fov": 2.0677303785806154,
+						"vision_range": 2610.8778516312204
+					},
+					"foods": 93,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 1500
+				},
+				{
+					"births": 48,
+					"body_energy": 5735.116843000001,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.13389368419032663,
+						"metabolism": 0.08306911654556554,
+						"size": 9.015888313979849,
+						"speed": 173.88015541681605,
+						"vision_fov": 2.0677303785806154,
+						"vision_range": 2610.8778516312204
+					},
+					"foods": 102,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 2000
+				},
+				{
+					"births": 48,
+					"body_energy": 5753.956902,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.13389368419032663,
+						"metabolism": 0.08306911654556554,
+						"size": 9.015888313979849,
+						"speed": 173.88015541681605,
+						"vision_fov": 2.0677303785806154,
+						"vision_range": 2610.8778516312204
+					},
+					"foods": 108,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 2500
+				},
+				{
+					"births": 60,
+					"body_energy": 4605.8410300000005,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.13764391424756553,
+						"metabolism": 0.08768859839925998,
+						"size": 8.876100998109083,
+						"speed": 166.95976637237064,
+						"vision_fov": 2.0574580940541556,
+						"vision_range": 2623.791643298166
+					},
+					"foods": 109,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 3000
+				},
+				{
+					"births": 108,
+					"body_energy": 4565.143449000001,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.14369394940948751,
+						"metabolism": 0.08827562452176081,
+						"size": 8.914881415781855,
+						"speed": 172.6490384980846,
+						"vision_fov": 2.0211132956641027,
+						"vision_range": 2767.3834460789553
+					},
+					"foods": 17,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 3500
+				},
+				{
+					"births": 108,
+					"body_energy": 5720.143138,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.14369394940948751,
+						"metabolism": 0.08827562452176081,
+						"size": 8.914881415781855,
+						"speed": 172.6490384980846,
+						"vision_fov": 2.0211132956641027,
+						"vision_range": 2767.3834460789553
+					},
+					"foods": 30,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 4000
+				},
+				{
+					"births": 108,
+					"body_energy": 5764.982032999999,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.14369394940948751,
+						"metabolism": 0.08827562452176081,
+						"size": 8.914881415781855,
+						"speed": 172.6490384980846,
+						"vision_fov": 2.0211132956641027,
+						"vision_range": 2767.3834460789553
+					},
+					"foods": 49,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 4500
+				},
+				{
+					"births": 108,
+					"body_energy": 5754.990289000001,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.14369394940948751,
+						"metabolism": 0.08827562452176081,
+						"size": 8.914881415781855,
+						"speed": 172.6490384980846,
+						"vision_fov": 2.0211132956641027,
+						"vision_range": 2767.3834460789553
+					},
+					"foods": 64,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 5000
+				},
+				{
+					"births": 108,
+					"body_energy": 5768.689167,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.14369394940948751,
+						"metabolism": 0.08827562452176081,
+						"size": 8.914881415781855,
+						"speed": 172.6490384980846,
+						"vision_fov": 2.0211132956641027,
+						"vision_range": 2767.3834460789553
+					},
+					"foods": 71,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 5500
+				},
+				{
+					"births": 120,
+					"body_energy": 4548.338792999999,
+					"deaths": 72,
+					"diversity": {
+						"hue": 0.14247296773138332,
+						"metabolism": 0.08360693912941555,
+						"size": 9.428449567318005,
+						"speed": 189.44578248251406,
+						"vision_fov": 1.8967357552298028,
+						"vision_range": 2747.638350074206
+					},
+					"foods": 92,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 6000
+				}
+			],
+			"save_round_trip_equal": true,
+			"scenario": "recursos_renováveis",
+			"seed": 104729
+		},
+		{
+			"final_lineage_example": [
+				{
+					"birth_tick": 0,
+					"creature_id": 122,
+					"death_reason": "age",
+					"death_tick": 3000,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.227541,
+						"id": 121,
+						"metabolism": 0.958455,
+						"parents": [],
+						"size": 8.248759999999999,
+						"speed": 28.386667,
+						"version": 1,
+						"vision_fov": 3.489588,
+						"vision_range": 150.52034
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 122",
+					"parents": []
+				},
+				{
+					"birth_tick": 120,
+					"creature_id": 190,
+					"death_reason": "age",
+					"death_tick": 3120,
+					"generation": 1,
+					"genome": {
+						"generation": 1,
+						"hue": 0.227541,
+						"id": 189,
+						"metabolism": 0.9575859999999999,
+						"parents": [
+							122
+						],
+						"size": 8.248759999999999,
+						"speed": 28.386667,
+						"version": 1,
+						"vision_fov": 3.489588,
+						"vision_range": 154.961694
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": 4.441354,
+							"gene": "vision_range"
+						},
+						{
+							"delta": -0.000869,
+							"gene": "metabolism"
+						}
+					],
+					"name": "Criatura 190",
+					"parents": [
+						122
+					]
+				},
+				{
+					"birth_tick": 240,
+					"creature_id": 262,
+					"death_reason": "age",
+					"death_tick": 3240,
+					"generation": 2,
+					"genome": {
+						"generation": 2,
+						"hue": 0.24398599999999998,
+						"id": 261,
+						"metabolism": 0.9575859999999999,
+						"parents": [
+							190
+						],
+						"size": 8.248759999999999,
+						"speed": 28.386667,
+						"version": 1,
+						"vision_fov": 3.489588,
+						"vision_range": 154.961694
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": 0.016444999999999998,
+							"gene": "hue"
+						}
+					],
+					"name": "Criatura 262",
+					"parents": [
+						190
+					]
+				},
+				{
+					"birth_tick": 360,
+					"creature_id": 356,
+					"death_reason": "age",
+					"death_tick": 3360,
+					"generation": 3,
+					"genome": {
+						"generation": 3,
+						"hue": 0.270982,
+						"id": 355,
+						"metabolism": 0.9575859999999999,
+						"parents": [
+							262
+						],
+						"size": 8.248759999999999,
+						"speed": 28.386667,
+						"version": 1,
+						"vision_fov": 3.489588,
+						"vision_range": 154.961694
+					},
+					"legacy_root": false,
+					"mutations": [
+						{
+							"delta": 0.026996,
+							"gene": "hue"
+						}
+					],
+					"name": "Criatura 356",
+					"parents": [
+						262
+					]
+				},
+				{
+					"birth_tick": 3288,
+					"creature_id": 1622,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 4,
+					"genome": {
+						"generation": 4,
+						"hue": 0.270982,
+						"id": 1621,
+						"metabolism": 0.9575859999999999,
+						"parents": [
+							356
+						],
+						"size": 8.248759999999999,
+						"speed": 28.386667,
+						"version": 1,
+						"vision_fov": 3.489588,
+						"vision_range": 154.961694
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 1622",
+					"parents": [
+						356
+					]
+				}
+			],
+			"no_food_energy_nonincreasing": null,
+			"samples": [
+				{
+					"births": 0,
+					"body_energy": 979.9003399999999,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.06837802504813888,
+						"metabolism": 0.08646632692540972,
+						"size": 5.711489606946912,
+						"speed": 255.26404930211558,
+						"vision_fov": 1.7387301870804721,
+						"vision_range": 1548.5265454442685
+					},
+					"foods": 120,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 0
+				},
+				{
+					"births": 48,
+					"body_energy": 5454.737227,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.06619218244868082,
+						"metabolism": 0.08565659753086556,
+						"size": 5.664884869502413,
+						"speed": 252.34533574705517,
+						"vision_fov": 1.698950730839712,
+						"vision_range": 1352.8535730059436
+					},
+					"foods": 80,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 500
+				},
+				{
+					"births": 48,
+					"body_energy": 5704.925953999999,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.06619218244868082,
+						"metabolism": 0.08565659753086556,
+						"size": 5.664884869502413,
+						"speed": 252.34533574705517,
+						"vision_fov": 1.698950730839712,
+						"vision_range": 1352.8535730059436
+					},
+					"foods": 87,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 1000
+				},
+				{
+					"births": 48,
+					"body_energy": 5695.516867000002,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.06619218244868082,
+						"metabolism": 0.08565659753086556,
+						"size": 5.664884869502413,
+						"speed": 252.34533574705517,
+						"vision_fov": 1.698950730839712,
+						"vision_range": 1352.8535730059436
+					},
+					"foods": 96,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 1500
+				},
+				{
+					"births": 48,
+					"body_energy": 5750.959301000001,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.06619218244868082,
+						"metabolism": 0.08565659753086556,
+						"size": 5.664884869502413,
+						"speed": 252.34533574705517,
+						"vision_fov": 1.698950730839712,
+						"vision_range": 1352.8535730059436
+					},
+					"foods": 93,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 2000
+				},
+				{
+					"births": 48,
+					"body_energy": 5537.619191999997,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.06619218244868082,
+						"metabolism": 0.08565659753086556,
+						"size": 5.664884869502413,
+						"speed": 252.34533574705517,
+						"vision_fov": 1.698950730839712,
+						"vision_range": 1352.8535730059436
+					},
+					"foods": 114,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 2500
+				},
+				{
+					"births": 60,
+					"body_energy": 4605.275843000001,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.06668272540703998,
+						"metabolism": 0.08372287914497888,
+						"size": 5.78107937602958,
+						"speed": 259.2610397069718,
+						"vision_fov": 1.6320900686173163,
+						"vision_range": 1324.7624859283271
+					},
+					"foods": 108,
+					"max_generation": 3,
+					"population": 60,
+					"tick": 3000
+				},
+				{
+					"births": 108,
+					"body_energy": 4466.547648000002,
+					"deaths": 60,
+					"diversity": {
+						"hue": 0.06537806034108999,
+						"metabolism": 0.08843027671923641,
+						"size": 5.604404611191382,
+						"speed": 264.98128248550444,
+						"vision_fov": 1.5917283915825269,
+						"vision_range": 1197.0602553857082
+					},
+					"foods": 25,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 3500
+				},
+				{
+					"births": 110,
+					"body_energy": 5494.9731839999995,
+					"deaths": 62,
+					"diversity": {
+						"hue": 0.06013257589949557,
+						"metabolism": 0.0917610758173875,
+						"size": 5.37864388507778,
+						"speed": 261.5977426176047,
+						"vision_fov": 1.581538406435828,
+						"vision_range": 1035.8007630171448
+					},
+					"foods": 42,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 4000
+				},
+				{
+					"births": 110,
+					"body_energy": 5672.066909,
+					"deaths": 62,
+					"diversity": {
+						"hue": 0.06013257589949557,
+						"metabolism": 0.0917610758173875,
+						"size": 5.37864388507778,
+						"speed": 261.5977426176047,
+						"vision_fov": 1.581538406435828,
+						"vision_range": 1035.8007630171448
+					},
+					"foods": 58,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 4500
+				},
+				{
+					"births": 110,
+					"body_energy": 5781.411660999999,
+					"deaths": 62,
+					"diversity": {
+						"hue": 0.06013257589949557,
+						"metabolism": 0.0917610758173875,
+						"size": 5.37864388507778,
+						"speed": 261.5977426176047,
+						"vision_fov": 1.581538406435828,
+						"vision_range": 1035.8007630171448
+					},
+					"foods": 61,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 5000
+				},
+				{
+					"births": 110,
+					"body_energy": 5650.811968000002,
+					"deaths": 62,
+					"diversity": {
+						"hue": 0.06013257589949557,
+						"metabolism": 0.0917610758173875,
+						"size": 5.37864388507778,
+						"speed": 261.5977426176047,
+						"vision_fov": 1.581538406435828,
+						"vision_range": 1035.8007630171448
+					},
+					"foods": 86,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 5500
+				},
+				{
+					"births": 121,
+					"body_energy": 4636.442940999999,
+					"deaths": 73,
+					"diversity": {
+						"hue": 0.059779306512449705,
+						"metabolism": 0.0846282851197955,
+						"size": 5.01462614502116,
+						"speed": 236.04298873473988,
+						"vision_fov": 1.6545543213750407,
+						"vision_range": 840.0494735082192
+					},
+					"foods": 94,
+					"max_generation": 4,
+					"population": 60,
+					"tick": 6000
+				}
+			],
+			"save_round_trip_equal": true,
+			"scenario": "recursos_renováveis",
+			"seed": 8675309
+		},
+		{
+			"final_lineage_example": [
+				{
+					"birth_tick": 0,
+					"creature_id": 2,
+					"death_reason": "starvation",
+					"death_tick": 1477,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.397622,
+						"id": 1,
+						"metabolism": 0.6507069999999999,
+						"parents": [],
+						"size": 7.675631999999999,
+						"speed": 20.11462,
+						"version": 1,
+						"vision_fov": 2.852382,
+						"vision_range": 162.62027
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 2",
+					"parents": []
+				}
+			],
+			"no_food_energy_nonincreasing": true,
+			"samples": [
+				{
+					"births": 0,
+					"body_energy": 977.122562,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.05137351848435417,
+						"metabolism": 0.12368750210674305,
+						"size": 5.713092609179743,
+						"speed": 162.5311318126103,
+						"vision_fov": 1.3078030131384164,
+						"vision_range": 1296.1879999096677
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 0
+				},
+				{
+					"births": 0,
+					"body_energy": 431.13371800000004,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.05137351848435417,
+						"metabolism": 0.12368750210674305,
+						"size": 5.713092609179743,
+						"speed": 162.5311318126103,
+						"vision_fov": 1.3078030131384164,
+						"vision_range": 1296.1879999096677
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 500
+				},
+				{
+					"births": 0,
+					"body_energy": 82.334375,
+					"deaths": 7,
+					"diversity": {
+						"hue": 0.039443006028,
+						"metabolism": 0.0053424160134400035,
+						"size": 3.7518875447632007,
+						"speed": 153.59812570732706,
+						"vision_fov": 0.84138638863616,
+						"vision_range": 1756.850218154764
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 5,
+					"tick": 1000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 1500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 2000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 2500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 3000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 3500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 4000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 4500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 5000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 5500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 6000
+				}
+			],
+			"save_round_trip_equal": true,
+			"scenario": "sem_alimento",
+			"seed": 7421
+		},
+		{
+			"final_lineage_example": [
+				{
+					"birth_tick": 0,
+					"creature_id": 2,
+					"death_reason": "starvation",
+					"death_tick": 608,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.730648,
+						"id": 1,
+						"metabolism": 1.5728469999999999,
+						"parents": [],
+						"size": 8.621019,
+						"speed": 43.845512,
+						"version": 1,
+						"vision_fov": 5.547797,
+						"vision_range": 129.577454
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 2",
+					"parents": []
+				}
+			],
+			"no_food_energy_nonincreasing": true,
+			"samples": [
+				{
+					"births": 0,
+					"body_energy": 957.9079349999997,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.0719827084311875,
+						"metabolism": 0.1326399974804097,
+						"size": 7.0559669329740196,
+						"speed": 169.31735787709962,
+						"vision_fov": 2.377916079768354,
+						"vision_range": 2639.715964108811
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 0
+				},
+				{
+					"births": 0,
+					"body_energy": 266.20465999999993,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.0719827084311875,
+						"metabolism": 0.1326399974804097,
+						"size": 7.0559669329740196,
+						"speed": 169.31735787709962,
+						"vision_fov": 2.377916079768354,
+						"vision_range": 2639.715964108811
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 500
+				},
+				{
+					"births": 0,
+					"body_energy": 18.371633,
+					"deaths": 10,
+					"diversity": {
+						"hue": 0.023503342864,
+						"metabolism": 0.0039064375022500085,
+						"size": 3.7084995822622475,
+						"speed": 60.166891319824,
+						"vision_fov": 0.25153735622499973,
+						"vision_range": 1550.191157666089
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 2,
+					"tick": 1000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 1500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 2000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 2500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 3000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 3500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 4000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 4500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 5000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 5500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 6000
+				}
+			],
+			"save_round_trip_equal": true,
+			"scenario": "sem_alimento",
+			"seed": 104729
+		},
+		{
+			"final_lineage_example": [
+				{
+					"birth_tick": 0,
+					"creature_id": 2,
+					"death_reason": "starvation",
+					"death_tick": 510,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.763729,
+						"id": 1,
+						"metabolism": 1.7257989999999999,
+						"parents": [],
+						"size": 12.354949999999999,
+						"speed": 51.676562999999994,
+						"version": 1,
+						"vision_fov": 5.155723,
+						"vision_range": 207.52484099999998
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 2",
+					"parents": []
+				}
+			],
+			"no_food_energy_nonincreasing": true,
+			"samples": [
+				{
+					"births": 0,
+					"body_energy": 1016.6840169999997,
+					"deaths": 0,
+					"diversity": {
+						"hue": 0.056709663911687504,
+						"metabolism": 0.17392557292074304,
+						"size": 4.882221833446918,
+						"speed": 154.78071346618938,
+						"vision_fov": 1.7089460356217498,
+						"vision_range": 3589.8554545417023
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 12,
+					"tick": 0
+				},
+				{
+					"births": 0,
+					"body_energy": 250.89187499999997,
+					"deaths": 1,
+					"diversity": {
+						"hue": 0.06171202640087604,
+						"metabolism": 0.16810634365317353,
+						"size": 5.253589220512446,
+						"speed": 162.71675354543223,
+						"vision_fov": 1.4233199682762645,
+						"vision_range": 3424.9355710719697
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 11,
+					"tick": 500
+				},
+				{
+					"births": 0,
+					"body_energy": 32.884623,
+					"deaths": 10,
+					"diversity": {
+						"hue": 0.06530426920899998,
+						"metabolism": 0.0008690998802500012,
+						"size": 0.3449917696000004,
+						"speed": 51.64713332083599,
+						"vision_fov": 0.11632840383024998,
+						"vision_range": 4313.047743744803
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 2,
+					"tick": 1000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 1500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 2000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 2500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 3000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 3500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 4000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 4500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 5000
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 5500
+				},
+				{
+					"births": 0,
+					"body_energy": 0.0,
+					"deaths": 12,
+					"diversity": {
+						"hue": 0.0,
+						"metabolism": 0.0,
+						"size": 0.0,
+						"speed": 0.0,
+						"vision_fov": 0.0,
+						"vision_range": 0.0
+					},
+					"foods": 0,
+					"max_generation": 0,
+					"population": 0,
+					"tick": 6000
+				}
+			],
+			"save_round_trip_equal": true,
+			"scenario": "sem_alimento",
+			"seed": 8675309
+		}
+	],
+	"seeds": [
+		7421,
+		104729,
+		8675309
+	],
+	"ticks": 6000
+}

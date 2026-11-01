@@ -25,7 +25,10 @@ func bound_genes() -> void:
 		var value := float(get(gene))
 		if not is_finite(value):
 			value = float(limits[0])
-		set(gene, clampf(snappedf(value, 0.000001), limits[0], limits[1]))
+		# Keep values on the save precision grid even at irrational FOV bounds.
+		var low := ceilf(float(limits[0]) * 1000000.0) / 1000000.0
+		var high := floorf(float(limits[1]) * 1000000.0) / 1000000.0
+		set(gene, clampf(snappedf(value, 0.000001), low, high))
 
 func to_dict() -> Dictionary:
 	var result := {"version": VERSION, "id": id, "parents": parents.duplicate(), "generation": generation}

@@ -22,7 +22,7 @@ func run() -> Array:
 	return failures
 
 func _empty_config() -> Dictionary:
-	return {"creature_count": 0, "food_count": 0, "obstacle_count": 0, "food_regrow": false}
+	return {"creature_count": 0, "food_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false}
 
 func _check(condition: bool, message: String, failures: Array) -> void:
 	if not condition:
@@ -77,7 +77,7 @@ func _q_update(failures: Array) -> void:
 	_check(brain.greedy(3) == Actions.EAT and brain.greedy(0) == Actions.FORWARD, "Greedy selection wrong", failures)
 
 func _learner_world(seed: int):
-	var world := World.new(seed, {"creature_count": 6, "food_count": 30, "obstacle_count": 6})
+	var world := World.new(seed, {"creature_count": 6, "food_count": 30, "obstacle_count": 6, "reproduction_enabled": false})
 	var ids := world.creatures.keys()
 	ids.sort()
 	for index in range(ids.size()):
