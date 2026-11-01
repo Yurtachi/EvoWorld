@@ -8,9 +8,19 @@ var pointer := Vector2.ZERO
 var show_pointer := false
 var show_sensors := false
 var terrain := PackedVector2Array()
+var command_target := Vector2.ZERO
+var grass_texture: Texture2D
+var food_texture: Texture2D
+var rock_texture: Texture2D
 
 func set_world(value: World) -> void:
 	world = value
+	if grass_texture == null:
+		grass_texture = _texture("res://assets/external/kenney/roguelike-rpg-pack/tiles/terrain/grass.png")
+		var atlas := _texture("res://assets/external/kenney/roguelike-rpg-pack/Spritesheet/roguelikeSheet_transparent.png")
+		food_texture = _tile(atlas, Vector2i(28, 10))
+		rock_texture = _tile(atlas, Vector2i(54, 21))
+		texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	# Separate visual RNG never consumes the simulation's random stream.
 	var decoration_rng := RandomNumberGenerator.new()
 	decoration_rng.seed = world.seed
@@ -25,6 +35,10 @@ func _draw() -> void:
 		return
 	draw_rect(Rect2(Vector2(-10, -10), world.size + Vector2(20, 20)), Color("233c32"))
 	draw_rect(Rect2(Vector2.ZERO, world.size), Color("54745b"))
+	# Leve textura CC0 de terreno; as entidades permanecem contrastantes.
+	for y in range(0, int(world.size.y), 48):
+		for x in range(0, int(world.size.x), 48):
+			draw_texture_rect(grass_texture, Rect2(x, y, minf(48, world.size.x - x), minf(48, world.size.y - y)), false, Color(0.8, 0.9, 0.7, 0.12))
 	for point in terrain:
 		draw_line(point, point + Vector2(2, -3), Color("648166"), 1.1, true)
 	for x in range(0, int(world.size.x), 100):
@@ -39,6 +53,10 @@ func _draw() -> void:
 		if creature.id == selected_id and show_sensors:
 			_sensor(creature)
 		_creature(creature)
+	if Rect2(Vector2.ZERO, world.size).has_point(command_target):
+		draw_arc(command_target, 10, 0, TAU, 24, Color("8fd5dd"), 1.5, true)
+		draw_line(command_target - Vector2(14, 0), command_target + Vector2(14, 0), Color("8fd5dd"), 1, true)
+		draw_line(command_target - Vector2(0, 14), command_target + Vector2(0, 14), Color("8fd5dd"), 1, true)
 	if show_pointer and tool != "select" and Rect2(Vector2.ZERO, world.size).has_point(pointer):
 		var radius := 24.0 if tool == "obstacle" else (13.0 if tool == "creature" else 7.0)
 		draw_circle(pointer, radius, Color(0.96, 0.91, 0.68, 0.18))
@@ -46,22 +64,24 @@ func _draw() -> void:
 
 func _food(pos: Vector2) -> void:
 	draw_circle(pos + Vector2(1, 3), 5.5, Color(0.12, 0.23, 0.17, 0.26))
-	draw_line(pos, pos + Vector2(1, -7), Color("a9c37a"), 1.6, true)
-	draw_colored_polygon(PackedVector2Array([pos + Vector2(0, -3), pos + Vector2(-7, -7),
-		pos + Vector2(-5, -1)]), Color("bbce83"))
-	draw_circle(pos + Vector2(2, -1), 3.4, Color("e3b86a"))
-	draw_circle(pos + Vector2(3, -2), 1.0, Color("fae2a3"))
+	draw_circle(pos, 6, Color(0.96, 0.89, 0.6, 0.3))
+	draw_texture_rect(food_texture, Rect2(pos - Vector2(9, 9), Vector2(18, 18)), false, Color("e5f1ab"))
 
 func _rock(pos: Vector2, radius: float) -> void:
 	draw_circle(pos + Vector2(3, 5), radius, Color(0.12, 0.22, 0.17, 0.32))
-	var points := PackedVector2Array()
-	for i in range(7):
-		var angle := TAU * i / 7.0
-		points.append(pos + Vector2.from_angle(angle) * radius * (0.9 + 0.1 * sin(i * 4.0)))
-	draw_colored_polygon(points, Color("89988a"))
-	draw_colored_polygon(PackedVector2Array([points[3], points[4], points[5],
-		pos + Vector2(radius * 0.25, -radius * 0.1)]), Color("a4afa0"))
-	draw_line(points[1], points[2], Color("697f70"), 2, true)
+	draw_texture_rect(rock_texture, Rect2(pos - Vector2.ONE * radius * 1.2, Vector2.ONE * radius * 2.4), false)
+
+func _texture(path: String) -> Texture2D:
+	# Também funciona em checkout novo, antes da importação do editor.
+	if ResourceLoader.exists(path, "Texture2D"):
+		return load(path)
+	return ImageTexture.create_from_image(Image.load_from_file(path))
+
+func _tile(atlas: Texture2D, cell: Vector2i) -> AtlasTexture:
+	var texture := AtlasTexture.new()
+	texture.atlas = atlas
+	texture.region = Rect2(Vector2(cell * 17), Vector2(16, 16))
+	return texture
 
 func _creature(creature) -> void:
 	var radius: float = creature.genome.size

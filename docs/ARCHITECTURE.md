@@ -36,3 +36,16 @@ Render rule: body drawn procedurally from genome (size/hue/speed visible).
 - No Python at runtime. No network. No external code execution from saves.
 - Tests: `tests/unit/test_*.gd` with `func run() -> Array` (failures). Run: `godot --headless --path . -s tests/run_tests.gd`.
 - Commit only own paths. No AI trailers in commits (mission rule). Identity: local repo config (Yurtachi).
+
+## Contratos integrados da UI2 (01/11/2026)
+
+O contrato inicial acima descreve a primeira etapa. O mundo integrado usa save v3 e migra versões 1 e 2; genealogia, sinais e ordens são persistidos pelo simulador. A UI não acrescenta campos ao schema do mundo.
+
+- `world.lineage(creature_id)` e `world.descendants(creature_id)` devolvem cópias dos registros permanentes. Cada registro inclui genoma, genitores, geração, nascimento, morte e mutações. `world.genetic_diversity()` informa variância dos seis genes na população viva.
+- `world.comandos` é a instância usada pela UI e pelo executor físico. A UI não a substitui ao carregar; restaura o marcador de alvo a partir de `comandos.to_dict(world).order.target`, preservando ordens de seguir no primeiro quadro.
+- `Dialogo.interpretar(texto)` reconhece intenções; `Dialogo.responder(intent, criatura, world)` fornece narração e evidências sem aplicar ações. A UI chama `comandos.aplicar` e mostra o recibo separadamente.
+- `world.emitir_sinal(id, symbol)` aplica custo e regras do canal. `signal_log` contém `{tick, emitter, symbol, context, receivers, action_changes}`; contexto contém `saw_food/low_energy`, e cada decisão registrada contém `receiver/tick/before/after`. A apresentação traduz ações e não infere causalidade ou semântica.
+- `scripts/ui/laboratory.gd` e `population_chart.gd` guardam até 180 amostras observadas, uma a cada 50 passos. As curvas são locais à sessão, sem escrita em genes ou registros do mundo.
+- A proteção da UI é pausa preventiva antes de um passo com energia do companheiro ≤15% ou idade no limite. Não altera fisiologia. A configuração pessoal não é uma promessa de proteção em execuções headless externas.
+- `SaveStore` continua dono de gravação/validação. UI usa slots separados `world` e `autosave`, sem mudar o envelope. Preferências ficam em `user://ui-settings.cfg`; testes e capturas usam arquivos isolados.
+- Textos novos da UI ficam em `scripts/core/textos.gd`; códigos e chaves JSON continuam intactos. `verify_ui.gd` valida a integração da cena, APIs, arquivos e resolução mínima.
