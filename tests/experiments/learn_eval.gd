@@ -107,11 +107,13 @@ func _run_episode(world_seed: int, condition: String, shared = null, checkpoint:
 				creature.brain = brain
 		bodies.append(creature)
 	var food := {}
+	var gained := {}
 	var actions: Array = []
 	actions.resize(Actions.COUNT)
 	actions.fill(0)
 	for creature in bodies:
 		food[creature.id] = 0
+		gained[creature.id] = 0.0
 	for index in range(MAX_TICKS):
 		if world.creatures.is_empty():
 			break
@@ -125,6 +127,7 @@ func _run_episode(world_seed: int, condition: String, shared = null, checkpoint:
 			var event: Dictionary = world.events[cursor]
 			if event["type"] == "eat" and food.has(int(event["creature_id"])):
 				food[int(event["creature_id"])] += 1
+				gained[int(event["creature_id"])] += float(event["energy"])
 			cursor -= 1
 	if condition == "train":
 		var used := 0
@@ -133,15 +136,18 @@ func _run_episode(world_seed: int, condition: String, shared = null, checkpoint:
 		shared.steps = start_steps + used
 	var survival_total := 0.0
 	var food_total := 0.0
+	var gained_total := 0.0
 	var survivors := 0
 	for creature in bodies:
 		survival_total += float(creature.age)
 		food_total += float(food[creature.id])
+		gained_total += float(gained[creature.id])
 		if creature.alive:
 			survivors += 1
 	return {
 		"seed": world_seed, "condition": condition, "ticks": world.tick,
 		"survival_mean": survival_total / bodies.size(), "food_mean": food_total / bodies.size(),
+		"energy_gained_mean": gained_total / bodies.size(),
 		"survivors": survivors, "creatures": bodies.size(), "action_counts": actions
 	}
 
@@ -187,6 +193,7 @@ func _summarize(evaluation: Dictionary, curve: Array, passes: int, per_pass: int
 			table[condition] = {
 				"food_mean": _mean(rows, "food_mean"), "food_sd": _stdev(rows, "food_mean"),
 				"survival_mean": _mean(rows, "survival_mean"), "survival_sd": _stdev(rows, "survival_mean"),
+				"energy_gained_mean": _mean(rows, "energy_gained_mean"),
 				"survivors_mean": _mean(rows, "survivors")
 			}
 		var e: Dictionary = evaluation[set_name]
@@ -197,6 +204,8 @@ func _summarize(evaluation: Dictionary, curve: Array, passes: int, per_pass: int
 		table["frozen_vs_random_food"] = _paired(e["learner_frozen"], e["random"], "food_mean")
 		table["trained_vs_heuristic_food"] = _paired(e["learner_trained"], e["heuristic"], "food_mean")
 		table["trained_vs_heuristic_survival"] = _paired(e["learner_trained"], e["heuristic"], "survival_mean")
+		table["trained_vs_random_energy"] = _paired(e["learner_trained"], e["random"], "energy_gained_mean")
+		table["trained_vs_heuristic_energy"] = _paired(e["learner_trained"], e["heuristic"], "energy_gained_mean")
 		var survival_ratio: float = table["learner_trained"]["survival_mean"] / maxf(0.001, table["random"]["survival_mean"])
 		table["trained_over_random_survival_ratio"] = survival_ratio
 		table["H1_pass"] = table["trained_vs_random_food"]["wins"] >= 9 and survival_ratio >= 1.2
@@ -222,13 +231,14 @@ func _print_summary(summary: Dictionary, checkpoint: Dictionary) -> void:
 	for set_name in summary["sets"]:
 		var table: Dictionary = summary["sets"][set_name]
 		print("")
-		print("[%s] condition | food/creature mean (sd) | survival ticks mean (sd) | survivors/8" % set_name)
+		print("[%s] condition | food/creature mean (sd) | survival ticks mean (sd) | survivors/8 | energy gained/creature" % set_name)
 		for condition in CONDITIONS:
 			var row: Dictionary = table[condition]
-			print("  %-16s | %6.2f (%5.2f) | %7.1f (%6.1f) | %.2f" % [condition, row["food_mean"], row["food_sd"],
-				row["survival_mean"], row["survival_sd"], row["survivors_mean"]])
+			print("  %-16s | %6.2f (%5.2f) | %7.1f (%6.1f) | %.2f | %.1f" % [condition, row["food_mean"], row["food_sd"],
+				row["survival_mean"], row["survival_sd"], row["survivors_mean"], row["energy_gained_mean"]])
 		for key in ["trained_vs_random_food", "trained_vs_random_survival", "trained_vs_naive_food", "naive_vs_random_food",
-				"frozen_vs_random_food", "trained_vs_heuristic_food", "trained_vs_heuristic_survival"]:
+				"frozen_vs_random_food", "trained_vs_heuristic_food", "trained_vs_heuristic_survival",
+				"trained_vs_random_energy", "trained_vs_heuristic_energy"]:
 			var c: Dictionary = table[key]
 			print("  %-30s wins %d/%d  p=%.4f  mean_diff=%.2f" % [key, c["wins"], c["n"], c["p_one_sided"], c["mean_diff"]])
 		print("  survival ratio trained/random=%.2f  H1=%s  H2=%s  H3(naive>random)=%s" % [

@@ -15,7 +15,7 @@ const KIND := "q_learning"
 const VERSION := 1
 const TABLE_SIZE := Obs.STATE_COUNT * Actions.COUNT
 
-var alpha: float = 0.1
+var alpha: float = snappedf(0.1, 0.000001)
 var gamma: float = 0.97
 var epsilon_start: float = 0.3
 var epsilon_min: float = 0.02
@@ -71,9 +71,7 @@ func decide(creature, obs: Dictionary, rng) -> int:
 	prev_state = state
 	prev_action = action
 	prev_energy = creature.energy
-	last_reason = "Q-policy %s: %s; Q=%.2f%s" % [
-		"explore" if explored else "greedy", Obs.describe_state(state), value(state, action),
-		" (eps=%.3f)" % epsilon() if learning else " (frozen)"]
+	last_reason = "brain.q_frozen" if not learning else ("brain.q_explore" if explored else "brain.q_greedy")
 	return action
 
 func on_death(creature) -> void:
@@ -111,16 +109,16 @@ func to_dict() -> Dictionary:
 	}
 
 static func from_dict(data: Dictionary):
-	if data.get("kind") != KIND or data.get("version") != VERSION:
+	if not data.get("kind") is String or data["kind"] != KIND or not Data.integer(data.get("version")) or int(data["version"]) != VERSION:
 		return null
 	for field in ["alpha", "gamma", "epsilon_start", "epsilon_min", "epsilon_decay", "death_penalty", "prev_energy", "total_reward"]:
 		if not Data.number(data.get(field)):
 			return null
-	if float(data["alpha"]) <= 0.0 or float(data["alpha"]) > 1.0 or float(data["gamma"]) < 0.0 or float(data["gamma"]) >= 1.0:
+	if float(data["alpha"]) < 0.000001 or float(data["alpha"]) > 1.0 or float(data["gamma"]) < 0.0 or float(data["gamma"]) > 0.999999:
 		return null
 	if float(data["epsilon_start"]) < 0.0 or float(data["epsilon_start"]) > 1.0 or float(data["epsilon_min"]) < 0.0 or float(data["epsilon_min"]) > 1.0:
 		return null
-	if float(data["epsilon_decay"]) <= 0.0 or float(data["death_penalty"]) < 0.0:
+	if float(data["epsilon_decay"]) < 0.000001 or float(data["death_penalty"]) < 0.0:
 		return null
 	if not data.get("learning") is bool or not Data.integer(data.get("steps")):
 		return null

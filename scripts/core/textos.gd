@@ -74,6 +74,15 @@ const CATALOGO := {
 	"screenshot_graphics": "A captura de tela requer uma janela gráfica.",
 	"screenshot_saved": "Captura de tela salva: %s",
 	"screenshot_failed": "Não foi possível salvar a captura de tela (código %d).",
+	"action_forward": "Avan?ar",
+	"action_turn_left": "Virar à esquerda",
+	"action_turn_right": "Virar à direita",
+	"reason_q_explore": "Experimentando uma ação para aprender com seu resultado.",
+	"reason_q_greedy": "Escolhendo a ação mais valorizada pela experiência.",
+	"reason_q_frozen": "Seguindo a experiência salva, com aprendizado pausado.",
+	"reason_random": "Experimentando uma ação aleatória, sem aprender.",
+	"reason_eat_empty": "Tentou comer, mas não há alimento percebido ao alcance.",
+	"reason_blocked": "O movimento foi bloqueado por contato físico.",
 	"action_rest": "Descansar",
 	"action_seek_food": "Buscar alimento",
 	"action_explore": "Explorar",
@@ -161,6 +170,12 @@ const MENUS := {
 }
 
 const RAZOES := {
+	"brain.q_explore": "reason_q_explore",
+	"brain.q_greedy": "reason_q_greedy",
+	"brain.q_frozen": "reason_q_frozen",
+	"brain.random": "reason_random",
+	"brain.eat_empty": "reason_eat_empty",
+	"brain.blocked": "reason_blocked",
 	"Newly spawned": "reason_new",
 	"Satiated; conserving energy": "reason_satiated",
 	"Brief rest; no food perceived": "reason_rest",

@@ -3,7 +3,7 @@ extends RefCounted
 ## Data-only validation shared by save readers. No resources or scripts are loaded.
 
 static func number(value: Variant) -> bool:
-	return (value is int or value is float) and is_finite(float(value))
+	return (value is int or value is float) and is_finite(float(value)) and absf(float(value)) <= 2147483647.0
 
 static func integer(value: Variant, minimum: int = 0) -> bool:
 	return number(value) and float(value) == floor(float(value)) and float(value) >= minimum and float(value) <= 2147483647.0
@@ -62,4 +62,21 @@ static func json_data(value: Variant, depth: int = 0) -> bool:
 			if not key is String or not json_data(value[key], depth + 1):
 				return false
 		return true
+	return false
+
+## Closed event schema: consumers may safely access fields after load.
+static func event(value: Variant, max_tick: int = 2147483647, next_id: int = 2147483647) -> bool:
+	if not value is Dictionary or not value.get("type") is String:
+		return false
+	if not integer(value.get("tick")) or int(value["tick"]) > max_tick:
+		return false
+	if not integer(value.get("creature_id"), 1) or int(value["creature_id"]) >= next_id:
+		return false
+	match value["type"]:
+		"spawn":
+			return value.size() == 4 and value.get("name") is String and value["name"].length() <= 64
+		"eat":
+			return value.size() == 5 and integer(value.get("food_id"), 1) and int(value["food_id"]) < next_id and number(value.get("energy")) and float(value["energy"]) >= 0.0 and float(value["energy"]) <= 10000.0
+		"death":
+			return value.size() == 4 and value.get("reason") is String and value["reason"] == "starvation"
 	return false
