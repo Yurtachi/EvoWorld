@@ -13,7 +13,7 @@ const Obs = preload("res://scripts/behavior/observation.gd")
 const Actions = preload("res://scripts/behavior/actions.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
 const KIND := "q_learning"
-const VERSION := 3
+const VERSION := 4
 const TABLE_SIZE := Obs.STATE_COUNT * Actions.COUNT
 
 var alpha: float = snappedf(0.1, 0.000001)
@@ -33,10 +33,47 @@ var prev_water_enabled := false
 var _allowed_actions: Array = []
 var total_reward: float = 0.0
 var last_reason: String = ""
+## Separate goal table leaves historical physiology Q cells and transitions intact.
+const GOAL_ACTIONS := [Actions.FORWARD, Actions.TURN_LEFT, Actions.TURN_RIGHT, Actions.REST, Actions.DRINK]
+var goal_q: Array = []
+var goal_updates := 0
 
 func _init() -> void:
 	q.resize(TABLE_SIZE)
 	q.fill(0.0)
+	goal_q.resize(Obs.GOAL_STATE_COUNT * Actions.COUNT)
+	goal_q.fill(0.0)
+
+func decide_goal(obs: Dictionary, rng) -> int:
+	var allowed: Array = GOAL_ACTIONS if obs.skill == "buscar_agua" else GOAL_ACTIONS.slice(0, 4)
+	var best: int = allowed[0]
+	var offset: int = int(obs.state) * Actions.COUNT
+	for action in allowed:
+		if float(goal_q[offset + int(action)]) > float(goal_q[offset + best]):
+			best = int(action)
+	if learning and rng.between(0.0, 1.0) < 0.15:
+		best = int(allowed[clampi(int(rng.between(0, allowed.size())), 0, allowed.size() - 1)])
+	return best
+
+## Monte Carlo credit only for a physically completed, explicitly rewarded attempt.
+## No distance shaping or failure reward, so oscillation cannot earn teaching credit.
+func reward_goal(trace: Array) -> int:
+	if not learning:
+		return 0
+	var credit := 1.0
+	var count := 0
+	for index in range(trace.size() - 1, -1, -1):
+		var row: Dictionary = trace[index]
+		var cell: int = int(row.state) * Actions.COUNT + int(row.action)
+		goal_q[cell] = snappedf(float(goal_q[cell]) + 0.25 * (credit - float(goal_q[cell])), 0.000001)
+		credit *= 0.97
+		count += 1
+	goal_updates += count
+	return count
+
+func reset_goals() -> void:
+	goal_q.fill(0.0)
+	goal_updates = 0
 
 func epsilon() -> float:
 	return maxf(epsilon_min, epsilon_start * epsilon_decay / (epsilon_decay + float(steps)))
@@ -128,14 +165,30 @@ func to_dict() -> Dictionary:
 		"epsilon_start": epsilon_start, "epsilon_min": epsilon_min, "epsilon_decay": epsilon_decay,
 		"death_penalty": death_penalty, "learning": learning, "q": q.duplicate(), "steps": steps,
 		"prev_state": prev_state, "prev_action": prev_action, "prev_energy": prev_energy, "prev_hydration": prev_hydration, "prev_water_enabled": prev_water_enabled,
-		"total_reward": total_reward
+		"total_reward": total_reward, "goal_q": goal_q.duplicate(), "goal_updates": goal_updates
 	}
 
 static func from_dict(data: Dictionary):
+	var historical: bool = Data.integer(data.get("version")) and int(data["version"]) < VERSION
 	if Data.integer(data.get("version")) and int(data["version"]) == 1:
 		data = _migrate_v1(data)
 	if Data.integer(data.get("version")) and int(data["version"]) == 2:
 		data = _migrate_v2(data)
+	if Data.integer(data.get("version")) and int(data["version"]) == 3:
+		data = data.duplicate(true)
+		data["version"] = VERSION
+	if not data.has("goal_q") and historical and Data.integer(data.get("version")) and int(data["version"]) == VERSION:
+		# Historical migrations explicitly initialize the new table, once.
+		data = data.duplicate(true)
+		data["goal_q"] = []
+		data["goal_q"].resize(Obs.GOAL_STATE_COUNT * Actions.COUNT)
+		data["goal_q"].fill(0.0)
+		data["goal_updates"] = 0
+	if not data.get("goal_q") is Array or data["goal_q"].size() != Obs.GOAL_STATE_COUNT * Actions.COUNT or not Data.integer(data.get("goal_updates")):
+		return null
+	for cell in data["goal_q"]:
+		if not Data.number(cell) or float(cell) < 0.0 or float(cell) > 1.0:
+			return null
 	if not Data.number(data.get("prev_hydration")) or float(data["prev_hydration"]) < 0.0 or float(data["prev_hydration"]) > 100.0 or not data.get("prev_water_enabled") is bool:
 		return null
 	if not data.get("kind") is String or data["kind"] != KIND or not Data.integer(data.get("version")) or int(data["version"]) != VERSION:
@@ -179,6 +232,9 @@ static func from_dict(data: Dictionary):
 	result.prev_water_enabled = data["prev_water_enabled"]
 	result.prev_energy = snappedf(float(data["prev_energy"]), 0.000001)
 	result.total_reward = snappedf(float(data["total_reward"]), 0.000001)
+	for index in range(result.goal_q.size()):
+		result.goal_q[index] = snappedf(float(data["goal_q"][index]), 0.000001)
+	result.goal_updates = int(data["goal_updates"])
 	return result
 
 static func _migrate_v1(data: Dictionary) -> Dictionary:

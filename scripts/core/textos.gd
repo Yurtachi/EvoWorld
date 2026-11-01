@@ -549,3 +549,19 @@ static func episodio(item: Dictionary) -> String:
 
 static func expressao(state: Dictionary) -> String:
 	return texto("expression_strained" if float(state["valence"]) < -0.25 else ("expression_active" if float(state["arousal"]) >= 0.5 else "expression_calm"))
+
+# E3-SIM — seção aditiva; os formatadores de UI podem consultar estas chaves.
+const E3_CATALOGO := {
+	"ir_ate_local": "Ir até o local marcado", "buscar_agua": "Buscar água e beber",
+	"not_learned": "Ainda não aprendeu", "learned": "Aprendizado observado",
+	"show": "Mostrar", "reward": "Recompensar", "observe": "Observar",
+	"reset": "Reiniciar treinamento", "assisted": "Rota assistida pelo cuidador",
+	"goal": "Tentativa autônoma da habilidade ativa",
+	"not_completed": "A tarefa ainda não foi concluída; nenhuma recompensa foi aplicada.",
+	"already_rewarded": "Esta conclusão já recebeu recompensa.",
+	"frozen": "Política congelada; nenhuma atualização foi aplicada.",
+	"reward_note": "Recompensa é sinal de aprendizado. Não repõe energia nem hidratação.",
+	"success": "Conclusão verificada pela simulação", "timeout": "Não concluiu no prazo",
+	"assistance_note": "Conclusões assistidas não comprovam aprendizado autônomo."
+}
+const E3_RAZOES := {"teaching.assisted": "assisted", "teaching.goal": "goal"}

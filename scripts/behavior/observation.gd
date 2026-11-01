@@ -22,6 +22,24 @@ const HIGH_ENERGY := 0.7
 const FOOD_NAMES := ["none", "reach", "near_left", "near_ahead", "near_right", "far_left", "far_ahead", "far_right"]
 const ENERGY_NAMES := ["low", "mid", "high"]
 const TICK_DT := 0.1
+const GOAL_SKILLS := ["ir_ate_local", "buscar_agua"]
+const GOAL_STATE_COUNT := 2 * 13 * 3 * 2
+const GOAL_ANGLE_STEP := 0.5
+
+## Body-relative goal features generalize across absolute positions/headings.
+## Marked locations are explicit player information; water comes from sensors.
+static func goal_features(creature, skill: String, target: Vector2, sensors: Dictionary, world_size: Vector2, visible: bool = true) -> Dictionary:
+	var offset: Vector2 = target - creature.pos
+	var distance := offset.length()
+	var relative := wrapf(offset.angle() - creature.heading, -PI, PI)
+	var direction := clampi(roundi(relative / GOAL_ANGLE_STEP), -6, 6) + 6
+	var bucket := 0 if distance <= reach(creature) else (1 if distance <= NEAR_DISTANCE else 2)
+	if bucket == 0:
+		direction = 6
+	var obstacle := _obstacle_ahead(creature, sensors.get("obstacles", []), world_size)
+	return {"skill": skill, "state": ((GOAL_SKILLS.find(skill) * 13 + direction) * 3 + bucket) * 2 + (1 if obstacle else 0),
+		"direction_bucket": direction, "distance_bucket": bucket, "distance": snappedf(distance, 0.000001),
+		"visible": visible, "obstacle_ahead": obstacle}
 
 static func reach(creature) -> float:
 	return creature.genome.size + 5.0

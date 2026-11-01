@@ -18,7 +18,9 @@ const Commands = preload("res://scripts/communication/comandos.gd")
 const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
 const Water = preload("res://scripts/environment/water_rules.gd")
 const Personality = preload("res://scripts/behavior/personality.gd")
-const SAVE_VERSION := 5
+const Ensino = preload("res://scripts/interaction/ensino.gd")
+const QBrain = preload("res://scripts/behavior/q_brain.gd")
+const SAVE_VERSION := 6
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
@@ -393,8 +395,10 @@ func _update_creature(creature: Creature) -> void:
 			closest = food
 			closest_distance = distance
 	var moving := false
+	var teaching_acted := false
 	var order: Dictionary = comandos.acao_pendente(creature, self)
-	var survival := personality_enabled and (creature.hunger > Commands.FOME_SUSPENDE_ORDEM or (water_enabled and creature.thirst > Water.THIRST_THRESHOLD))
+	var teaching_active: bool = creature.ensino != null and creature.ensino.running()
+	var survival := (personality_enabled or teaching_active) and (creature.hunger > Commands.FOME_SUSPENDE_ORDEM or (water_enabled and creature.thirst > Water.THIRST_THRESHOLD))
 	var motive: String = creature.personality.motive(creature.temperament) if personality_enabled and not survival else ""
 	if survival:
 		_suspend_brain(creature)
@@ -409,6 +413,9 @@ func _update_creature(creature: Creature) -> void:
 		creature.last_action = Actions.name_of(int(order["acao"]))
 		creature.last_reason = order["razao"]
 		moving = _apply_action(creature, sensors, int(order["acao"]))
+	elif creature.ensino != null and creature.ensino.running() and creature.hunger <= Commands.FOME_SUSPENDE_ORDEM and (not water_enabled or creature.thirst <= Water.THIRST_THRESHOLD):
+		moving = _ensino_act(creature, sensors)
+		teaching_acted = true
 	elif not motive.is_empty():
 		_suspend_brain(creature)
 		moving = _personality_action(creature, sensors, motive)
@@ -452,8 +459,12 @@ func _update_creature(creature: Creature) -> void:
 		creature.personality.finish_tick(creature, tick, moving, before, started)
 	if creature.energy <= 0.0:
 		_die(creature, "starvation")
+	elif creature.ensino != null and creature.ensino.running():
+		_ensino_finish_tick(creature, teaching_acted)
 
 func _die(creature: Creature, reason: String) -> void:
+	if creature.ensino != null:
+		creature.ensino.finish(tick, "death", creature.energy, creature.ensino.active.get("final_distance", 0.0))
 	creature.alive = false
 	creature.last_action = "dead"
 	creature.last_reason = "Starvation: energy exhausted" if reason == "starvation" else "evolution." + reason
@@ -686,7 +697,7 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -704,6 +715,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		data = _migrate_v4(data)
 		if data.is_empty():
 			return null
+	if int(data["save_version"]) == 5:
+		data = _migrate_v5(data)
 	if not Data.integer_text(data.get("world_seed")):
 		return null
 	if not Data.integer(data.get("tick")) or not Data.integer(data.get("next_id"), 1) or not Data.integer(data.get("pet_id"), -1):
@@ -775,6 +788,13 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		var creature := Creature.from_dict(entry)
 		if creature == null or not creature.alive or used_ids.has(creature.id) or used_ids.has(creature.genome.id) or creature.id == creature.genome.id or creature.genome.id < 1:
 			return null
+		if creature.ensino != null:
+			if Ensino.from_dict(entry["ensino"], result.tick) == null:
+				return null
+			if not creature.ensino.active.is_empty():
+				var target := Data.unpack_vector(creature.ensino.active.target)
+				if not Commands._alvo_valido(target, result):
+					return null
 		if result.personality_enabled:
 			if creature.personality == null or Personality.from_dict(entry.get("personality"), result.tick) == null:
 				return null
@@ -916,6 +936,14 @@ static func _migrate_v4(data: Dictionary) -> Dictionary:
 		return {}
 	var migrated := data.duplicate(true)
 	migrated["config"]["personality_enabled"] = false
+	migrated["save_version"] = 5
+	return migrated
+
+## Teaching is opt-in; no invented experience, RNG draws or Q updates on migration.
+static func _migrate_v5(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION:
+		return data.duplicate(true)
+	var migrated := data.duplicate(true)
 	migrated["save_version"] = SAVE_VERSION
 	return migrated
 
@@ -991,3 +1019,153 @@ func interagir_jogador(creature_id: int, position: Vector2, valencia: float = 0.
 	creature.personality.stimulus("player", tick)
 	creature.personality.record(tick, where, "player_contact", 0.0, 0.0, 0.0, "player_contact", "player")
 	return true
+
+## E3 public API. Snapshots are detached copies; no physiology changes here.
+func ensino_habilidades() -> Array:
+	return [
+		{"id": "ir_ate_local", "text": Text.E3_CATALOGO.ir_ate_local, "requires_target": true},
+		{"id": "buscar_agua", "text": Text.E3_CATALOGO.buscar_agua, "requires_target": false}
+	]
+
+func ensino_iniciar(creature_id: int, skill: String, target: Vector2 = Vector2.INF, assisted: bool = false, horizon: int = 200, policy: String = "q") -> Dictionary:
+	if not creatures.has(creature_id) or not creatures[creature_id].alive or skill not in Obs.GOAL_SKILLS or policy not in ["q", "heuristica"] or horizon < 1 or horizon > Ensino.TRACE_LIMIT:
+		return {"ok": false, "code": "invalid_request"}
+	var creature: Creature = creatures[creature_id]
+	if skill == "ir_ate_local" and (not Commands._alvo_valido(target, self) or target != _inside(target, creature.genome.size) or not _clear(target, creature.genome.size)):
+		return {"ok": false, "code": "invalid_target"}
+	if skill == "buscar_agua":
+		if not water_enabled:
+			return {"ok": false, "code": "water_disabled"}
+		target = creature.pos # Actual water target is resolved only from sensors.
+	if creature.ensino == null:
+		creature.ensino = Ensino.new()
+	if creature.ensino.running():
+		creature.ensino.finish(tick, "cancelled", creature.energy, creature.ensino.active.final_distance)
+	comandos.cancelar_ordem(creature_id)
+	if policy == "q" and creature.brain == null:
+		creature.brain = QBrain.new()
+	_suspend_brain(creature)
+	creature.ensino.start(skill, target, tick, creature.energy, assisted, horizon, policy)
+	return ensino_observar(creature_id)
+
+## Showing a marker alone does not steer. Assisted routes consume ordinary actions.
+func ensino_mostrar(creature_id: int, target: Vector2 = Vector2.INF, assisted: bool = false) -> Dictionary:
+	if not creatures.has(creature_id) or creatures[creature_id].ensino == null or not creatures[creature_id].ensino.running():
+		return {"ok": false, "code": "no_attempt"}
+	var creature: Creature = creatures[creature_id]
+	var active: Dictionary = creature.ensino.active
+	if target.is_finite():
+		if active.skill != "ir_ate_local" or not Commands._alvo_valido(target, self) or target != _inside(target, creature.genome.size) or not _clear(target, creature.genome.size):
+			return {"ok": false, "code": "invalid_target"}
+		# A different target is a new attempt, preserving honest completion evidence.
+		if Data.unpack_vector(active.target) != target:
+			return ensino_iniciar(creature_id, active.skill, target, assisted, active.horizon, active.policy)
+	active.assisted = assisted
+	creature.ensino.record(tick, "show", {}, -1, "active", 0)
+	return ensino_observar(creature_id)
+
+func ensino_observar(creature_id: int) -> Dictionary:
+	if not creatures.has(creature_id):
+		return {"ok": false, "code": "no_creature"}
+	var result: Dictionary = Ensino.new().snapshot() if creatures[creature_id].ensino == null else creatures[creature_id].ensino.snapshot()
+	result["creature_id"] = creature_id
+	return result
+
+func ensino_cancelar(creature_id: int) -> bool:
+	if not creatures.has(creature_id) or creatures[creature_id].ensino == null:
+		return false
+	var creature: Creature = creatures[creature_id]
+	creature.ensino.finish(tick, "cancelled", creature.energy, creature.ensino.active.get("final_distance", 0.0))
+	return true
+
+func ensino_recompensar(creature_id: int) -> Dictionary:
+	if not creatures.has(creature_id) or creatures[creature_id].ensino == null:
+		return {"ok": false, "code": "no_attempt", "updates": 0}
+	var creature: Creature = creatures[creature_id]
+	var teaching = creature.ensino
+	var code := "success"
+	if teaching.active.is_empty() or teaching.active.status != "success":
+		code = "not_completed"
+	elif teaching.active.rewarded:
+		code = "already_rewarded"
+	elif creature.brain == null or not creature.brain.has_method("reward_goal") or not creature.brain.learning:
+		code = "frozen"
+	if code != "success":
+		teaching.record(tick, "reward_rejected", {}, -1, code, 0)
+		return {"ok": false, "code": code, "updates": 0}
+	var updates: int = creature.brain.reward_goal(teaching.active.trace)
+	teaching.active.rewarded = true
+	teaching.active.updates = updates
+	if not teaching.attempts.is_empty():
+		teaching.attempts.back().rewarded = true
+		teaching.attempts.back().updates = updates
+	teaching.record(tick, "reward", {}, -1, "success", updates)
+	return {"ok": true, "code": "success", "updates": updates}
+
+func ensino_reset(creature_id: int) -> bool:
+	if not creatures.has(creature_id):
+		return false
+	var creature: Creature = creatures[creature_id]
+	creature.ensino = Ensino.new()
+	if creature.brain != null and creature.brain.has_method("reset_goals"):
+		creature.brain.reset_goals()
+	return true
+
+func _ensino_act(creature: Creature, sensors: Dictionary) -> bool:
+	_suspend_brain(creature)
+	var teaching = creature.ensino
+	var active: Dictionary = teaching.active
+	var target := Data.unpack_vector(active.target)
+	var visible := true
+	if active.skill == "buscar_agua":
+		visible = false
+		var closest := INF
+		for water in sensors.get("waters", []):
+			var distance: float = creature.pos.distance_to(water.pos)
+			if distance < closest:
+				closest = distance
+				target = water.pos
+				visible = true
+		active.target = Data.pack_vector(target)
+	var obs := Obs.goal_features(creature, active.skill, target, sensors, size, visible)
+	var action := Actions.FORWARD
+	var assisted: bool = active.assisted
+	if assisted or active.policy == "heuristica":
+		if visible and int(obs.distance_bucket) == 0:
+			action = Actions.DRINK if active.skill == "buscar_agua" else Actions.REST
+		elif visible:
+			var angle := wrapf((target - creature.pos).angle() - creature.heading, -PI, PI)
+			if absf(angle) > 0.25:
+				action = Actions.TURN_LEFT if angle < 0 else Actions.TURN_RIGHT
+		elif creature.age % 15 == 0:
+			action = Actions.TURN_RIGHT
+	elif not visible:
+		action = Actions.TURN_RIGHT if creature.age % 15 == 0 else Actions.FORWARD
+	elif creature.brain != null and creature.brain.has_method("decide_goal"):
+		action = creature.brain.decide_goal(obs, rng)
+	elif creature.brain != null:
+		var random_obs := Obs.features(creature, sensors, size)
+		action = creature.brain.decide(creature, random_obs, rng)
+	teaching.step_record(tick, obs, action, assisted, creature.energy)
+	creature.last_action = Actions.name_of(action)
+	creature.last_reason = "teaching.assisted" if assisted else "teaching.goal"
+	var moved := _apply_action(creature, sensors, action)
+	teaching.events.back().result = "moved" if moved else ("drink" if creature.last_action == "drink" and creature.last_reason == "ecology.drink" else "no_movement")
+	return moved
+
+func _ensino_finish_tick(creature: Creature, acted: bool) -> void:
+	var teaching = creature.ensino
+	var active: Dictionary = teaching.active
+	var target := Data.unpack_vector(active.target)
+	var distance: float = creature.pos.distance_to(target)
+	var success := false
+	if acted and active.skill == "ir_ate_local":
+		success = distance <= Obs.reach(creature) and not _occluded(creature.pos, target)
+	elif acted and active.skill == "buscar_agua":
+		for event in events:
+			if event.tick == tick and event.creature_id == creature.id and event.type == "drink" and event.hydration > 0.0:
+				success = true
+	if success:
+		teaching.finish(tick, "success", creature.energy, distance)
+	elif tick - int(active.start_tick) >= int(active.horizon):
+		teaching.finish(tick, "timeout", creature.energy, distance)
