@@ -1,0 +1,8 @@
+# Declaração de Dedicação ao Domínio Público (CC0 1.0 Universal)
+
+Os assets contidos neste diretório (`assets/original/`) são de autoria própria do projeto EvoWorld (autor: Yurtachi).
+
+O autor dedica esta obra ao domínio público sob os termos da Creative Commons Zero 1.0 Universal (CC0 1.0 Universal - Public Domain Dedication).
+Você pode copiar, modificar, distribuir e executar este trabalho, mesmo para fins comerciais, sem pedir permissão.
+
+Termos completos: https://creativecommons.org/publicdomain/zero/1.0/
