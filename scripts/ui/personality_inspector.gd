@@ -8,6 +8,7 @@ var traits: Label
 var memory: Label
 var preferences: Label
 var bonds: Label
+var encounters: Label
 var expression: Label
 var legacy: Label
 
@@ -57,6 +58,10 @@ func _ready() -> void:
 			"tab_bonds":
 				_text(col, Texto.texto("bonds_note"))
 				bonds = _text(col, "")
+				_text(col, Texto.texto("social_history"))
+				_text(col, Texto.texto("social_history_note"))
+				encounters = _text(col, "")
+				_text(col, Texto.texto("social_legend"))
 
 func _text(parent: Node, value: String) -> Label:
 	var label := Label.new()
@@ -89,7 +94,7 @@ func observe(creature, world) -> void:
 			bar.value = 0
 		for label in need_labels.values():
 			label.text = "—"
-		for label in [traits, memory, preferences, bonds, expression]:
+		for label in [traits, memory, preferences, bonds, encounters, expression]:
 			label.text = ""
 		return
 	var enabled: bool = creature.personality != null
@@ -103,7 +108,7 @@ func observe(creature, world) -> void:
 	var state: Dictionary = creature.expression_state()
 	expression.text = Texto.texto("expression_scores", [Texto.expressao(state), Texto.numero(float(state.valence), 2), Texto.numero(float(state.arousal) * 100, 0)]) if enabled else ""
 	if not enabled:
-		for label in [traits, memory, preferences, bonds]:
+		for label in [traits, memory, preferences, bonds, encounters]:
 			label.text = Texto.texto("legacy_personality")
 		return
 	var rows: Array[String] = []
@@ -121,10 +126,17 @@ func observe(creature, world) -> void:
 		rows.append(Texto.texto("preference_value", [Texto.texto("food_" + kind), Texto.numero(float(creature.personality.preferences[kind]), 3)]) if known else Texto.texto("preference_unknown", [Texto.texto("food_" + kind)]))
 	preferences.text = "\n\n".join(rows)
 	rows.clear()
-	var keys: Array = creature.personality.bonds.keys()
-	keys.sort()
-	for key in keys:
-		var item: Dictionary = creature.personality.bonds[key]
-		var who := Texto.texto("bond_player") if key == "player" else (Texto.nome_criatura(world.creatures[int(key)].name) if world.creatures.has(int(key)) else Texto.texto("bond_unknown", [int(key)]))
-		rows.append(Texto.texto("bond_row", [who, Texto.numero(float(item.familiarity) * 100, 1), int(item.count), int(item.last_tick)]))
+	for item in world.social_observar(creature.id).relations:
+		var who: String = Texto.nome_criatura(world.creatures[item.id].name) if world.creatures.has(item.id) else Texto.texto("bond_unknown", [item.id])
+		rows.append(Texto.texto("social_row", [who, item.id, Texto.numero(item.familiarity * 100, 1), Texto.numero(item.affinity * 100, 1), Texto.numero(item.aversion * 100, 1), Texto.texto("encounter_count_one") if int(item.encounters) == 1 else Texto.texto("encounter_count", [int(item.encounters)]), item.last_tick]))
+	if creature.personality.bonds.has("player"):
+		var item: Dictionary = creature.personality.bonds.player
+		rows.append(Texto.texto("bond_row", [Texto.texto("bond_player"), Texto.numero(item.familiarity * 100, 1), item.count, item.last_tick]))
 	bonds.text = "\n\n".join(rows) if not rows.is_empty() else Texto.texto("bonds_empty")
+	rows.clear()
+	for index in range(episodes.size() - 1, -1, -1):
+		if episodes[index].reward_source == "encounter":
+			rows.append(Texto.episodio(episodes[index]))
+			if rows.size() == 8:
+				break
+	encounters.text = "\n\n".join(rows) if not rows.is_empty() else Texto.texto("social_history_empty")

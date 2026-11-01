@@ -93,6 +93,7 @@ func _draw() -> void:
 		draw_line(command_target - Vector2(14, 0), command_target + Vector2(14, 0), Color("8fd5dd"), 1, true)
 		draw_line(command_target - Vector2(0, 14), command_target + Vector2(0, 14), Color("8fd5dd"), 1, true)
 	_draw_teaching()
+	_draw_social()
 	if show_pointer and tool != "select" and Rect2(Vector2.ZERO, world.size).has_point(pointer):
 		var radius := 30.0 if tool == "water" else (24.0 if tool == "obstacle" else (13.0 if tool == "creature" else 7.0))
 		draw_circle(pointer, radius, Color(0.96, 0.91, 0.68, 0.18))
@@ -105,6 +106,38 @@ func _water(pos: Vector2, radius: float) -> void:
 	for offset in [-0.35, 0.15, 0.48]:
 		var origin := pos + Vector2(-radius * 0.35, radius * offset)
 		draw_line(origin, origin + Vector2(radius * 0.6, 0), Color("a2e2e8"), 1.5, true)
+
+func social_marker(creature) -> Dictionary:
+	var recent := false
+	if creature.personality != null:
+		for key in creature.personality.bonds:
+			var tick: int = int(creature.personality.bonds[key].last_tick)
+			if key != "player" and world.tick - tick <= 20 and world.tick >= tick:
+				recent = true
+	return {"recent": recent, "approaching": creature.last_action in ["seek_contact", "social_approach", "social_follow"]}
+
+func _draw_social() -> void:
+	var creature = world.creatures.get(selected_id)
+	if creature == null:
+		return
+	var state := social_marker(creature)
+	var zoom: float = maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	# Skip unreadable marks at extreme zoom; draw only for the selected body.
+	if zoom < 0.15:
+		return
+	var radius: float = creature.genome.size + 7 / zoom
+	if state.recent:
+		for offset in [-3.0, 3.0]:
+			var point: Vector2 = creature.pos + Vector2(offset, -radius * zoom - 5) / zoom
+			draw_circle(point, 3 / zoom, Color("17372b"))
+			draw_circle(point, 1.8 / zoom, Color("ffe7ac"))
+	if state.approaching:
+		var direction := Vector2.from_angle(creature.heading)
+		var tip: Vector2 = creature.pos + direction * (radius + 8 / zoom)
+		for side in [-1.0, 1.0]:
+			var end: Vector2 = tip - direction.rotated(side * 0.6) * 8 / zoom
+			draw_line(end, tip, Color("17372b"), 4 / zoom, true)
+			draw_line(end, tip, Color("ffe7ac"), 2 / zoom, true)
 
 func _label_rect(creature) -> Rect2:
 	var zoom: float = maxf(get_global_transform_with_canvas().get_scale().x, 0.05)

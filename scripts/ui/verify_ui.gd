@@ -19,6 +19,8 @@ func _verify() -> void:
 	if not errors.is_empty():
 		quit(1)
 		return
+	# Keep graphical verification independent of personal launch preferences.
+	main.settings_path = "user://ui_test_launch_%d.cfg" % OS.get_process_id()
 	root.add_child(main)
 	await process_frame
 	await process_frame
@@ -237,6 +239,7 @@ func _verify() -> void:
 	await _verify_e1(main, folder)
 	await _verify_e2(main, folder)
 	await _verify_e3(main, folder)
+	await _verify_e4(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
 	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog]:
 		dialog.popup_centered()
@@ -451,6 +454,84 @@ func _verify_e3(main, folder: String) -> void:
 func _expect(condition: bool, message: String) -> void:
 	if not condition:
 		errors.append(message)
+
+func _verify_e4(main, folder: String) -> void:
+	main._e4_inspection_fixture()
+	var pet = main.world.creatures[main.world.pet_id]
+	var inspector = main.personality_inspector
+	_expect(inspector.bonds.text.contains("Bento") and inspector.bonds.text.contains("afinidade") and inspector.bonds.text.contains("aversão"), "Social usa vínculos reais e nomes naturais")
+	_expect(inspector.bonds.text.contains("1 encontro ·") and not inspector.bonds.text.contains("1 encontros"), "contagem de encontros concorda em número")
+	_expect(inspector.encounters.text.contains("Encontro próximo") and not inspector.encounters.text.contains(Texto.texto("text_unknown")), "histórico traduz episódios E4")
+	_expect(main.view.social_marker(pet).recent, "encontro recente gera indicador da seleção")
+	var before: Dictionary = main.world.to_dict()
+	for row in main.chat_input.get_parent().get_children():
+		if row is HBoxContainer:
+			for button in row.get_children():
+				button.pressed.emit()
+				_expect(main.chat_input.text == button.text, "atalho de consulta usa sua própria pergunta")
+	for question in ["Do que você gosta?", "O que aprendeu?", "Onde está a água?"]:
+		main._world_dirty = false
+		main.chat_input.text = question
+		main._send_chat()
+		_expect(main.chat_response.text.begins_with("Não sei"), "sem evidência responde não sei: " + question)
+		_expect(main.chat_evidence.text.contains("Fonte interna:") and not main.chat_evidence.text.contains("Evento próprio registrado"), "fontes E4 não viram evento genérico")
+		_expect(main.world.to_dict() == before and not main._world_dirty, "consulta E4 preserva mundo e autosave")
+	pet.energy = pet.max_energy * 0.5
+	main.world._eat(pet, main.world.place_food(pet.pos, "fruta"))
+	main.chat_input.text = "Do que você gosta?"
+	main._send_chat()
+	_expect(main.chat_response.text.contains("Fruta") and main.chat_evidence.text.contains("personality.preferences") and main.chat_evidence.text.contains("Fruta:"), "gosto mostra valor aprendido por ingestão e fonte")
+	main.world.place_water(pet.pos + Vector2(30, 0), 18)
+	main.chat_input.text = "Onde está a água?"
+	main._send_chat()
+	_expect(main.chat_response.text.contains("Vejo") and main.chat_evidence.text.contains("sense.waters") and main.chat_evidence.text.contains("margem"), "água vem da percepção presente")
+	main.world.waters.clear()
+	main._send_chat()
+	_expect(main.chat_response.text.begins_with("Não sei"), "água retirada não é localizada pelo mapa global")
+	for index in range(5):
+		main.teaching.mark(pet.pos)
+		main.teaching.observe_button.pressed.emit()
+		main.world.step()
+		main.teaching.refresh(true)
+	main.chat_input.text = "O que aprendeu?"
+	main._send_chat()
+	_expect(not main.chat_response.text.begins_with("Não sei") and main.chat_evidence.text.contains("5/5") and main.chat_evidence.text.contains("ensino.statistics"), "aprendizado mostra cinco conclusões reais e fonte")
+	for action in ["social_approach", "social_follow", "social_avoid", "social_share", "social_compete"]:
+		_expect(Texto.acao(action) != Texto.texto("action_unknown") and Texto.razao("social." + action.trim_prefix("social_")) != Texto.texto("reason_unknown"), "ação e razão E4 traduzidas: " + action)
+	main.world.signal_enabled = true
+	main.world.emitir_sinal(pet.id, 0)
+	main.world.step()
+	main.lab.observe(main.world, pet.id, true)
+	_expect(main.lab.signals.text.contains("Receptor #") and main.lab.signals.text.contains("Contexto:"), "sinal mostra receptor, contexto e decisão traduzida")
+	_expect(main.lab.signal_result.text.contains("18/20") and main.lab.signal_result.text.contains("encoder fixo") and Texto.texto("signals_title").contains("EXPERIMENTAL"), "resultado pré-registrado tem escopo e selo experimental")
+	main.store.save_world(main.world, "e4", {"name": "E4 salvo"})
+	var saved: Dictionary = main.world.to_dict()
+	main._load("e4")
+	_expect(main.world.to_dict() == saved and inspector.bonds.text.contains("afinidade"), "carregar v7 restaura painel social")
+	main._e4_inspection_fixture(false, true)
+	pet = main.world.creatures[main.world.pet_id]
+	var relation: Dictionary = main.world.social_observar(pet.id).relations[0]
+	_expect(relation.aversion > 0.0 and inspector.encounters.text.contains("disputa por alimento"), "aversão e consequência vêm de encontro físico com disputa")
+	main.selected_id = -1
+	main._refresh()
+	_expect(inspector.bonds.text.is_empty() and inspector.encounters.text.is_empty(), "sem seleção limpa vínculos e encontros")
+	main._e4_inspection_fixture(true)
+	pet = main.world.creatures[main.world.pet_id]
+	_expect(main.view.social_marker(pet).approaching, "aproximação social real gera seta corporal")
+	main._show_lab(false)
+	await process_frame
+	await process_frame
+	var tab: Control = inspector.get_child(4)
+	_expect(tab.get_child(0).size.x <= tab.size.x and tab.size.x <= main.caregiver_scroll.size.x, "Social quebra linhas na janela mínima")
+	main.chat_dialog.popup_centered()
+	await process_frame
+	await process_frame
+	_expect(main.chat_dialog.size.x <= 1100 and main.chat_dialog.size.y <= 650, "conversa E4 cabe na janela mínima")
+	main.chat_dialog.hide()
+	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var path := folder.path_join("e4.json" + suffix)
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
 
 func _verify_edit_menu(menu: PopupMenu) -> void:
 	for index in range(menu.item_count):
