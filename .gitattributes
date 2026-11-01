@@ -1,0 +1,2 @@
+# Preserve the exact experiment/checkpoint bytes used by their recorded SHA-256.
+tests/experiments/results/*.json text eol=lf
