@@ -20,7 +20,8 @@ const Water = preload("res://scripts/environment/water_rules.gd")
 const Personality = preload("res://scripts/behavior/personality.gd")
 const Ensino = preload("res://scripts/interaction/ensino.gd")
 const QBrain = preload("res://scripts/behavior/q_brain.gd")
-const SAVE_VERSION := 6
+const Social = preload("res://scripts/social/social_dynamics.gd")
+const SAVE_VERSION := 7 # E4 extends the validated episode/action vocabulary.
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
@@ -399,6 +400,7 @@ func _update_creature(creature: Creature) -> void:
 	var order: Dictionary = comandos.acao_pendente(creature, self)
 	var teaching_active: bool = creature.ensino != null and creature.ensino.running()
 	var survival := (personality_enabled or teaching_active) and (creature.hunger > Commands.FOME_SUSPENDE_ORDEM or (water_enabled and creature.thirst > Water.THIRST_THRESHOLD))
+	var social: Dictionary = Social.decide(self, creature, sensors) if personality_enabled and not survival else {}
 	var motive: String = creature.personality.motive(creature.temperament) if personality_enabled and not survival else ""
 	if survival:
 		_suspend_brain(creature)
@@ -416,6 +418,9 @@ func _update_creature(creature: Creature) -> void:
 	elif creature.ensino != null and creature.ensino.running() and creature.hunger <= Commands.FOME_SUSPENDE_ORDEM and (not water_enabled or creature.thirst <= Water.THIRST_THRESHOLD):
 		moving = _ensino_act(creature, sensors)
 		teaching_acted = true
+	elif not social.is_empty() and creature.personality.fatigue < 0.85:
+		_suspend_brain(creature)
+		moving = _social_action(creature, sensors, social)
 	elif not motive.is_empty():
 		_suspend_brain(creature)
 		moving = _personality_action(creature, sensors, motive)
@@ -697,7 +702,7 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -717,6 +722,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			return null
 	if int(data["save_version"]) == 5:
 		data = _migrate_v5(data)
+	if int(data["save_version"]) == 6:
+		data = _migrate_v6(data)
 	if not Data.integer_text(data.get("world_seed")):
 		return null
 	if not Data.integer(data.get("tick")) or not Data.integer(data.get("next_id"), 1) or not Data.integer(data.get("pet_id"), -1):
@@ -944,7 +951,14 @@ static func _migrate_v5(data: Dictionary) -> Dictionary:
 	if data.get("save_version") == SAVE_VERSION:
 		return data.duplicate(true)
 	var migrated := data.duplicate(true)
-	migrated["save_version"] = SAVE_VERSION
+	migrated["save_version"] = 6
+	return migrated
+
+## Only the allowed vocabulary changed; retain every existing event and bond.
+static func _migrate_v6(data: Dictionary) -> Dictionary:
+	var migrated := data.duplicate(true)
+	if data.get("save_version") in [6, SAVE_VERSION]:
+		migrated["save_version"] = SAVE_VERSION
 	return migrated
 
 func _suspend_brain(creature: Creature) -> void:
@@ -1002,8 +1016,7 @@ func _personality_encounters(creature: Creature, sensors: Dictionary) -> void:
 		var other: Creature = creatures[int(row["id"])]
 		if not other.alive or creature.pos.distance_to(other.pos) > creature.genome.size + other.genome.size + 8.0 or _occluded(creature.pos, other.pos):
 			continue
-		if creature.personality.meet(str(other.id), tick, 0.25):
-			creature.personality.record(tick, Personality.context(creature), "social_contact", 0.0, 0.0, 0.0, "contact", "encounter")
+		Social.encounter(self, creature, other, sensors)
 
 ## A registered interaction requires actual contact range and line of sight.
 ## A click far from the organism cannot create familiarity or physical resources.
@@ -1169,3 +1182,28 @@ func _ensino_finish_tick(creature: Creature, acted: bool) -> void:
 		teaching.finish(tick, "success", creature.energy, distance)
 	elif tick - int(active.start_tick) >= int(active.horizon):
 		teaching.finish(tick, "timeout", creature.energy, distance)
+
+## Detached evidence for UI/dialogue; reading never creates encounters.
+func social_observar(creature_id: int) -> Dictionary:
+	if not personality_enabled or not creatures.has(creature_id):
+		return {"ok": false, "relations": []}
+	var result: Array = []
+	var keys: Array = creatures[creature_id].personality.bonds.keys()
+	keys.sort()
+	for key in keys:
+		if key != "player":
+			result.append(Social.relation(creatures[creature_id].personality, int(key)))
+	return {"ok": true, "relations": result, "limit": Personality.BOND_LIMIT}
+
+func _social_action(creature: Creature, sensors: Dictionary, decision: Dictionary) -> bool:
+	creature.last_action = "seek_contact" if decision.action == "social_approach" else decision.action
+	creature.last_reason = "social." + decision.action.trim_prefix("social_")
+	if decision.action == "social_compete" and creature.pos.distance_to(decision.target) <= Obs.reach(creature):
+		_eat(creature, int(decision.food_id))
+		return false
+	if decision.action in ["social_follow", "social_approach"] and float(decision.distance) <= creature.genome.size + creatures[int(decision.other_id)].genome.size + 8.0:
+		return false
+	if creature.pos.distance_to(decision.target) < 0.01:
+		return false
+	creature.heading = (decision.target - creature.pos).angle()
+	return _move(creature, sensors.obstacles)

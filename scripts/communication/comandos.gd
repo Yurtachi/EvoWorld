@@ -28,7 +28,7 @@ func aplicar(pedido: Variant, mundo, alvo: Vector2 = Vector2.INF) -> Dictionary:
 	var pet: SimCreature = mundo.creatures[mundo.pet_id]
 	if not pet.alive:
 		return _resultado(false, false, "sem_pet")
-	if intent == "perguntar_estado":
+	if intent == "perguntar_estado" or intent in DialogoAPI.CONSULTAS:
 		return _resultado(true, true, "consulta")
 	if intent == "oferecer_comida":
 		# Busca determinística de posições próximas; respeita capacidade e geometria.

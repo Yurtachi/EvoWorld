@@ -9,9 +9,9 @@ const BOND_LIMIT := 32
 const STIMULUS_LIMIT := 24
 const CONTEXT_LIMIT := 45 # five food types x three energy x three hydration buckets
 const ENCOUNTER_INTERVAL := 30
-const EVENTS := ["metabolism", "food", "toxic_food", "water", "rest", "exploration", "contact", "collision", "player_contact"]
+const EVENTS := ["metabolism", "food", "toxic_food", "water", "rest", "exploration", "contact", "collision", "player_contact", "resource_contention"]
 const SOURCES := ["body", "ingestion", "drinking", "movement", "rest", "encounter", "player"]
-const ACTIONS := ["rest", "explore", "seek_contact", "social_contact", "seek_food", "seek_water", "eat", "drink", "forward", "turn_left", "turn_right", "avoid_obstacle", "player_contact", "emit_signal_0", "emit_signal_1", "emit_signal_2", "emit_signal_3", "emit_signal_4", "emit_signal_5", "emit_signal_6", "emit_signal_7"]
+const ACTIONS := ["social_approach", "social_follow", "social_avoid", "social_share", "social_compete", "rest", "explore", "seek_contact", "social_contact", "seek_food", "seek_water", "eat", "drink", "forward", "turn_left", "turn_right", "avoid_obstacle", "player_contact", "emit_signal_0", "emit_signal_1", "emit_signal_2", "emit_signal_3", "emit_signal_4", "emit_signal_5", "emit_signal_6", "emit_signal_7"]
 
 var fatigue := 0.0
 var boredom := 0.0

@@ -6,8 +6,12 @@ const Textos = preload("res://scripts/communication/dialogo_textos.gd")
 const Base = preload("res://scripts/core/textos.gd")
 const BAIXA_ENERGIA := 0.35
 const EVENTOS_RECENTES := 100 # dez segundos simulados
-const INTENTS := ["chamar", "oferecer_comida", "perguntar_estado", "seguir", "parar", "brincar", "proteger"]
+const CONSULTAS := ["perguntar_gostos", "perguntar_aprendizado", "perguntar_agua"]
+const INTENTS := ["perguntar_gostos", "perguntar_aprendizado", "perguntar_agua", "chamar", "oferecer_comida", "perguntar_estado", "seguir", "parar", "brincar", "proteger"]
 const VARIACOES := {
+	"perguntar_gostos": ["perguntar gostos", "do que voce gosta", "o que voce gosta"],
+	"perguntar_aprendizado": ["perguntar aprendizado", "o que aprendeu", "o que voce aprendeu"],
+	"perguntar_agua": ["perguntar agua", "onde esta a agua", "onde tem agua"],
 	"chamar": ["chamar", "vem", "venha", "vem aqui", "venha aqui", "vem ca", "venha ca", "chega perto", "aproxime se", "aproximar"],
 	"oferecer_comida": ["oferecer comida", "oferecer alimento", "ofereco comida", "te ofereco comida", "dar comida", "dar alimento", "alimentar", "coma", "comida", "tome comida", "quer comida"],
 	"perguntar_estado": ["perguntar estado", "estado", "como esta", "como voce esta", "como voce ta", "como vai", "tudo bem", "esta com fome", "voce esta com fome", "esta com pouca energia", "qual sua energia", "qual e sua idade"],
@@ -46,6 +50,8 @@ static func responder(intent: Variant, criatura: SimCreature, mundo) -> Dictiona
 		return {"texto": Textos.texto("desconhecido"), "evidencias": [], "comando": {}}
 	if mundo == null or criatura == null or not criatura.alive or mundo.creatures.get(criatura.id) != criatura:
 		return {"texto": Textos.texto("indisponivel"), "evidencias": [], "comando": {}}
+	if codigo in CONSULTAS:
+		return _consultar(codigo, criatura, mundo)
 	var evidencias: Array = []
 	var frases: Array[String] = []
 	if codigo != "perguntar_estado":
@@ -56,7 +62,7 @@ static func responder(intent: Variant, criatura: SimCreature, mundo) -> Dictiona
 	frases.append(Textos.texto("fome", [Base.numero(criatura.hunger * 100.0), criatura.age, Base.numero(criatura.age * float(mundo.TICK_DT))]))
 	evidencias.append({"fonte": "creature", "campo": "hunger", "valor": criatura.hunger})
 	evidencias.append({"fonte": "creature", "campo": "age", "valor": criatura.age})
-	frases.append(Textos.texto("acao", [Textos.acao(criatura.last_action), Base.razao(criatura.last_reason)]))
+	frases.append(Textos.texto("acao", [Textos.acao(criatura.last_action), Base.e4_razao(criatura.last_reason)]))
 	evidencias.append({"fonte": "creature", "campo": "last_action", "valor": criatura.last_action})
 	evidencias.append({"fonte": "creature", "campo": "last_reason", "valor": criatura.last_reason})
 	var visiveis: Array = mundo.sense(criatura, false)["foods"]
@@ -81,3 +87,34 @@ static func codigo_intent(pedido: Variant) -> String:
 	if pedido is Dictionary and pedido.get("intent") is String:
 		return pedido["intent"]
 	return "desconhecido"
+
+static func _consultar(codigo: String, criatura: SimCreature, mundo) -> Dictionary:
+	var fontes: Array = []
+	var frases: Array[String] = []
+	if codigo == "perguntar_gostos":
+		var preferencias: Dictionary = criatura.personality.preferences.duplicate(true) if criatura.personality != null else {}
+		fontes.append({"fonte": "personality.preferences", "valor": preferencias})
+		var keys := preferencias.keys()
+		keys.sort()
+		for key in keys:
+			if float(preferencias[key]) > 0.05:
+				frases.append(Textos.texto("gosto_aprendido", [Base.texto("food_" + key), Base.numero(preferencias[key])]))
+	elif codigo == "perguntar_aprendizado":
+		var dados: Dictionary = criatura.ensino.snapshot() if criatura.ensino != null else {}
+		fontes.append({"fonte": "ensino.statistics", "valor": dados})
+		for skill in dados.get("skills", []):
+			if skill.learned:
+				frases.append(Textos.texto("habilidade_aprendida", [Base.E3_CATALOGO[skill.skill], skill.successes, skill.attempts]))
+		if criatura.personality != null:
+			fontes.append({"fonte": "personality.episodes", "valor": criatura.personality.episodes.duplicate(true)})
+	else:
+		var aguas: Array = mundo.sense(criatura, false).get("waters", [])
+		fontes.append({"fonte": "sense.waters", "tick": mundo.tick, "valor": aguas.duplicate(true)})
+		fontes.append({"fonte": "creature.memory", "valor": criatura.memory.duplicate(true)})
+		if not aguas.is_empty():
+			var agua: Dictionary = aguas[0]
+			frases.append(Textos.texto("agua_observada", [Base.numero(agua.pos.x), Base.numero(agua.pos.y), mundo.tick]))
+		# A drink episode has an ID, but no position: it cannot locate hidden water.
+	if frases.is_empty():
+		frases.append(Textos.texto("nao_sei"))
+	return {"texto": " ".join(frases), "evidencias": fontes, "comando": {}}

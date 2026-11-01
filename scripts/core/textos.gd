@@ -565,3 +565,33 @@ const E3_CATALOGO := {
 	"assistance_note": "Conclusões assistidas não comprovam aprendizado autônomo."
 }
 const E3_RAZOES := {"teaching.assisted": "assisted", "teaching.goal": "goal"}
+
+
+# E4 — append-only integration catalogue. Stable codes remain in saves.
+const E4_CATALOGO := {
+	"action_social_approach": "Aproximar de um vizinho",
+	"action_social_follow": "Seguir um vizinho familiar",
+	"action_social_avoid": "Afastar de um vizinho",
+	"action_social_share": "Ceder acesso ao alimento",
+	"action_social_compete": "Disputar acesso ao alimento",
+	"reason_social_approach": "A solidão motivou aproximação de um vizinho percebido.",
+	"reason_social_follow": "Solidão e familiaridade motivaram seguir o vizinho.",
+	"reason_social_avoid": "Cautela e aversão registrada motivaram afastamento.",
+	"reason_social_share": "Afinidade e fome do vizinho motivaram ceder acesso; não confirma ingestão.",
+	"reason_social_compete": "Fome e impulsividade motivaram buscar o mesmo recurso.",
+	"episode_resource_contention": "Encontro pr?ximo com disputa por alimento vis?vel.",
+	"social_familiarity": "Familiaridade por encontros",
+	"social_affinity": "Afinidade registrada",
+	"social_aversion": "Aversão registrada"
+}
+const E4_RAZOES := {
+	"social.approach": "reason_social_approach", "social.follow": "reason_social_follow",
+	"social.avoid": "reason_social_avoid", "social.share": "reason_social_share",
+	"social.compete": "reason_social_compete"
+}
+
+static func e4_acao(codigo: String) -> String:
+	return E4_CATALOGO.get("action_" + codigo, acao(codigo))
+
+static func e4_razao(codigo: String) -> String:
+	return E4_CATALOGO[E4_RAZOES[codigo]] if E4_RAZOES.has(codigo) else razao(codigo)
