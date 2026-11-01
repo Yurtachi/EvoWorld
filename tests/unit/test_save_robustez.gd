@@ -6,6 +6,7 @@ func run() -> Array:
 	var failures: Array = []
 	_hostile_versions(failures)
 	_migration_roundtrips(failures)
+	_bound_trait_roundtrip(failures)
 	return failures
 
 func _check(ok: bool, message: String, failures: Array) -> void:
@@ -115,3 +116,13 @@ func _migration_roundtrips(f: Array) -> void:
 			migrated.step()
 			loaded.world.step()
 		_check(_snapshot(migrated) == _snapshot(loaded.world), "continuacao apos migracao v%d divergiu" % version, f)
+
+func _bound_trait_roundtrip(f: Array) -> void:
+	var world := World.new_world(60, {"creature_count": 1})
+	var creature = world.creatures[world.pet_id]
+	creature.genome.temperament.caution = 1.0
+	creature.genome.temperament.curiosity = 0.0
+	world.genealogy.records[creature.id].genome = creature.genome.to_dict()
+	var snapshot := _snapshot(world)
+	var restored := World.from_dict(JSON.parse_string(snapshot))
+	_check(restored != null and _snapshot(restored) == snapshot, "temperamento nos limites 0/1 muda de float para int no roundtrip", f)
