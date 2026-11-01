@@ -70,6 +70,20 @@ A interface chama `Dialogo.interpretar/responder` e usa a instância persistente
 
 Oferecer comida coloca alimento real sem prometer ingestão. Pedidos de movimento passam pela física, colisões e custos normais; o recibo de registro não significa que o alvo já foi alcançado. **Proteger** ativa a pausa preventiva da interface. O save v4 guarda ordens e alvo; o alvo de seguir é restaurado pela UI. Se a mesma UI for usada com uma base sem executor de comandos, ela indica explicitamente os pedidos pendentes.
 
+## Ensinar uma habilidade
+
+Selecione uma criatura no mapa ou na lista do Cuidador e abra **Ensinar** no painel lateral. Escolha **Ir até o local marcado** ou **Buscar água e beber**. Para local, pressione **Marcar alvo no mapa** e clique em terreno livre: o alvo amarelo é separado do alvo azul dos pedidos de diálogo. Para água, a criatura usa seus sensores; coloque água visível. Aproximação sem bebida com ganho hídrico não conclui essa habilidade. Saves com sede desativada recebem uma recusa explicada.
+
+**Mostrar** inicia uma tentativa com rota assistida pelo cuidador. A linha amarela tracejada indica a direção do alvo; não garante um caminho livre de obstáculos. Para água, a assistência é indicada junto ao corpo, sem revelar recursos fora da percepção. A criatura anda, vira e bebe pela física normal, pagando os custos. Use **Iniciar** no rodapé ou Espaço para avançar; o mundo começa pausado. Fome e sede críticas têm prioridade.
+
+**Observar sem guiar** inicia uma tentativa autônoma ou desliga a guia da tentativa atual. Ações já assistidas continuam no registro; essa tentativa não passa a contar como autônoma. Mudar um alvo em andamento cancela a tentativa anterior e inicia outra pela API do simulador. **Cancelar tentativa** encerra sem recompensa ou punição.
+
+**Recompensar** só fica habilitado depois de conclusão física real, ainda não recompensada, com aprendizado habilitado. É um **sinal de aprendizado; não repõe energia nem hidratação**. Uma conclusão assistida não comprova aprendizado autônomo. O selo **Aprendizado observado** exige pelo menos cinco tentativas sem assistência e taxa de sucesso de 70% ou mais nas últimas 20 tentativas autônomas retidas; antes disso, aparece **Ainda não aprendeu**. O selo pode voltar ao estado anterior se a taxa cair.
+
+Role o painel para ver taxa, sucessos/tentativas autônomas, total de tentativas e sessões retidas, curva de evolução, comparação antes/depois da sessão e os dez eventos mais recentes em pt-BR. O simulador guarda até 32 sessões, 32 tentativas e 64 eventos por criatura. A curva é recalculada a partir desse histórico limitado; antes/depois compara taxas observadas e não prevê resultados futuros. **Reiniciar treinamento** pede confirmação com o nome da criatura e apaga apenas seu aprendizado e histórico de ensino. Corpo, personalidade e aprendizado de sobrevivência são preservados. Saves v6 conservam os registros; carregar continua aceitando versões v1–v5.
+
+Evidências da interface, capturas e benchmark gráfico: [reports/E3_ui.md](reports/E3_ui.md). A eficácia experimental e seus limites pertencem à evidência [E3-SIM](reports/E3_sim.md); capturas da UI não substituem esse experimento.
+
 ## Investigar no Laboratório
 
 O toggle **Laboratório** troca o painel lateral sem interromper o jardim. Ele apresenta:

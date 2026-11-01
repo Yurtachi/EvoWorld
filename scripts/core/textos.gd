@@ -343,7 +343,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
-	var modelo: String = E2_UI.get(codigo, E2_CATALOGO.get(codigo, E1_UI.get(codigo, E1_CATALOGO.get(codigo, CATALOGO.get(codigo, CATALOGO.text_unknown)))))
+	var modelo: String = E3_UI.get(codigo, E3_CATALOGO.get(codigo, E2_UI.get(codigo, E2_CATALOGO.get(codigo, E1_UI.get(codigo, E1_CATALOGO.get(codigo, CATALOGO.get(codigo, CATALOGO.text_unknown)))))))
 	return modelo if valores.is_empty() else modelo % valores
 
 static func numero(valor: float, casas: int = 1) -> String:
@@ -395,6 +395,8 @@ static func acao(codigo: String) -> String:
 	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) or E2_CATALOGO.has("action_" + codigo) else texto("action_unknown")
 
 static func razao(original: String) -> String:
+	if E3_RAZOES.has(original):
+		return texto(E3_RAZOES[original])
 	if E2_RAZOES.has(original):
 		return texto(E2_RAZOES[original])
 	if E1_RAZOES.has(original):
@@ -565,3 +567,50 @@ const E3_CATALOGO := {
 	"assistance_note": "Conclusões assistidas não comprovam aprendizado autônomo."
 }
 const E3_RAZOES := {"teaching.assisted": "assisted", "teaching.goal": "goal"}
+
+
+const E3_UI := {
+	"te_title": "Ensinar", "te_heading": "Ensinar · %s", "te_mark": "Marcar alvo no mapa",
+	"place_teaching": "alvo de ensino no terreno", "te_observe": "Observar sem guiar",
+	"te_target": "Alvo marcado: %s, %s", "te_target_missing": "Marque um alvo no mapa antes de começar.",
+	"te_water_target": "Água: usa a percepção da criatura. Coloque água visível; só beber conclui.",
+	"te_idle": "Sem tentativa ativa. Escolha Mostrar ou Observar.",
+	"te_started_assisted": "Rota ASSISTIDA iniciada. Use Iniciar para avançar a física.",
+	"te_started_auto": "Observação sem guiar iniciada. Use Iniciar para avançar a física.",
+	"te_progress": "%s · %s\n%d passos · %d ações assistidas",
+	"te_metrics": "Sucesso autônomo: %s%% (%d/%d)\nHistórico: %d tentativas · %d sessões",
+	"te_criterion": "Selo: pelo menos 5 tentativas autônomas e 70% de sucesso nas últimas 20 retidas. Assistência não conta.",
+	"te_chart_empty": "Sem tentativas autônomas concluídas", "te_chart_axis": "Taxa (%) × tentativas autônomas retidas",
+	"te_comparison": "Antes da sessão: %s%% → agora: %s%%\nTaxa autônoma observada; não prevê sucesso futuro.",
+	"te_comparison_empty": "Antes/depois disponível após iniciar esta habilidade.",
+	"te_rewarded": "Recompensa registrada: %d atualizações de aprendizado.",
+	"te_cancel": "Cancelar tentativa", "te_cancelled": "Tentativa cancelada sem recompensa ou punição.",
+	"te_reset_confirm": "Apagar o aprendizado e o histórico de ensino de %s?\nCorpo, personalidade e aprendizado de sobrevivência são preservados.",
+	"te_keep": "Manter treinamento", "te_reset_done": "Treinamento reiniciado para esta criatura.",
+	"te_events": "EVENTOS DE ENSINO · mais recentes", "te_events_empty": "Nenhum evento de ensino registrado.",
+	"te_event": "Passo %d · %s · %s%s", "te_event_action": " · ação: %s", "te_event_updates": " · %d atualizações",
+	"te_event_start": "Sessão iniciada", "te_event_show": "Modo de demonstração alterado", "te_event_assistance": "Ação assistida",
+	"te_event_decision": "Decisão autônoma", "te_event_outcome": "Resultado físico", "te_event_reward": "Recompensa registrada", "te_event_reward_rejected": "Recompensa recusada",
+	"te_code_active": "Em andamento", "te_code_pending": "Aguardando resultado", "te_code_moved": "Deslocamento real", "te_code_drink": "Bebida confirmada",
+	"te_code_no_movement": "Sem deslocamento", "te_code_cancelled": "Cancelada", "te_code_death": "Criatura morreu",
+	"te_code_invalid_request": "Pedido recusado: selecione uma criatura viva e uma habilidade disponível.",
+	"te_code_invalid_target": "Alvo recusado: escolha terreno livre dentro dos limites e longe de rochas.",
+	"te_code_water_disabled": "Buscar água indisponível: sede desativada neste save legado.",
+	"te_code_no_attempt": "Nenhuma tentativa ativa para esta ação.", "te_code_no_creature": "Selecione uma criatura viva.",
+	"te_code_unknown": "Resultado de ensino indisponível.", "te_route": "ASSISTÊNCIA · direção indicativa", "te_marker": "ALVO DE ENSINO",
+	"help_body": "Crie o jardim e escolha nomes e população (padrão: 12). Começa pausado. Selecione uma criatura no mapa ou na lista do Cuidador. Corpo e Traços mostram estado e temperamento; Memória, Comida e Vínculos mostram experiências reais. Carinho exige clicar no corpo e intervalo de 30 passos. A expressão aparente não indica consciência.\n\nENSINAR: selecione a criatura e abra Ensinar. Escolha Ir até o local marcado ou Buscar água e beber. Para local, use Marcar alvo no mapa e clique em terreno livre. Para água, coloque uma região percebida pela criatura; só beber com ganho real conclui.\n\nMostrar ativa uma rota ASSISTIDA, com movimento físico e custos reais. A linha é direção indicativa, não uma rota garantida por obstáculos. Observar sem guiar inicia uma tentativa autônoma ou desliga a assistência atual; ações já assistidas continuam registradas. Use Iniciar no rodapé (ou Espaço) para avançar. Fome/sede críticas têm prioridade e podem interromper a tarefa.\n\nRecompensar só fica disponível após conclusão física ainda não recompensada. É sinal de aprendizado: não repõe energia nem hidratação. Conclusões assistidas não comprovam aprendizado autônomo. O selo exige 5 tentativas autônomas e sucesso de pelo menos 70% nas últimas 20 retidas. Gráfico e antes/depois descrevem esse histórico limitado. Cancelar encerra a tentativa; Reiniciar treinamento exige confirmação e apaga só o ensino desta criatura.\n\nFruta, Semente, Folha e Cogumelo são físicos; cogumelo tem toxicidade. Oferecer coloca comida perto; só ingerir ensina preferências. + Água permite beber na margem. Expandir: direita/inferior, custo zero. Laboratório: genes, famílias e sinais.\n\nRoda: zoom · botão do meio/WASD: câmera · F: enquadrar · Espaço: pausar · Esc: inspecionar · F12: captura · Ctrl+S/Ctrl+L: salvar/carregar. Saves antigos preservam seus dados. Proteção pausa por energia/idade e não repõe reservas. Morte é permanente naquele mundo."
+}
+
+static func ensino_codigo(code: String) -> String:
+	if E3_CATALOGO.has(code):
+		return texto(code)
+	return texto("te_code_" + code) if E3_UI.has("te_code_" + code) else texto("te_code_unknown")
+
+static func ensino_evento(event: Dictionary) -> String:
+	var detail := ""
+	var action := int(event.get("action", -1))
+	if action >= 0:
+		detail += texto("te_event_action", [acao(preload("res://scripts/behavior/actions.gd").NAMES[action])])
+	if int(event.get("updates", 0)) > 0:
+		detail += texto("te_event_updates", [event.updates])
+	return texto("te_event", [event.tick, texto("te_event_" + str(event.event)), ensino_codigo(str(event.result)), detail])

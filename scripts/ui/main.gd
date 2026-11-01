@@ -9,7 +9,11 @@ const Laboratory = preload("res://scripts/ui/laboratory.gd")
 const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
 const FpsChart = preload("res://scripts/ui/fps_chart.gd")
 const PersonalityInspector = preload("res://scripts/ui/personality_inspector.gd")
+const TeachingPanel = preload("res://scripts/ui/teaching_panel.gd")
 const SIDEBAR := 350.0
+var teaching: VBoxContainer
+var teaching_scroll: ScrollContainer
+var teaching_button: Button
 var world: World
 var store := Store.new()
 var world_name := Texto.texto("world_default")
@@ -122,7 +126,7 @@ func _ready() -> void:
 			capture_path = argument.trim_prefix("--capture=")
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--fps-benchmark=") and capture_path.is_empty():
-			capture_path = "reports/E2-fps-%d.png" % initial_population
+			capture_path = "reports/E3-fps-%d.png" % initial_population
 	if not capture_path.is_empty():
 		_capture_demo.call_deferred(capture_path)
 	else:
@@ -211,8 +215,10 @@ func _build_ui() -> void:
 	var modes := HBoxContainer.new()
 	side_column.add_child(modes)
 	care_button = _button(modes, Texto.texto("caregiver"), _show_lab.bind(false))
+	teaching_button = _button(modes, Texto.texto("te_title"), _show_teaching)
 	lab_button = _button(modes, Texto.texto("laboratory"), _show_lab.bind(true))
-	for button in [care_button, lab_button]:
+	for button in [care_button, lab_button, teaching_button]:
+		button.add_theme_font_size_override("font_size", 13)
 		button.toggle_mode = true
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	care_button.button_pressed = true
@@ -227,8 +233,20 @@ func _build_ui() -> void:
 	side_column.add_child(lab_scroll)
 	lab = Laboratory.new()
 	lab_scroll.add_child(lab)
-	lab.intervention.connect(func(): _world_dirty = true)
+	lab.intervention.connect(func():
+		_world_dirty = true
+		if teaching != null and teaching.world == world:
+			teaching.refresh(true))
 	lab_scroll.hide()
+	teaching_scroll = ScrollContainer.new()
+	teaching_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	teaching_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side_column.add_child(teaching_scroll)
+	teaching = TeachingPanel.new()
+	teaching_scroll.add_child(teaching)
+	teaching.target_requested.connect(func(): _set_tool("teaching"))
+	teaching.changed.connect(func(): _world_dirty = true)
+	teaching_scroll.hide()
 	var inspector := VBoxContainer.new()
 	inspector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inspector.add_theme_constant_override("separation", 5)
@@ -380,7 +398,7 @@ func _confirm_new_world() -> void:
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
-	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible:
+	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible:
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -404,7 +422,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible:
+	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -426,7 +444,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible:
+	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible:
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -448,6 +466,10 @@ func _apply_tool(pos: Vector2) -> void:
 					selected_id = creature.id
 					nearest = distance
 			follow = false
+		"teaching":
+			teaching.mark(pos)
+			_set_tool("select")
+			_refresh()
 		"attention":
 			_give_attention(pos)
 		"food":
@@ -474,6 +496,9 @@ func _apply_tool(pos: Vector2) -> void:
 	_world_dirty = true
 
 func _refresh() -> void:
+	teaching.observe(world, selected_id)
+	view.teaching_snapshot = teaching.snapshot
+	view.teaching_target = teaching.target if teaching.selected_skill() == "ir_ate_local" else Vector2.INF
 	mode_note.text = Texto.texto("protection_active" if protected_mode else "protection_off")
 	title.text = Texto.texto("title", [Texto.nome_mundo(world_name)])
 	stats.text = Texto.texto("garden_stats", [world.creatures.size(), world.foods.size(), world.waters.size(), world.tick, Engine.get_frames_per_second()])
@@ -594,6 +619,8 @@ func _load(slot: String = "world") -> void:
 	_notify(Texto.mensagem(result.message), 10)
 
 func _reset_session() -> void:
+	if teaching != null:
+		teaching.world = null
 	comandos = ComandosAPI.new()
 	# Quando o simulador fornecer o adaptador integrado, usa a mesma instância.
 	for property in world.get_property_list():
@@ -646,7 +673,18 @@ func _autosave(delta: float) -> void:
 		if world.tick != autosave_tick or _world_dirty:
 			_save("autosave")
 
+func _show_teaching() -> void:
+	caregiver_scroll.hide()
+	lab_scroll.hide()
+	teaching_scroll.show()
+	care_button.button_pressed = false
+	lab_button.button_pressed = false
+	teaching_button.button_pressed = true
+	teaching.refresh(true)
+
 func _show_lab(enabled: bool) -> void:
+	teaching_scroll.hide()
+	teaching_button.button_pressed = false
 	caregiver_scroll.visible = not enabled
 	lab_scroll.visible = enabled
 	lab_button.button_pressed = enabled
@@ -705,6 +743,7 @@ func _send_chat() -> void:
 		rows.append(Texto.texto("evidence_value", [Texto.texto("evidence_" + field), shown]))
 	chat_evidence.text = Texto.texto("evidence_none") if rows.is_empty() else "\n".join(rows)
 	lab.observe(world, selected_id, true)
+	teaching.refresh(true)
 
 func _build_settings() -> void:
 	settings_dialog = _window("settings_title", Vector2i(620, 600))
@@ -851,6 +890,10 @@ func _capture_demo(path: String) -> void:
 			await _benchmark_fps(path)
 			get_tree().quit()
 			return
+	if state.begins_with("e3-"):
+		await _capture_e3(state, path)
+		get_tree().quit()
+		return
 	if state.begins_with("e2-"):
 		await _capture_e2(state, path)
 		get_tree().quit()
@@ -1278,6 +1321,63 @@ func _capture_e2(state: String, path: String) -> void:
 	if state == "e2-expression":
 		var body_scroll: ScrollContainer = personality_inspector.get_child(0)
 		body_scroll.scroll_vertical = int(personality_inspector.expression.position.y) - 8
+	var warmup := Time.get_ticks_msec() + 1200
+	while Time.get_ticks_msec() < warmup:
+		await get_tree().process_frame
+	await capture_screenshot(path)
+
+
+func _capture_e3(state: String, path: String) -> void:
+	# Explicit open-terrain fixture; real API, physics and Q updates throughout.
+	world = World.new_world(7421, {"creature_count": 1, "food_count": 0, "obstacle_count": 0, "water_count": 0, "food_regrow": false, "reproduction_enabled": false})
+	selected_id = world.pet_id
+	world.creatures[selected_id].name = Texto.texto("pet_default")
+	_reset_session()
+	view.set_world(world)
+	_refresh()
+	_show_teaching()
+	var creature = world.creatures[selected_id]
+	var direction: Vector2 = (world.size * 0.5 - creature.pos).normalized()
+	teaching.mark(creature.pos + direction * 120)
+	if state == "e3-water":
+		world.place_water(creature.pos + direction * 70, 24)
+		creature.hydration = 65
+		teaching.skill.select(1)
+		teaching.skill.item_selected.emit(1)
+	teaching.show_button.pressed.emit()
+	if state != "e3-route":
+		for i in range(200):
+			world.step()
+			if not creature.ensino.running():
+				break
+		teaching.refresh(true)
+		if state in ["e3-reward", "e3-events", "e3-water"]:
+			teaching.reward_button.pressed.emit()
+		if state == "e3-observe":
+			teaching.mark(creature.pos + direction * 75)
+			teaching.observe_button.pressed.emit()
+		if state in ["e3-history", "e3-learned"]:
+			# Evaluate retained real outcomes; no fabricated learned badge.
+			teaching.reward_button.pressed.emit()
+			for trial in range(5):
+				teaching.mark(creature.pos + Vector2.from_angle(creature.heading) * 40)
+				teaching.observe_button.pressed.emit()
+				for step_index in range(200):
+					world.step()
+					if not creature.ensino.running():
+						break
+				teaching.refresh(true)
+				if not teaching.reward_button.disabled:
+					teaching.reward_button.pressed.emit()
+	_refresh()
+	camera.zoom = Vector2.ONE * 1.25
+	camera.position = creature.pos + direction * 45 + _camera_bias()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if state in ["e3-history", "e3-events"]:
+		teaching_scroll.scroll_vertical = int(teaching.metrics.position.y) - 4 if state == "e3-history" else int(teaching.events.position.y) - 35
+	if state == "e3-reset":
+		teaching.reset_button.pressed.emit()
 	var warmup := Time.get_ticks_msec() + 1200
 	while Time.get_ticks_msec() < warmup:
 		await get_tree().process_frame
