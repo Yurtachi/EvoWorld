@@ -126,7 +126,7 @@ func _ready() -> void:
 			capture_path = argument.trim_prefix("--capture=")
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--fps-benchmark=") and capture_path.is_empty():
-			capture_path = "reports/E3-fps-%d.png" % initial_population
+			capture_path = "reports/E4-fps-%d.png" % initial_population
 	if not capture_path.is_empty():
 		_capture_demo.call_deferred(capture_path)
 	else:
@@ -267,6 +267,7 @@ func _build_ui() -> void:
 		_refresh())
 	inspector.add_child(roster)
 	personality_inspector = PersonalityInspector.new()
+	_button(inspector, Texto.texto("chat_open"), func(): chat_dialog.popup_centered())
 	inspector.add_child(personality_inspector)
 	var attention := _button(inspector, Texto.texto("tool_attention"), _set_tool.bind("attention"))
 	attention.tooltip_text = Texto.texto("attention_help")
@@ -290,7 +291,6 @@ func _build_ui() -> void:
 	offer_button = _button(inspector, Texto.texto("offer"), _offer_food)
 	_label(inspector, Texto.texto("receipt_title"), 12, Color("bccc98"))
 	receipts = _wrapped(inspector, Texto.texto("receipt_empty"))
-	_button(inspector, Texto.texto("chat_open"), func(): chat_dialog.popup_centered())
 	_separator(inspector)
 	_label(inspector, Texto.texto("current_action"), 12, Color("bccc98"))
 	action_text = _label(inspector, Texto.acao("rest"), 20)
@@ -699,6 +699,13 @@ func _build_chat() -> void:
 	chat_input = _field(column, Texto.texto("chat_examples"), "", 180)
 	chat_input.placeholder_text = Texto.texto("chat_placeholder")
 	chat_input.text_submitted.connect(func(_text): _send_chat())
+	var questions := HBoxContainer.new()
+	column.add_child(questions)
+	for key in ["gostos", "aprendizado", "agua"]:
+		var question := Texto.texto("question_" + key)
+		_button(questions, question, func():
+			chat_input.text = question
+			_send_chat())
 	_button(column, Texto.texto("chat_send"), _send_chat)
 	_wrapped(column, Texto.texto("chat_target"))
 	chat_response = _wrapped(column, Texto.texto("chat_empty"))
@@ -714,8 +721,10 @@ func _send_chat() -> void:
 	last_response = DialogoAPI.responder(intent, pet, world)
 	chat_response.text = str(last_response.texto)
 	var receipt := comandos.aplicar(intent, world, command_target)
-	_world_dirty = _world_dirty or (receipt.aceito and intent.intent != "perguntar_estado")
+	_world_dirty = _world_dirty or (receipt.aceito and intent.intent != "perguntar_estado" and intent.intent not in DialogoAPI.CONSULTAS)
 	chat_receipt.text = str(receipt.texto)
+	if intent.intent in DialogoAPI.CONSULTAS:
+		chat_receipt.text = Texto.texto("query_receipt")
 	if receipt.aceito and intent.intent == "proteger":
 		protected_mode = true
 		chat_receipt.text = Texto.texto("protection_active")
@@ -731,6 +740,10 @@ func _send_chat() -> void:
 	if not last_response.evidencias.is_empty():
 		rows.append(Texto.texto("evidence_snapshot", [world.tick, world.pet_id]))
 	for evidence in last_response.evidencias:
+		var source := Texto.fonte_e4(evidence)
+		if not source.is_empty():
+			rows.append(source)
+			continue
 		var field: String = str(evidence.get("campo", "events"))
 		var value = evidence.get("valor")
 		var shown := ""
@@ -813,7 +826,7 @@ func _read_settings() -> void:
 
 func _build_help() -> void:
 	help_dialog = _window("help_title", Vector2i(650, 570))
-	_wrapped(_window_column(help_dialog), Texto.texto("help_body"))
+	_wrapped(_window_column(help_dialog), Texto.texto("social_help") + "\n\n" + Texto.texto("help_body"))
 
 func _population_field(parent: Node) -> SpinBox:
 	var field := SpinBox.new()
@@ -892,6 +905,10 @@ func _capture_demo(path: String) -> void:
 			return
 	if state.begins_with("e3-"):
 		await _capture_e3(state, path)
+		get_tree().quit()
+		return
+	if state.begins_with("e4-"):
+		await _capture_e4(state, path)
 		get_tree().quit()
 		return
 	if state.begins_with("e2-"):
@@ -979,6 +996,75 @@ func _capture_demo(path: String) -> void:
 				DirAccess.remove_absolute(fixture)
 		DirAccess.remove_absolute(folder)
 	get_tree().quit()
+
+func _e4_inspection_fixture(approach: bool = false, contention: bool = false) -> void:
+	# Explicit visual fixture, never used by new/load gameplay paths.
+	world = World.new_world(51001, {"creature_count": 0, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false, "signal_noise": 0.0})
+	world.pet_id = world.spawn_creature(Vector2(300, 200), Texto.NOMES_INICIAIS[0])
+	world.spawn_creature(Vector2(375 if approach else 320, 200), Texto.NOMES_INICIAIS[1])
+	for creature in world.creatures.values():
+		# Inspection only: full field of view makes the encounter reproducible.
+		creature.genome.vision_fov = floorf(TAU * 1000000.0) / 1000000.0
+		world.genealogy.records[creature.id].genome = creature.genome.to_dict()
+		creature.energy = creature.max_energy * 0.95
+		if contention:
+			creature.energy = creature.max_energy * 0.5
+		creature.heading = 0
+		if approach:
+			creature.personality.loneliness = 1.0
+	selected_id = world.pet_id
+	paused = true
+	_reset_session()
+	view.set_world(world)
+	if contention:
+		world.place_food(Vector2(310, 200), "fruta")
+	world.step()
+	command_target = Vector2(700, 400)
+	view.command_target = command_target
+	_refresh()
+	personality_inspector.current_tab = 4
+	camera.zoom = Vector2.ONE * 1.4
+	camera.position = Vector2(340, 220) + _camera_bias()
+	_notify(Texto.texto("social_demo"), 30)
+
+func _capture_e4(state: String, path: String) -> void:
+	_e4_inspection_fixture(state == "e4-approach", state == "e4-aversao")
+	var pet = world.creatures[world.pet_id]
+	if state == "e4-gostos":
+		pet.energy = pet.max_energy * 0.5
+		world._eat(pet, world.place_food(pet.pos, "fruta"))
+	if state == "e4-aprendizado":
+		for index in range(5):
+			teaching.mark(pet.pos)
+			teaching.observe_button.pressed.emit()
+			world.step()
+			teaching.refresh(true)
+	if state == "e4-agua":
+		world.place_water(pet.pos + Vector2(35, 0), 18)
+	if state in ["e4-gostos", "e4-nao-sei", "e4-aprendizado", "e4-agua"]:
+		chat_input.text = Texto.texto("question_" + ("gostos" if state in ["e4-gostos", "e4-nao-sei"] else state.trim_prefix("e4-")))
+		_send_chat()
+		chat_dialog.popup_centered()
+	if state.begins_with("e4-sinais"):
+		_show_lab(true)
+		lab.signal_switch.button_pressed = true
+		lab.emit_button.pressed.emit()
+		world.step()
+		lab.observe(world, selected_id, true)
+	_refresh()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if state.begins_with("e4-sinais"):
+		lab_scroll.scroll_vertical = int(lab.signal_result.position.y) - 30
+		if state == "e4-sinais-log":
+			lab_scroll.scroll_vertical = int(lab.signal_controls.position.y)
+	if state == "e4-encontros":
+		caregiver_scroll.scroll_vertical = int(personality_inspector.position.y) - 8
+		personality_inspector.get_child(4).scroll_vertical = int(personality_inspector.encounters.position.y) - 80
+	var warmup := Time.get_ticks_msec() + 900
+	while Time.get_ticks_msec() < warmup:
+		await get_tree().process_frame
+	await capture_screenshot(path)
 
 func _panel(parent: Node, offsets: Vector4, anchors: Vector4) -> PanelContainer:
 	var panel := PanelContainer.new()

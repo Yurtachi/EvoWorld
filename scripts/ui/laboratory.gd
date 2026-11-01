@@ -18,6 +18,7 @@ var descendants: Label
 var diversity: Label
 var events: Label
 var signals: Label
+var signal_result: Label
 var signal_switch: CheckButton
 var symbol_input: OptionButton
 var emit_button: Button
@@ -50,6 +51,8 @@ func _ready() -> void:
 	_heading("events_title")
 	events = _text("")
 	_heading("signals_title")
+	signal_result = _text(Texto.texto("signals_result"))
+	signal_result.add_theme_color_override("font_color", Color("ffdda5"))
 	signal_controls = VBoxContainer.new()
 	add_child(signal_controls)
 	signal_switch = CheckButton.new()

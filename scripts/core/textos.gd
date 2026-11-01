@@ -343,6 +343,9 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if E4_UI.has(codigo) or E4_CATALOGO.has(codigo):
+		var e4: String = E4_UI.get(codigo, E4_CATALOGO.get(codigo, ""))
+		return e4 if valores.is_empty() else e4 % valores
 	var modelo: String = E3_UI.get(codigo, E3_CATALOGO.get(codigo, E2_UI.get(codigo, E2_CATALOGO.get(codigo, E1_UI.get(codigo, E1_CATALOGO.get(codigo, CATALOGO.get(codigo, CATALOGO.text_unknown)))))))
 	return modelo if valores.is_empty() else modelo % valores
 
@@ -361,8 +364,13 @@ static func sinal(row: Dictionary) -> String:
 	var result := texto("signals_row", [int(row.get("tick", 0)), int(row.get("symbol", 0)), int(row.get("emitter", -1)),
 		texto("yes" if context.get("saw_food", false) else "no"), texto("yes" if context.get("low_energy", false) else "no"), ids])
 	var changes: Array = row.get("action_changes", [])
+	if changes.is_empty():
+		result += "\n" + texto("signals_no_decision" if not receivers.is_empty() else "signals_no_receiver")
 	for change in changes.slice(0, 12):
-		result += "\n" + texto("signals_change", [int(change.get("receiver", -1)), int(change.get("tick", 0)), acao(str(change.get("before", ""))), acao(str(change.get("after", "")))])
+		if change.get("before") == change.get("after"):
+			result += "\n" + texto("signals_unchanged", [int(change.get("receiver", -1)), int(change.get("tick", 0)), acao(str(change.get("after", "")))])
+		else:
+			result += "\n" + texto("signals_change", [int(change.get("receiver", -1)), int(change.get("tick", 0)), acao(str(change.get("before", ""))), acao(str(change.get("after", "")))])
 	if changes.size() > 12:
 		result += "\n" + texto("lab_more", [changes.size() - 12])
 	return result
@@ -392,9 +400,13 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
+	if E4_CATALOGO.has("action_" + codigo):
+		return texto("action_" + codigo)
 	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) or E2_CATALOGO.has("action_" + codigo) else texto("action_unknown")
 
 static func razao(original: String) -> String:
+	if E4_RAZOES.has(original):
+		return texto(E4_RAZOES[original])
 	if E3_RAZOES.has(original):
 		return texto(E3_RAZOES[original])
 	if E2_RAZOES.has(original):
@@ -643,3 +655,73 @@ static func e4_acao(codigo: String) -> String:
 
 static func e4_razao(codigo: String) -> String:
 	return E4_CATALOGO[E4_RAZOES[codigo]] if E4_RAZOES.has(codigo) else razao(codigo)
+
+const E4_UI := {
+	"tab_bonds": "Social",
+	"bonds_note": "VÍNCULOS · experiências desta criatura. Familiaridade decai; afinidade e aversão vêm da valência dos encontros, não de emoções medidas.",
+	"social_row": "%s · #%d\nFamiliaridade %s%% · afinidade %s%% · aversão %s%%\n%s · último no passo %d",
+	"encounter_count_one": "1 encontro", "encounter_count": "%d encontros",
+	"social_history": "ÚLTIMOS ENCONTROS",
+	"social_history_note": "Até 8 episódios retidos. O registro não guarda o parceiro de cada episódio; não é possível associá-lo a um vínculo específico.",
+	"social_history_empty": "Nenhum encontro retido nesta memória.",
+	"social_legend": "No mapa, só a seleção recebe indicadores: dois pontos = encontro nos últimos 20 passos; seta = direção corporal durante aproximação/seguimento. Não confirma chegada.",
+	"episode_resource_contention": "Encontro com disputa por alimento",
+	"episode_contact": "Encontro próximo sem disputa por alimento",
+	"chat_examples": "Pergunte sobre gostos, aprendizado, água ou estado; pedidos: chamar, seguir, parar, brincar, proteger ou oferecer comida.",
+	"question_gostos": "Do que você gosta?", "question_aprendizado": "O que aprendeu?", "question_agua": "Onde está a água?",
+	"query_receipt": "Consulta somente de leitura; não cria ordem, experiência ou vínculo.",
+	"source_row": "Fonte interna: %s\n%s",
+	"source_preferences": "Preferências alimentares aprendidas (personality.preferences)",
+	"source_statistics": "Resultados de ensino (ensino.statistics)",
+	"source_episodes": "Episódios retidos (personality.episodes)",
+	"source_waters": "Águas percebidas agora (sense.waters)",
+	"source_memory": "Memória da criatura (creature.memory)",
+	"source_empty": "Sem registros nesta fonte.",
+	"source_preference_value": "%s: %s (intervalo −1 a +1)",
+	"source_skill": "%s: %d/%d sucessos autônomos · %s",
+	"source_count": "%d registros retidos; não comprovam aprendizado de habilidade por si só.",
+	"source_water": "Água #%d · margem (%s; %s) · passo %d",
+	"source_memory_count": "%d registros. Memória de bebida sem coordenada não localiza água oculta.",
+	"signals_title": "SINAIS · EXPERIMENTAL",
+	"signals_log": "LOG · EXPERIMENTAL",
+	"signals_result": "Pré-registro E4: bebeu em 18/20 com canal ativo, 8/20 desligado e 10/20 embaralhado. Utilidade restrita: encoder fixo e receptor aprendido, com visão experimental. Não é linguagem; esse receptor não é instalado nos pets.",
+	"signals_manual": "Emissão manual cobra energia. A heurística padrão não emite sozinha. A sequência abaixo mostra decisões após recepção; não comprova causalidade neste jardim.",
+	"signals_no_decision": "Receptores presentes; decisão após recepção ainda não registrada.",
+	"signals_no_receiver": "Nenhum receptor recebeu este pacote; sem reação a apresentar.",
+	"signals_change": "Receptor #%d · passo %d · %s → %s",
+	"signals_unchanged": "Receptor #%d · passo %d · ação mantida: %s",
+	"social_demo": "Cenário de inspeção E4: dois corpos próximos; encontros e decisões pelo simulador real.",
+	"social_badge": "Encontro", "approach_badge": "Aproximação",
+	"social_help": "Social: vínculos e encontros da seleção. Indicadores no mapa só na seleção. Converse sobre gostos, aprendizado e água; fontes internas acompanham cada resposta, com “Não sei” sem evidência. Sinais no Laboratório são EXPERIMENTAIS: encoder fixo, não é linguagem."
+}
+
+static func fonte_e4(evidence: Dictionary) -> String:
+	var source: String = str(evidence.get("fonte", ""))
+	var value = evidence.get("valor")
+	var rows: Array[String] = []
+	var label := ""
+	match source:
+		"personality.preferences":
+			label = "source_preferences"
+			var keys: Array = value.keys()
+			keys.sort()
+			for kind in keys:
+				rows.append(texto("source_preference_value", [texto("food_" + str(kind)), numero(float(value[kind]), 3)]))
+		"ensino.statistics":
+			label = "source_statistics"
+			for skill in value.get("skills", []):
+				rows.append(texto("source_skill", [texto(str(skill.skill)), int(skill.successes), int(skill.attempts), texto("learned" if skill.learned else "not_learned")]))
+		"personality.episodes":
+			label = "source_episodes"
+			if not value.is_empty():
+				rows.append(texto("source_count", [value.size()]))
+		"sense.waters":
+			label = "source_waters"
+			for water in value.slice(0, 3):
+				rows.append(texto("source_water", [int(water.id), numero(water.pos.x), numero(water.pos.y), int(evidence.get("tick", 0))]))
+		"creature.memory":
+			label = "source_memory"
+			if not value.is_empty():
+				rows.append(texto("source_memory_count", [value.size()]))
+		_: return ""
+	return texto("source_row", [texto(label), "\n".join(rows) if not rows.is_empty() else texto("source_empty")])
