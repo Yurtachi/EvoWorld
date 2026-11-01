@@ -5,13 +5,16 @@ extends RefCounted
 
 # Food bucket: 0 none visible, 1 within reach (direction irrelevant),
 # 2..4 near (left/ahead/right), 5..7 far (left/ahead/right).
+const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
+const Water = preload("res://scripts/environment/water_rules.gd")
 const FOOD_BUCKETS := 8
 const ENERGY_BUCKETS := 3
 const OBSTACLE_BUCKETS := 2
 const BASE_STATE_COUNT := FOOD_BUCKETS * ENERGY_BUCKETS * OBSTACLE_BUCKETS
 # No signal, or one of eight neutral symbols × three directions × two distances.
 const SIGNAL_BUCKETS := 1 + 8 * 3 * 2
-const STATE_COUNT := BASE_STATE_COUNT * SIGNAL_BUCKETS
+const LEGACY_STATE_COUNT := BASE_STATE_COUNT * SIGNAL_BUCKETS
+const STATE_COUNT := LEGACY_STATE_COUNT + FOOD_BUCKETS * OBSTACLE_BUCKETS * SIGNAL_BUCKETS
 const AHEAD_ANGLE := 0.25
 const NEAR_DISTANCE := 60.0
 const LOW_ENERGY := 0.35
@@ -27,6 +30,8 @@ static func state_index(food_bucket: int, energy_bucket: int, obstacle_ahead: bo
 	return (food_bucket * ENERGY_BUCKETS + energy_bucket) * OBSTACLE_BUCKETS + (1 if obstacle_ahead else 0)
 
 static func describe_state(state: int) -> String:
+	if state >= LEGACY_STATE_COUNT:
+		return "ecology.thirst"
 	state = state % BASE_STATE_COUNT
 	var obstacle := state % OBSTACLE_BUCKETS
 	var energy := (state / OBSTACLE_BUCKETS) % ENERGY_BUCKETS
@@ -37,9 +42,12 @@ static func features(creature, sensors: Dictionary, world_size: Vector2) -> Dict
 	var closest_id := -1
 	var closest_distance := INF
 	var closest_pos := Vector2.ZERO
+	var best_score := INF
 	for food in sensors.get("foods", []):
 		var distance: float = creature.pos.distance_to(food["pos"])
-		if distance < closest_distance:
+		var score: float = (distance + 1.0) / float(FoodCatalog.PARAMETERS[food.get("food_type", "legacy")]["palatability"])
+		if score < best_score:
+			best_score = score
 			closest_distance = distance
 			closest_id = int(food["id"])
 			closest_pos = food["pos"]
@@ -58,8 +66,30 @@ static func features(creature, sensors: Dictionary, world_size: Vector2) -> Dict
 	var signal_bucket := 0
 	if not heard.is_empty():
 		signal_bucket = 1 + (int(heard["symbol"]) * 3 + int(heard["direction_bucket"])) * 2 + int(heard["distance_bucket"])
+	var water_id := -1
+	var water_distance := INF
+	var water_pos := Vector2.ZERO
+	for water in sensors.get("waters", []):
+		var distance: float = creature.pos.distance_to(water["pos"])
+		if distance < water_distance:
+			water_distance = distance
+			water_id = int(water["id"])
+			water_pos = water["pos"]
+	var water_bucket := 0
+	if water_id != -1:
+		if water_distance <= reach(creature):
+			water_bucket = 1
+		else:
+			var relative := wrapf((water_pos - creature.pos).angle() - creature.heading, -PI, PI)
+			var direction := 0 if relative < -AHEAD_ANGLE else (2 if relative > AHEAD_ANGLE else 1)
+			water_bucket = (2 if water_distance <= NEAR_DISTANCE else 5) + direction
+	var state := state_index(food_bucket, energy_bucket, obstacle_ahead) + BASE_STATE_COUNT * signal_bucket
+	if sensors.get("water_enabled", false) and creature.thirst > Water.THIRST_THRESHOLD:
+		state = LEGACY_STATE_COUNT + (water_bucket * OBSTACLE_BUCKETS + (1 if obstacle_ahead else 0)) * SIGNAL_BUCKETS + signal_bucket
 	return {
-		"state": state_index(food_bucket, energy_bucket, obstacle_ahead) + BASE_STATE_COUNT * signal_bucket,
+		"state": state, "water_id": water_id, "water_distance": water_distance,
+		"water_bucket": water_bucket, "thirst": creature.thirst,
+		"water_enabled": sensors.get("water_enabled", false), "allowed_actions": sensors.get("allowed_actions", []),
 		"signal": heard.duplicate(true), "signal_bucket": signal_bucket,
 		"action_count": sensors.get("action_count", 5),
 		"food_bucket": food_bucket, "energy_bucket": energy_bucket, "obstacle_ahead": obstacle_ahead,

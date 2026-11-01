@@ -429,3 +429,24 @@ static func nome_mundo(original: String) -> String:
 	if original == "Restored garden":
 		return texto("world_restored")
 	return original
+
+
+# E1-SIM — chaves aditivas; integração nos formatadores pertence à UI.
+const E1_CATALOGO := {
+	"food_legacy": "Alimento tradicional", "food_fruta": "Fruta", "food_semente": "Semente",
+	"food_folha": "Folha", "food_cogumelo": "Cogumelo",
+	"action_drink": "Beber", "action_seek_water": "Buscar água",
+	"hydration": "Hidratação", "thirst": "Sede",
+	"event_drink": "Passo %d: criatura %d bebeu na água %d; recuperou %s de hidratação.",
+	"reason_seek_water": "Água percebida; aproximando-se da margem.",
+	"reason_drink": "Bebeu água ao alcance.",
+	"reason_drink_empty": "Nenhuma água percebida ao alcance para beber.",
+	"reason_no_water": "Com sede e sem água percebida; explorando.",
+	"reason_thirst": "Decisão condicionada pela sede e pela água percebida.",
+	"reason_food_toxic": "Ingeriu alimento com toxicidade; houve perda líquida de energia."
+}
+const E1_RAZOES := {
+	"ecology.seek_water": "reason_seek_water", "ecology.drink": "reason_drink",
+	"ecology.drink_empty": "reason_drink_empty", "ecology.no_water": "reason_no_water",
+	"ecology.thirst": "reason_thirst", "ecology.food_toxic": "reason_food_toxic"
+}

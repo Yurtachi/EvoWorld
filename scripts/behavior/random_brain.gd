@@ -10,7 +10,12 @@ var last_reason: String = ""
 
 func decide(_creature, obs: Dictionary, rng) -> int:
 	var count: int = obs.get("action_count", Actions.COUNT)
-	var action := clampi(int(rng.between(0.0, float(count))), 0, count - 1)
+	var allowed: Array = obs.get("allowed_actions", [])
+	var action: int
+	if allowed.is_empty():
+		action = clampi(int(rng.between(0.0, float(count))), 0, count - 1)
+	else:
+		action = int(allowed[clampi(int(rng.between(0.0, float(allowed.size()))), 0, allowed.size() - 1)])
 	last_reason = "brain.random"
 	return action
 
