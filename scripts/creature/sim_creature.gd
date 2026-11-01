@@ -7,8 +7,10 @@ const Brains = preload("res://scripts/behavior/brains.gd")
 const Signals = preload("res://scripts/communication/signal_channel.gd")
 const MEMORY_LIMIT := 16
 const Personality = preload("res://scripts/behavior/personality.gd")
+const Ensino = preload("res://scripts/interaction/ensino.gd")
 
 var personality = null
+var ensino = null
 var personality_water_enabled := false
 var temperament: Dictionary:
 	get:
@@ -56,6 +58,8 @@ func to_dict() -> Dictionary:
 	}
 	if personality != null:
 		result["personality"] = personality.to_dict()
+	if ensino != null:
+		result["ensino"] = ensino.to_dict()
 	# Optional key: heuristic creatures keep the original snapshot layout.
 	if brain != null:
 		result["brain"] = brain.to_dict()
@@ -97,12 +101,18 @@ static func from_dict(data: Dictionary) -> SimCreature:
 		if saved_brain == null:
 			return null
 	var saved_personality = null
+	var saved_teaching = null
+	if data.has("ensino"):
+		saved_teaching = Ensino.from_dict(data["ensino"])
+		if saved_teaching == null:
+			return null
 	if data.has("personality"):
 		saved_personality = Personality.from_dict(data["personality"])
 		if saved_personality == null or genes.temperament.is_empty():
 			return null
 	var result = load("res://scripts/creature/sim_creature.gd").new()
 	result.personality = saved_personality
+	result.ensino = saved_teaching
 	result.brain = saved_brain
 	result.id = int(data["id"])
 	result.name = data["name"]

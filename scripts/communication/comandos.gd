@@ -47,6 +47,7 @@ func aplicar(pedido: Variant, mundo, alvo: Vector2 = Vector2.INF) -> Dictionary:
 		alvo = (pet.pos + Vector2.from_angle(pet.heading) * 40.0).clamp(Vector2.ONE * pet.genome.size, mundo.size - Vector2.ONE * pet.genome.size)
 	if intent in ["chamar", "seguir", "brincar"] and not _alvo_valido(alvo, mundo):
 		return _resultado(false, false, "alvo_invalido")
+	mundo.ensino_cancelar(pet.id)
 	_ordens[pet.id] = {"intent": intent, "alvo": alvo if intent != "parar" else pet.pos, "restante": int(TICKS_ORDEM[intent])}
 	return _resultado(true, false, "ok")
 
@@ -98,6 +99,10 @@ func limpar() -> void:
 	_ordens.clear()
 	_protecao.clear()
 	_mundo = null
+
+## Explicit control supersedes teaching; a player order cannot count as autonomy.
+func cancelar_ordem(creature_id: int) -> void:
+	_ordens.erase(creature_id)
 
 ## JSON-safe state, bound to this world's pet only. Protection remains a request.
 func to_dict(mundo) -> Dictionary:
