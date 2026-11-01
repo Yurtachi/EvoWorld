@@ -7,6 +7,8 @@ const Ids = preload("res://scripts/core/sim_ids.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
 const Genes = preload("res://scripts/creature/genome.gd")
 const Creature = preload("res://scripts/creature/sim_creature.gd")
+const Obs = preload("res://scripts/behavior/observation.gd")
+const Actions = preload("res://scripts/behavior/actions.gd")
 const SAVE_VERSION := 1
 const TICK_DT := 0.1
 const EVENT_LIMIT := 256
@@ -145,7 +147,9 @@ func _update_creature(creature: Creature) -> void:
 			closest = food
 			closest_distance = distance
 	var moving := false
-	if not closest.is_empty() and closest_distance <= creature.genome.size + 5.0 and creature.hunger > 0.05:
+	if creature.brain != null:
+		moving = _act_with_brain(creature, sensors)
+	elif not closest.is_empty() and closest_distance <= creature.genome.size + 5.0 and creature.hunger > 0.05:
 		_eat(creature, int(closest["id"]))
 	elif creature.hunger < 0.12 or (creature.age % 120 < 12 and closest.is_empty()):
 		creature.last_action = "rest"
@@ -171,7 +175,41 @@ func _update_creature(creature: Creature) -> void:
 		creature.alive = false
 		creature.last_action = "dead"
 		creature.last_reason = "Starvation: energy exhausted"
+		if creature.brain != null:
+			creature.brain.on_death(creature)
 		_record({"type": "death", "creature_id": creature.id, "reason": "starvation"})
+
+## Pluggable-policy path: the brain chooses a discrete action from discretized limited
+## observations; the world applies the same physics/costs as the heuristic. No reflexive
+## obstacle avoidance here: blocked moves simply fail and the brain must learn to turn.
+func _act_with_brain(creature: Creature, sensors: Dictionary) -> bool:
+	var obs: Dictionary = Obs.features(creature, sensors, size)
+	var action: int = creature.brain.decide(creature, obs, rng)
+	creature.last_action = Actions.name_of(action)
+	creature.last_reason = creature.brain.last_reason
+	match action:
+		Actions.EAT:
+			if int(obs["food_id"]) != -1 and float(obs["food_distance"]) <= Obs.reach(creature):
+				_eat(creature, int(obs["food_id"]))
+			else:
+				creature.last_reason += "; nothing within reach"
+			return false
+		Actions.REST:
+			return false
+		Actions.TURN_LEFT:
+			creature.heading -= Actions.TURN_STEP
+		Actions.TURN_RIGHT:
+			creature.heading += Actions.TURN_STEP
+		Actions.FORWARD:
+			pass
+		_:
+			return false
+	var target := creature.pos + Vector2.from_angle(creature.heading) * creature.genome.speed * TICK_DT
+	if target != _inside(target, creature.genome.size) or _occluded(creature.pos, target, creature.genome.size):
+		creature.last_reason += "; blocked by physical contact"
+		return false
+	creature.pos = target
+	return true
 
 func _eat(creature: Creature, food_id: int) -> void:
 	for index in range(foods.size()):
