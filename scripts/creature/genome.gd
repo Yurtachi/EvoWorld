@@ -34,7 +34,7 @@ func to_dict() -> Dictionary:
 	return result
 
 static func from_dict(data: Dictionary) -> Genome:
-	if data.get("version") != VERSION or not Data.integer(data.get("id")) or not Data.integer(data.get("generation")):
+	if not Data.integer(data.get("version")) or int(data["version"]) != VERSION or not Data.integer(data.get("id")) or not Data.integer(data.get("generation")):
 		return null
 	if not data.get("parents") is Array or data["parents"].size() > 2:
 		return null

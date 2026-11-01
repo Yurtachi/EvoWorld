@@ -7,6 +7,9 @@ const Ids = preload("res://scripts/core/sim_ids.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
 const Genes = preload("res://scripts/creature/genome.gd")
 const Creature = preload("res://scripts/creature/sim_creature.gd")
+const Obs = preload("res://scripts/behavior/observation.gd")
+const Actions = preload("res://scripts/behavior/actions.gd")
+const Grid = preload("res://scripts/core/spatial_grid.gd")
 const SAVE_VERSION := 1
 const TICK_DT := 0.1
 const EVENT_LIMIT := 256
@@ -26,6 +29,13 @@ var food_regrow_interval: int = 10
 var food_regrow_batch: int = 2
 var rng: Rng
 var ids := Ids.new()
+var _food_grid := Grid.new()
+var _creature_grid := Grid.new()
+var _obstacle_grid := Grid.new()
+var _food_by_id: Dictionary = {}
+var _max_obstacle_radius := 0.0
+var _in_step := false
+
 
 func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	seed = world_seed
@@ -44,7 +54,9 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	for index in range(clampi(int(config.get("food_count", 80)), 0, food_capacity)):
 		place_food(_free_position(3.0))
 	for index in range(clampi(int(config.get("creature_count", 16)), 0, 1000)):
-		spawn_creature(_free_position(16.0))
+		var creature_id := spawn_creature(_free_position(16.0))
+		if pet_id == -1:
+			pet_id = creature_id
 
 func spawn_creature(pos: Vector2, creature_name: String = "", genome = null) -> int:
 	if not pos.is_finite():
@@ -70,14 +82,12 @@ func spawn_creature(pos: Vector2, creature_name: String = "", genome = null) -> 
 	var creature := Creature.new()
 	creature.id = ids.take()
 	creature.genome = genes
-	creature.name = creature_name if not creature_name.is_empty() else "Creature %d" % creature.id
+	creature.name = creature_name.left(64) if not creature_name.is_empty() else "Creature %d" % creature.id
 	creature.pos = location
 	creature.heading = snappedf(rng.between(-PI, PI), 0.000001)
 	creature.max_energy = snappedf(80.0 + genes.size * 2.0, 0.000001)
 	creature.energy = snappedf(creature.max_energy * 0.8, 0.000001)
 	creatures[creature.id] = creature
-	if pet_id == -1:
-		pet_id = creature.id
 	_record({"type": "spawn", "creature_id": creature.id, "name": creature.name})
 	return creature.id
 
@@ -105,6 +115,8 @@ func place_obstacle(pos: Vector2, radius: float) -> void:
 	obstacles.append({"pos": location, "radius": actual_radius})
 
 func step() -> void:
+	_rebuild_spatial()
+	_in_step = true
 	tick += 1
 	# Stable ordering also preserves competition outcomes after save/load.
 	var creature_ids := creatures.keys()
@@ -112,31 +124,60 @@ func step() -> void:
 	for creature_id in creature_ids:
 		var creature: Creature = creatures[creature_id]
 		_update_creature(creature)
+		_creature_grid.insert(creature_id, creature.pos)
 		if not creature.alive:
+			_creature_grid.remove(creature_id)
 			creatures.erase(creature_id)
 			if pet_id == creature_id:
 				pet_id = -1
+	_in_step = false
 	if food_regrow and tick % food_regrow_interval == 0:
 		for index in range(mini(food_regrow_batch, food_capacity - foods.size())):
 			place_food(_free_position(3.0))
 
-func sense(creature: Creature) -> Dictionary:
-	var result := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger}
+func _rebuild_spatial() -> void:
+	_food_grid = Grid.new()
+	_creature_grid = Grid.new()
+	_obstacle_grid = Grid.new()
+	_food_by_id.clear()
+	_max_obstacle_radius = 0.0
 	for food in foods:
-		if _visible(creature, food["pos"]) and not _occluded(creature.pos, food["pos"]):
-			result["foods"].append(food.duplicate(true))
+		_food_grid.insert(int(food["id"]), food["pos"])
+		_food_by_id[int(food["id"])] = food
 	for other in creatures.values():
-		if other.id != creature.id and _visible(creature, other.pos) and not _occluded(creature.pos, other.pos):
-			result["creatures"].append({"id": other.id, "pos": other.pos})
-	for obstacle in obstacles:
+		_creature_grid.insert(other.id, other.pos)
+	for index in range(obstacles.size()):
+		_obstacle_grid.insert(index, obstacles[index]["pos"])
+		_max_obstacle_radius = maxf(_max_obstacle_radius, obstacles[index]["radius"])
+
+## External callers may mutate public collections; rebuild outside a simulation step.
+## Built-in policies don't consume neighboring creatures, so skip that query for them.
+func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
+	if not _in_step:
+		_rebuild_spatial()
+	var result := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger}
+	var extent := Vector2.ONE * creature.genome.vision_range
+	var low := creature.pos - extent
+	var high := creature.pos + extent
+	for food_id in _food_grid.query(low, high):
+		var food: Dictionary = _food_by_id[food_id]
+		if _visible(creature, food["pos"]) and not _occluded(creature.pos, food["pos"]):
+			result["foods"].append(food.duplicate())
+	if include_creatures:
+		for other_id in _creature_grid.query(low, high):
+			var other: Creature = creatures[other_id]
+			if other.id != creature.id and _visible(creature, other.pos) and not _occluded(creature.pos, other.pos):
+				result["creatures"].append({"id": other.id, "pos": other.pos})
+	for index in _obstacle_grid.query(low, high):
+		var obstacle: Dictionary = obstacles[index]
 		if _visible(creature, obstacle["pos"]):
-			result["obstacles"].append(obstacle.duplicate(true))
+			result["obstacles"].append(obstacle.duplicate())
 	return result
 
 func _update_creature(creature: Creature) -> void:
 	creature.age += 1
 	creature.energy = clampf(creature.energy, 0.0, creature.max_energy)
-	var sensors := sense(creature)
+	var sensors := sense(creature, false)
 	var closest: Dictionary = {}
 	var closest_distance := INF
 	for food in sensors["foods"]:
@@ -145,7 +186,9 @@ func _update_creature(creature: Creature) -> void:
 			closest = food
 			closest_distance = distance
 	var moving := false
-	if not closest.is_empty() and closest_distance <= creature.genome.size + 5.0 and creature.hunger > 0.05:
+	if creature.brain != null:
+		moving = _act_with_brain(creature, sensors)
+	elif not closest.is_empty() and closest_distance <= creature.genome.size + 5.0 and creature.hunger > 0.05:
 		_eat(creature, int(closest["id"]))
 	elif creature.hunger < 0.12 or (creature.age % 120 < 12 and closest.is_empty()):
 		creature.last_action = "rest"
@@ -171,7 +214,41 @@ func _update_creature(creature: Creature) -> void:
 		creature.alive = false
 		creature.last_action = "dead"
 		creature.last_reason = "Starvation: energy exhausted"
+		if creature.brain != null:
+			creature.brain.on_death(creature)
 		_record({"type": "death", "creature_id": creature.id, "reason": "starvation"})
+
+## Pluggable-policy path: the brain chooses a discrete action from discretized limited
+## observations; the world applies the same physics/costs as the heuristic. No reflexive
+## obstacle avoidance here: blocked moves simply fail and the brain must learn to turn.
+func _act_with_brain(creature: Creature, sensors: Dictionary) -> bool:
+	var obs: Dictionary = Obs.features(creature, sensors, size)
+	var action: int = creature.brain.decide(creature, obs, rng)
+	creature.last_action = Actions.name_of(action)
+	creature.last_reason = creature.brain.last_reason
+	match action:
+		Actions.EAT:
+			if int(obs["food_id"]) != -1 and float(obs["food_distance"]) <= Obs.reach(creature):
+				_eat(creature, int(obs["food_id"]))
+			else:
+				creature.last_reason = "brain.eat_empty"
+			return false
+		Actions.REST:
+			return false
+		Actions.TURN_LEFT:
+			creature.heading -= Actions.TURN_STEP
+		Actions.TURN_RIGHT:
+			creature.heading += Actions.TURN_STEP
+		Actions.FORWARD:
+			pass
+		_:
+			return false
+	var target := creature.pos + Vector2.from_angle(creature.heading) * creature.genome.speed * TICK_DT
+	if target != _inside(target, creature.genome.size) or _occluded(creature.pos, target, creature.genome.size):
+		creature.last_reason = "brain.blocked"
+		return false
+	creature.pos = target
+	return true
 
 func _eat(creature: Creature, food_id: int) -> void:
 	for index in range(foods.size()):
@@ -180,6 +257,8 @@ func _eat(creature: Creature, food_id: int) -> void:
 		var gained := minf(float(foods[index]["energy"]), creature.max_energy - creature.energy)
 		creature.energy += gained
 		foods.remove_at(index)
+		_food_grid.remove(food_id)
+		_food_by_id.erase(food_id)
 		creature.last_action = "eat"
 		creature.last_reason = "Ate visible food %d; gained %.1f energy" % [food_id, gained]
 		var event := {"type": "eat", "creature_id": creature.id, "food_id": food_id, "energy": snappedf(gained, 0.000001)}
@@ -214,9 +293,16 @@ func _visible(creature: Creature, target: Vector2) -> bool:
 	return offset.is_zero_approx() or absf(wrapf(offset.angle() - creature.heading, -PI, PI)) <= creature.genome.vision_fov * 0.5
 
 func _occluded(start: Vector2, finish: Vector2, margin: float = 0.0) -> bool:
-	for obstacle in obstacles:
-		if _segment_hits(start, finish, obstacle["pos"], obstacle["radius"] + margin):
-			return true
+	if _in_step:
+		var extent := Vector2.ONE * (_max_obstacle_radius + margin)
+		for index in _obstacle_grid.query(start.min(finish) - extent, start.max(finish) + extent):
+			var obstacle: Dictionary = obstacles[index]
+			if _segment_hits(start, finish, obstacle["pos"], obstacle["radius"] + margin):
+				return true
+	else:
+		for obstacle in obstacles:
+			if _segment_hits(start, finish, obstacle["pos"], obstacle["radius"] + margin):
+				return true
 	return false
 
 func _segment_hits(start: Vector2, finish: Vector2, center: Vector2, radius: float) -> bool:
@@ -271,7 +357,7 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
-	if data.get("save_version") != SAVE_VERSION or not Data.integer_text(data.get("world_seed")):
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) != SAVE_VERSION or not Data.integer_text(data.get("world_seed")):
 		return null
 	if not Data.integer(data.get("tick")) or not Data.integer(data.get("next_id"), 1) or not Data.integer(data.get("pet_id"), -1):
 		return null
@@ -298,6 +384,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		return null
 	if data["events"].size() > EVENT_LIMIT or not Data.json_data(data["events"]):
 		return null
+	for event in data["events"]:
+		if not Data.event(event, int(data["tick"]), int(data["next_id"])):
+			return null
 	config.merge({"size": saved_size, "creature_count": 0, "food_count": 0, "obstacle_count": 0}, true)
 	var result = load("res://scripts/world/sim_world.gd").new(int(data["world_seed"]), config)
 	result.tick = int(data["tick"])
@@ -319,6 +408,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			return null
 		if creature.pos != result._inside(creature.pos, creature.genome.size) or not result._clear(creature.pos, creature.genome.size):
 			return null
+		for event in creature.memory:
+			if not Data.event(event, result.tick, int(data["next_id"])):
+				return null
 		used_ids[creature.id] = true
 		used_ids[creature.genome.id] = true
 		result.creatures[creature.id] = creature
@@ -326,10 +418,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if not food is Dictionary or not Data.integer(food.get("id"), 1) or used_ids.has(int(food.get("id", -1))) or not Data.vector(food.get("pos")) or not Data.number(food.get("energy")):
 			return null
 		var pos := Data.unpack_vector(food["pos"])
-		if float(food["energy"]) <= 0.0 or pos != result._inside(pos, 3.0) or not result._clear(pos, 3.0):
+		if float(food["energy"]) < 0.000001 or float(food["energy"]) > 10000.0 or pos != result._inside(pos, 3.0) or not result._clear(pos, 3.0):
 			return null
 		used_ids[int(food["id"])] = true
-		result.foods.append({"id": int(food["id"]), "pos": pos, "energy": float(food["energy"])})
+		result.foods.append({"id": int(food["id"]), "pos": pos, "energy": snappedf(float(food["energy"]), 0.000001)})
 	for used_id in used_ids:
 		if used_id >= int(data["next_id"]):
 			return null
