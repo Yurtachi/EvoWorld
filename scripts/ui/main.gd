@@ -3,7 +3,10 @@ const World = preload("res://scripts/world/sim_world.gd")
 const Store = preload("res://scripts/persistence/save_store.gd")
 const GardenTheme = preload("res://scripts/ui/garden_theme.gd")
 const Texto = preload("res://scripts/core/textos.gd")
-const SIDEBAR := 308.0
+const DialogoAPI = preload("res://scripts/communication/dialogo.gd")
+const ComandosAPI = preload("res://scripts/communication/comandos.gd")
+const Laboratory = preload("res://scripts/ui/laboratory.gd")
+const SIDEBAR := 350.0
 var world: World
 var store := Store.new()
 var world_name := Texto.texto("world_default")
@@ -36,14 +39,53 @@ var pet_input: LineEdit
 var seed_input: LineEdit
 var dialog_error: Label
 var dialog_was_paused := true
+var comandos := ComandosAPI.new()
+var lab: VBoxContainer
+var caregiver_scroll: ScrollContainer
+var lab_scroll: ScrollContainer
+var lab_button: Button
+var care_button: Button
+var mode_note: Label
+var chat_dialog: AcceptDialog
+var chat_input: LineEdit
+var chat_response: Label
+var chat_evidence: Label
+var chat_receipt: Label
+var last_response: Dictionary = {}
+var command_target := Vector2.ZERO
+var settings_dialog: AcceptDialog
+var help_dialog: AcceptDialog
+var population_input: SpinBox
+var new_population: SpinBox
+var protection_input: CheckButton
+var autosave_input: CheckButton
+var settings_speed: OptionButton
+var initial_population := 16
+var protected_mode := true
+var autosave_enabled := true
+var autosave_elapsed := 0.0
+var autosave_tick := -1
+var settings_path := "user://ui-settings.cfg"
+var _lab_elapsed := 0.0
+var _capture_mode := false
+var _world_dirty := false
 @onready var view = $WorldView
 @onready var camera: Camera2D = $Camera2D
 
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("152d25"))
 	get_window().min_size = Vector2i(1100, 680)
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--capture="):
+			_capture_mode = true
+	if DisplayServer.get_name() != "headless" and not _capture_mode:
+		_read_settings()
 	_build_ui()
 	_build_new_dialog()
+	_build_chat()
+	_build_settings()
+	_build_help()
+	_set_speed(speed)
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
 	get_viewport().size_changed.connect(_fit_world)
 	# Reproducible capture mode uses this same running scene and real SimWorld.
@@ -57,13 +99,15 @@ func _ready() -> void:
 		_open_new_world.call_deferred()
 
 func create_world(garden_name: String, creature_name: String, world_seed: int) -> void:
-	world = World.new(world_seed)
+	world = World.new(world_seed, {"creature_count": initial_population})
 	world_name = garden_name
 	world.creatures[world.pet_id].name = creature_name
 	selected_id = world.pet_id
 	paused = true
 	accumulator = 0
 	follow = false
+	_reset_session()
+	_world_dirty = true
 	view.set_world(world)
 	_set_tool("select")
 	_fit_world()
@@ -73,11 +117,20 @@ func create_world(garden_name: String, creature_name: String, world_seed: int) -
 func _process(delta: float) -> void:
 	if world == null:
 		return
+	# O alvo é uma posição explícita; nunca é extraído do texto livre.
+	comandos.atualizar_alvo(world, command_target)
 	if not paused:
 		accumulator += minf(delta, 0.25) * speed
 		while accumulator >= World.TICK_DT:
+			if not _can_step():
+				break
 			world.step()
 			accumulator -= World.TICK_DT
+	_lab_elapsed += delta
+	if _lab_elapsed >= 0.5:
+		lab.observe(world, selected_id)
+		_lab_elapsed = 0
+	_autosave(delta)
 	if follow and world.creatures.has(selected_id):
 		camera.position = world.creatures[selected_id].pos + _camera_bias()
 	view.selected_id = selected_id
@@ -106,10 +159,32 @@ func _build_ui() -> void:
 	_button(header_row, Texto.texto("new_world"), _open_new_world).tooltip_text = Texto.texto("new_tooltip")
 	_button(header_row, Texto.texto("save"), _save).tooltip_text = Texto.texto("save_tooltip")
 	_button(header_row, Texto.texto("load"), _load).tooltip_text = Texto.texto("load_tooltip")
+	_button(header_row, Texto.texto("settings"), _open_settings)
+	_button(header_row, Texto.texto("help"), func(): help_dialog.popup_centered())
 	var sidebar := _panel(ui, Vector4(-SIDEBAR - 20, 116, -20, -20), Vector4(1, 0, 1, 1))
+	var side_column := VBoxContainer.new()
+	sidebar.add_child(side_column)
+	var modes := HBoxContainer.new()
+	side_column.add_child(modes)
+	care_button = _button(modes, Texto.texto("caregiver"), _show_lab.bind(false))
+	lab_button = _button(modes, Texto.texto("laboratory"), _show_lab.bind(true))
+	for button in [care_button, lab_button]:
+		button.toggle_mode = true
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	care_button.button_pressed = true
 	var scroll := ScrollContainer.new()
+	caregiver_scroll = scroll
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	sidebar.add_child(scroll)
+	side_column.add_child(scroll)
+	lab_scroll = ScrollContainer.new()
+	lab_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	lab_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side_column.add_child(lab_scroll)
+	lab = Laboratory.new()
+	lab_scroll.add_child(lab)
+	lab.intervention.connect(func(): _world_dirty = true)
+	lab_scroll.hide()
 	var inspector := VBoxContainer.new()
 	inspector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	inspector.add_theme_constant_override("separation", 5)
@@ -119,6 +194,8 @@ func _build_ui() -> void:
 	pet_name.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	identity = _label(inspector, "", 13, Color("acbfad"))
 	identity.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	mode_note = _label(inspector, "", 12, Color("d4d6ab"))
+	mode_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_separator(inspector)
 	energy_text = _label(inspector, Texto.texto("energy"), 15)
 	energy_bar = ProgressBar.new()
@@ -126,6 +203,7 @@ func _build_ui() -> void:
 	energy_bar.show_percentage = false
 	inspector.add_child(energy_bar)
 	age_text = _label(inspector, "", 14, Color("acbfad"))
+	_button(inspector, Texto.texto("chat_open"), func(): chat_dialog.popup_centered())
 	_separator(inspector)
 	_label(inspector, Texto.texto("current_action"), 12, Color("bccc98"))
 	action_text = _label(inspector, Texto.acao("rest"), 20)
@@ -149,8 +227,6 @@ func _build_ui() -> void:
 	filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	inspector.add_child(filler)
 	_separator(inspector)
-	var note := _label(inspector, Texto.texto("survival_note"), 12, Color("a8baa6"))
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var bottom := _panel(ui, Vector4(20, -190, -SIDEBAR - 36, -20), Vector4(0, 1, 1, 1))
 	var bottom_col := VBoxContainer.new()
 	bottom.add_child(bottom_col)
@@ -186,20 +262,21 @@ func _build_new_dialog() -> void:
 	new_dialog.title = Texto.texto("dialog_title")
 	new_dialog.ok_button_text = Texto.texto("create_garden")
 	new_dialog.cancel_button_text = Texto.texto("keep_exploring")
-	new_dialog.min_size = Vector2i(540, 430)
+	new_dialog.min_size = Vector2i(580, 600)
 	new_dialog.theme = ui.theme
 	new_dialog.dialog_hide_on_ok = false
 	ui.add_child(new_dialog)
-	var column := VBoxContainer.new()
-	new_dialog.add_child(column)
+	var column := _window_column(new_dialog)
 	_label(column, Texto.texto("begin_name"), 24)
-	var intro := _label(column, Texto.texto("dialog_intro"), 14, Color("b7c7b1"))
-	intro.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_wrapped(column, Texto.texto("dialog_intro"))
 	world_input = _field(column, Texto.texto("garden_name"), Texto.texto("world_default"), 48)
 	pet_input = _field(column, Texto.texto("pet_name"), Texto.texto("pet_default"), 32)
 	seed_input = _field(column, Texto.texto("seed_caption"), Texto.texto("seed_default"), 10)
-	dialog_error = _label(column, Texto.texto("pet_rules"), 12, Color("d4d6ab"))
-	dialog_error.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_label(column, Texto.texto("initial_population"), 13)
+	new_population = _population_field(column)
+	new_population.value = initial_population
+	dialog_error = _wrapped(column, Texto.texto("pet_rules"))
+	dialog_error.add_theme_color_override("font_color", Color("d4d6ab"))
 	new_dialog.confirmed.connect(_confirm_new_world)
 	new_dialog.canceled.connect(func(): paused = dialog_was_paused)
 
@@ -219,12 +296,19 @@ func _confirm_new_world() -> void:
 		return
 	new_dialog.hide()
 	dialog_error.text = Texto.texto("pet_rules")
+	initial_population = int(new_population.value)
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
 	if new_dialog.visible:
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
+		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+			command_target = get_global_mouse_position().clamp(Vector2.ZERO, world.size)
+			view.command_target = command_target
+			_world_dirty = true
+			_notify(Texto.texto("target_set"))
+			return
 		if event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			var before := get_global_mouse_position()
 			var factor := 1.12 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.12
@@ -240,7 +324,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible:
+	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -262,7 +346,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible:
+	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible:
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -300,8 +384,10 @@ func _apply_tool(pos: Vector2) -> void:
 				selected_id = id
 			_notify(Texto.texto("creature_placed" if id >= 0 else "creature_blocked"))
 	_refresh()
+	_world_dirty = true
 
 func _refresh() -> void:
+	mode_note.text = Texto.texto("protection_active" if protected_mode else "protection_off")
 	title.text = Texto.texto("title", [Texto.nome_mundo(world_name)])
 	stats.text = Texto.texto("stats", [world.seed, world.tick,
 		Engine.get_frames_per_second(), world.creatures.size() + world.foods.size() + world.obstacles.size(), world.creatures.size(), world.foods.size()])
@@ -340,6 +426,8 @@ func _set_tool(value: String) -> void:
 
 func _set_speed(value: float) -> void:
 	speed = value
+	if settings_speed != null:
+		settings_speed.select([1.0, 2.0, 5.0].find(value))
 	for key in speed_buttons:
 		speed_buttons[key].button_pressed = is_equal_approx(key, value)
 
@@ -373,12 +461,18 @@ func _over_world(pos: Vector2) -> bool:
 	var size := get_viewport_rect().size
 	return pos.x < size.x - SIDEBAR - 36 and pos.y > 150 and pos.y < size.y - 200
 
-func _save() -> void:
-	var result := store.save_world(world, "world", {"name": world_name})
-	_notify(Texto.mensagem(result.message), 8)
+func _save(slot: String = "world") -> void:
+	var result := store.save_world(world, slot, {"name": world_name})
+	if slot == "autosave":
+		if result.ok:
+			autosave_tick = world.tick
+			_world_dirty = false
+		_notify(Texto.texto("autosave_ok") if result.ok else Texto.texto("autosave_failed", [Texto.mensagem(result.message)]), 8)
+	else:
+		_notify(Texto.mensagem(result.message), 8)
 
-func _load() -> void:
-	var result := store.load_world("world")
+func _load(slot: String = "world") -> void:
+	var result := store.load_world(slot)
 	if result.ok:
 		world = result.world
 		var name_value = result.metadata.get("name", Texto.texto("world_restored"))
@@ -386,11 +480,227 @@ func _load() -> void:
 		selected_id = world.pet_id
 		paused = true
 		accumulator = 0
+		_reset_session()
 		view.set_world(world)
 		_set_tool("select")
 		_fit_world()
 		_refresh()
 	_notify(Texto.mensagem(result.message), 10)
+
+func _reset_session() -> void:
+	comandos = ComandosAPI.new()
+	# Quando o simulador fornecer o adaptador integrado, usa a mesma instância.
+	for property in world.get_property_list():
+		if property.name == "comandos" and world.get("comandos") != null:
+			comandos = world.get("comandos")
+	command_target = world.creatures[world.pet_id].pos if world.creatures.has(world.pet_id) else world.size * 0.5
+	# O alvo de seguir restaurado deve sobreviver ao primeiro quadro da UI.
+	if comandos.has_method("to_dict"):
+		var state: Dictionary = comandos.to_dict(world)
+		var order: Dictionary = state.get("order", {})
+		if order.get("target") is Array and order.target.size() == 2:
+			command_target = Vector2(float(order.target[0]), float(order.target[1]))
+	view.command_target = command_target
+	autosave_elapsed = 0
+	autosave_tick = world.tick
+	_world_dirty = false
+	lab.reset()
+	lab.observe(world, selected_id, true)
+	last_response.clear()
+	chat_response.text = Texto.texto("chat_empty")
+	chat_evidence.text = Texto.texto("evidence_none")
+	chat_receipt.text = ""
+	chat_input.text = ""
+
+func _can_step() -> bool:
+	if protected_mode and world.creatures.has(world.pet_id):
+		var pet = world.creatures[world.pet_id]
+		if pet.energy <= pet.max_energy * 0.15 or pet.age + 1 >= world.max_age:
+			paused = true
+			accumulator = 0
+			_notify(Texto.texto("protection_paused"), 12)
+			return false
+	return true
+
+func _autosave(delta: float) -> void:
+	if not autosave_enabled or _capture_mode:
+		return
+	autosave_elapsed += delta
+	if autosave_elapsed >= 60:
+		autosave_elapsed = 0
+		if world.tick != autosave_tick or _world_dirty:
+			_save("autosave")
+
+func _show_lab(enabled: bool) -> void:
+	caregiver_scroll.visible = not enabled
+	lab_scroll.visible = enabled
+	lab_button.button_pressed = enabled
+	care_button.button_pressed = not enabled
+	if world != null:
+		lab.observe(world, selected_id, true)
+
+func _build_chat() -> void:
+	chat_dialog = _window("chat_title", Vector2i(820, 600))
+	var column := _window_column(chat_dialog)
+	_wrapped(column, Texto.texto("chat_intro"))
+	chat_input = _field(column, Texto.texto("chat_examples"), "", 180)
+	chat_input.placeholder_text = Texto.texto("chat_placeholder")
+	chat_input.text_submitted.connect(func(_text): _send_chat())
+	_button(column, Texto.texto("chat_send"), _send_chat)
+	_wrapped(column, Texto.texto("chat_target"))
+	chat_response = _wrapped(column, Texto.texto("chat_empty"))
+	chat_receipt = _wrapped(column, "")
+	chat_receipt.add_theme_color_override("font_color", Color("dbe8a5"))
+	_separator(column)
+	_label(column, Texto.texto("evidence_title"), 13, Color("bccc98"))
+	chat_evidence = _wrapped(column, Texto.texto("evidence_none"))
+
+func _send_chat() -> void:
+	var intent := DialogoAPI.interpretar(chat_input.text)
+	var pet = world.creatures.get(world.pet_id)
+	last_response = DialogoAPI.responder(intent, pet, world)
+	chat_response.text = str(last_response.texto)
+	var receipt := comandos.aplicar(intent, world, command_target)
+	_world_dirty = _world_dirty or (receipt.aceito and intent.intent != "perguntar_estado")
+	chat_receipt.text = str(receipt.texto)
+	if receipt.aceito and intent.intent == "proteger":
+		protected_mode = true
+		chat_receipt.text = Texto.texto("protection_active")
+		_sync_settings()
+	elif receipt.aceito and not receipt.aplicado:
+		var integrated := false
+		for property in world.get_property_list():
+			if property.name == "comandos":
+				integrated = true
+		if not integrated:
+			chat_receipt.text += " " + Texto.texto("chat_pending")
+	var rows: Array[String] = []
+	if not last_response.evidencias.is_empty():
+		rows.append(Texto.texto("evidence_snapshot", [world.tick, world.pet_id]))
+	for evidence in last_response.evidencias:
+		var field: String = str(evidence.get("campo", "events"))
+		var value = evidence.get("valor")
+		var shown := ""
+		match field:
+			"last_action": shown = Texto.acao(str(value))
+			"last_reason": shown = Texto.razao(str(value))
+			"events": shown = Texto.evento(value) if value is Dictionary else Texto.texto("lab_none")
+			"foods": shown = str(value)
+			_: shown = Texto.numero(float(value), 3) if value is float else str(value)
+		rows.append(Texto.texto("evidence_value", [Texto.texto("evidence_" + field), shown]))
+	chat_evidence.text = Texto.texto("evidence_none") if rows.is_empty() else "\n".join(rows)
+	lab.observe(world, selected_id, true)
+
+func _build_settings() -> void:
+	settings_dialog = _window("settings_title", Vector2i(620, 600))
+	settings_dialog.ok_button_text = Texto.texto("apply")
+	var column := _window_column(settings_dialog)
+	_label(column, Texto.texto("settings_speed"), 14)
+	settings_speed = OptionButton.new()
+	for multiplier in [1, 2, 5]:
+		settings_speed.add_item(Texto.texto("speed", [multiplier]))
+	column.add_child(settings_speed)
+	_label(column, Texto.texto("initial_population"), 14)
+	population_input = _population_field(column)
+	protection_input = CheckButton.new()
+	protection_input.text = Texto.texto("protected_mode")
+	column.add_child(protection_input)
+	_wrapped(column, Texto.texto("protected_info"))
+	var warning := _wrapped(column, Texto.texto("survival_warning"))
+	warning.add_theme_color_override("font_color", Color("f0c19a"))
+	autosave_input = CheckButton.new()
+	autosave_input.text = Texto.texto("autosave")
+	column.add_child(autosave_input)
+	_wrapped(column, Texto.texto("autosave_info"))
+	_button(column, Texto.texto("autosave_load"), func():
+		settings_dialog.hide()
+		_load("autosave"))
+	settings_dialog.confirmed.connect(_apply_settings)
+	_sync_settings()
+
+func _open_settings() -> void:
+	_sync_settings()
+	settings_dialog.popup_centered()
+
+func _sync_settings() -> void:
+	if settings_speed == null:
+		return
+	settings_speed.select([1.0, 2.0, 5.0].find(speed))
+	population_input.value = initial_population
+	protection_input.button_pressed = protected_mode
+	autosave_input.button_pressed = autosave_enabled
+
+func _apply_settings() -> void:
+	_set_speed([1.0, 2.0, 5.0][settings_speed.selected])
+	initial_population = int(population_input.value)
+	new_population.value = initial_population
+	protected_mode = protection_input.button_pressed
+	autosave_enabled = autosave_input.button_pressed
+	var config := ConfigFile.new()
+	config.set_value("ui", "initial_population", initial_population)
+	config.set_value("ui", "protected_mode", protected_mode)
+	config.set_value("ui", "autosave_enabled", autosave_enabled)
+	config.set_value("ui", "speed", speed)
+	_notify(Texto.texto("settings_saved" if config.save(settings_path) == OK else "settings_failed"))
+	_refresh()
+
+func _read_settings() -> void:
+	var config := ConfigFile.new()
+	if config.load(settings_path) != OK:
+		return
+	var population = config.get_value("ui", "initial_population", 16)
+	if population is int or population is float:
+		initial_population = clampi(int(population), 1, 100)
+	protected_mode = config.get_value("ui", "protected_mode", true) == true
+	autosave_enabled = config.get_value("ui", "autosave_enabled", true) == true
+	var saved_speed = config.get_value("ui", "speed", 1.0)
+	if saved_speed in [1.0, 2.0, 5.0]:
+		speed = float(saved_speed)
+
+func _build_help() -> void:
+	help_dialog = _window("help_title", Vector2i(650, 570))
+	_wrapped(_window_column(help_dialog), Texto.texto("help_body"))
+
+func _population_field(parent: Node) -> SpinBox:
+	var field := SpinBox.new()
+	field.min_value = 1
+	field.max_value = 100
+	field.step = 1
+	parent.add_child(field)
+	var menu := field.get_line_edit().get_menu()
+	_localize_edit_menu(menu)
+	menu.about_to_popup.connect(_localize_edit_menu.bind(menu))
+	return field
+
+func _window(code: String, dimensions: Vector2i) -> AcceptDialog:
+	var dialog := AcceptDialog.new()
+	dialog.title = Texto.texto(code)
+	dialog.ok_button_text = Texto.texto("close")
+	dialog.min_size = dimensions
+	dialog.theme = ui.theme
+	dialog.exclusive = false
+	ui.add_child(dialog)
+	return dialog
+
+func _window_column(dialog: AcceptDialog) -> VBoxContainer:
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	dialog.add_child(scroll)
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(column)
+	return column
+
+func _wrapped(parent: Node, value: String) -> Label:
+	# A quebra deve existir antes de anexar: Window preserva o tamanho que
+	# assumiu quando um Label temporariamente sem quebra pediu toda a linha.
+	var label := Label.new()
+	label.text = value
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", 13)
+	label.add_theme_color_override("font_color", Color("c8d6c0"))
+	parent.add_child(label)
+	return label
 
 func _notify(message: String, seconds: float = 5.0) -> void:
 	status.text = message
@@ -448,6 +758,38 @@ func _capture_demo(path: String) -> void:
 			if creature.id != world.pet_id:
 				selected_id = creature.id
 				break
+	if state in ["laboratory", "lineage", "signals"]:
+		for i in range(1080):
+			world.step()
+			if world.tick % 50 == 0:
+				lab.observe(world, selected_id)
+		var generation := -1
+		for creature in world.creatures.values():
+			if creature.genome.generation > generation:
+				selected_id = creature.id
+				generation = creature.genome.generation
+		_show_lab(true)
+		_refresh()
+		await get_tree().process_frame
+		if state == "lineage":
+			lab_scroll.scroll_vertical = int(lab.mutations.position.y) - 35
+		if state == "signals":
+			if world.has_method("emitir_sinal"):
+				lab.signal_switch.button_pressed = true
+				lab.emit_button.pressed.emit()
+				world.step()
+				lab.observe(world, selected_id, true)
+				_refresh()
+				await get_tree().process_frame
+			lab_scroll.scroll_vertical = int(lab.signals.position.y) - 45
+	if state == "dialogue":
+		chat_input.text = Texto.texto("chat_placeholder")
+		_send_chat()
+		chat_dialog.popup_centered()
+	if state == "settings":
+		_open_settings()
+	if state == "help":
+		help_dialog.popup_centered()
 	if "--show-new-world" in arguments:
 		_open_new_world()
 		if state == "menu":
@@ -502,7 +844,7 @@ func _separator(parent: Node) -> void:
 	parent.add_child(separator)
 
 func _field(parent: Node, caption: String, value: String, limit: int) -> LineEdit:
-	_label(parent, caption, 13, Color("b7c7b1"))
+	_wrapped(parent, caption)
 	var input := LineEdit.new()
 	input.text = value
 	input.max_length = limit

@@ -3,6 +3,118 @@ extends RefCounted
 ## Catálogo da apresentação. Identificadores e dados salvos continuam intactos.
 
 const CATALOGO := {
+	"caregiver": "Cuidador",
+	"laboratory": "Laboratório",
+	"chat_open": "Conversar com o companheiro",
+	"chat_title": "Conversa com o companheiro",
+	"chat_intro": "Respostas descrevem dados observados, sem atribuir consciência. Pedidos só têm efeito quando confirmados pelo recibo.",
+	"chat_placeholder": "Como você está?",
+	"chat_examples": "Experimente: como você está? · oferecer comida · chamar · seguir · parar · brincar · proteger",
+	"chat_send": "Enviar",
+	"chat_target": "Alvo dos pedidos: marcador no jardim. Clique com o botão direito para escolher; seguir usa esse marcador.",
+	"target_set": "Alvo do diálogo marcado no jardim.",
+	"chat_empty": "Digite uma pergunta ou um pedido acima.",
+	"chat_pending": "Pedido registrado; execução de movimento depende da integração com o simulador.",
+	"evidence_title": "EVIDÊNCIAS DA RESPOSTA",
+	"evidence_snapshot": "Consulta no passo %d · companheiro ID %d",
+	"evidence_value": "%s: %s",
+	"evidence_energy": "Energia observada",
+	"evidence_hunger": "Fome (fração de 0 a 1)",
+	"evidence_age": "Idade em passos",
+	"evidence_last_action": "Ação registrada",
+	"evidence_last_reason": "Razão registrada",
+	"evidence_foods": "Alimentos percebidos (IDs)",
+	"evidence_events": "Evento próprio registrado",
+	"evidence_none": "Nenhuma evidência de estado foi produzida para esta entrada.",
+	"close": "Fechar",
+	"apply": "Aplicar",
+	"settings": "Ajustes",
+	"help": "Ajuda",
+	"settings_title": "Configurações do jardim",
+	"settings_speed": "Velocidade da simulação",
+	"initial_population": "População inicial (vale para o próximo jardim)",
+	"protected_mode": "Modo protegido: pausa preventiva",
+	"protected_info": "No modo protegido, o jardim pausa antes de avançar com energia do companheiro abaixo de 15% ou perto do limite de idade. A pausa não repõe energia nem rejuvenesce: ofereça comida ou mantenha o jardim pausado.",
+	"survival_warning": "SOBREVIVÊNCIA: com a proteção desligada, o companheiro pode morrer de fome ou idade. A morte é permanente neste mundo; só um ponto salvo anterior permite voltar.",
+	"protection_paused": "Proteção: pausa preventiva por energia baixa ou idade limite. Ofereça alimento; para continuar assumindo o risco, desligue a proteção nos Ajustes.",
+	"protection_active": "PROTEGIDO · pausa preventiva por energia/idade. Esta intervenção interrompe a seleção natural enquanto o jardim fica pausado.",
+	"protection_off": "SOBREVIVÊNCIA · proteção desligada. O companheiro pode morrer de fome ou idade.",
+	"autosave": "Salvamento automático a cada 60 segundos",
+	"autosave_info": "O automático usa um ponto separado, validado com soma de verificação e cópia de segurança. Só grava após mudanças no mundo e preserva o ponto manual.",
+	"autosave_load": "Recuperar automático",
+	"autosave_ok": "Salvamento automático concluído.",
+	"autosave_failed": "Falha no salvamento automático: %s",
+	"settings_saved": "Configurações aplicadas.",
+	"settings_failed": "Não foi possível gravar as configurações; os ajustes continuam ativos nesta sessão.",
+	"help_title": "Seu primeiro jardim",
+	"help_body": "1. Crie um jardim com nomes, semente e população inicial. Ele começa pausado.\n\n2. Use Iniciar, selecione uma criatura ou encontre seu companheiro pelo Cuidador.\n\n3. Escolha + Alimento e clique no terreno livre. A criatura precisa percebê-lo e alcançá-lo para comer.\n\n4. Converse pelo Cuidador. Para chamar/seguir, marque um alvo com o botão direito no jardim. Confira o recibo e as evidências.\n\n5. Laboratório mostra genes, famílias, curvas e eventos. O canal de sinais permite uma emissão manual com custo de energia, sem significado presumido.\n\n6. Ctrl+S salva; Ctrl+L carrega e pausa. Ajustes permite recuperar o automático e escolher velocidade/proteção.\n\nRoda: ampliar · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: capturar.\n\nAtenção: sobrevivência permite morte permanente. A proteção pausa por energia baixa ou idade limite; não repõe energia nem rejuvenesce.",
+	"lab_intro": "Observações do mundo real. Variação genética e nascimentos não demonstram adaptação ou linguagem por si só.",
+	"lab_summary": "%d organismos vivos · geração máxima %d\n%d nascimentos · %d mortes no registro permanente",
+	"lab_chart": "POPULAÇÃO E DIVERSIDADE NO TEMPO",
+	"lab_history": "Últimas %d amostras desta sessão · passo %d a %d. Cada curva tem sua própria escala.",
+	"chart_population": "População · máximo %d",
+	"chart_diversity": "Diversidade normalizada · máximo %s",
+	"lab_genome": "Genoma ID %d · criatura ID %d\nGeração %d · nascimento no passo %d",
+	"lab_no_record": "Selecione uma criatura com registro de nascimento.",
+	"lab_ancestors": "ANCESTRAIS (mais próximos primeiro)",
+	"lab_descendants": "DESCENDENTES",
+	"lab_mutations": "MUTAÇÕES DE NASCIMENTO",
+	"lab_none": "Nenhum registro.",
+	"lab_founder": "Fundador: sem genitores registrados.",
+	"lab_legacy": "Origem migrada: parentesco anterior não verificado.",
+	"lab_record": "#%d · %s · geração %d · %s",
+	"lab_alive": "viva",
+	"lab_dead": "morte no passo %d",
+	"lab_more": "… mais %d registros (lista resumida)",
+	"lab_mutation": "%s: variação %s",
+	"lab_diversity": "DIVERSIDADE · VARIÂNCIA POR GENE",
+	"lab_diversity_note": "A curva usa a média das variâncias divididas pelo intervalo de cada gene ao quadrado. População vazia ou única tem variância zero.",
+	"gene_size": "Tamanho",
+	"gene_speed": "Velocidade",
+	"gene_vision_range": "Alcance de visão",
+	"gene_vision_fov": "Campo de visão (radianos)",
+	"gene_metabolism": "Metabolismo",
+	"gene_hue": "Matiz",
+	"events_title": "NASCIMENTOS, MORTES E ALIMENTAÇÃO",
+	"signals_title": "SINAIS E REAÇÕES OBSERVADAS",
+	"signals_log": "LOG DE EMISSÕES E DECISÕES",
+	"signals_enabled": "Canal de sinais ligado",
+	"signals_emit": "Emitir pela seleção",
+	"signals_symbol": "Símbolo %d",
+	"signals_manual": "Intervenção de laboratório: emitir cobra energia do organismo selecionado. A heurística padrão não emite sozinha. Uma ação após a recepção não comprova que o sinal a causou.",
+	"signals_disabled": "Canal desligado. Ative-o para emitir símbolos; nenhum significado é associado a eles.",
+	"signals_empty": "Ainda não há emissões registradas neste mundo.",
+	"signals_emission_ok": "Emissão registrada. Avance a simulação para observar as decisões dos receptores.",
+	"signals_emission_failed": "Emissão recusada: confira canal, seleção viva e energia disponível.",
+	"signals_row": "Passo %d · símbolo %d · emissor #%d\nContexto: alimento visível %s; energia baixa %s.\nReceptores (IDs): %s",
+	"signals_change": "#%d · passo %d · %s → %s",
+	"yes": "sim",
+	"no": "não",
+	"signals_hook": "Sem eventos de sinais nesta versão/sessão. Este painel lê os eventos do simulador quando o canal estiver disponível; símbolos não recebem significado presumido.",
+	"event_spawn": "Passo %d · introdução de %s (#%d)",
+	"event_birth": "Passo %d · nascimento #%d, genitor #%d, geração %d",
+	"event_death": "Passo %d · morte #%d: %s",
+	"event_eat": "Passo %d · #%d comeu alimento #%d, energia +%s",
+	"event_mutation": "Passo %d · #%d: mutação em %s (%s)",
+	"event_unknown": "Passo %d · evento registrado",
+	"event_signal": "Passo %d · sinal %s · emissor #%d · receptor #%d · reação %s",
+	"death_starvation": "falta de energia",
+	"death_age": "limite de idade",
+	"death_external": "intervenção externa",
+	"death_unknown": "causa não informada",
+	"reason_command_stop": "Pedido do jogador: permanecer parado.",
+	"reason_command_arrived": "Chegou ao alvo pedido pelo jogador.",
+	"reason_command_move": "Movimento solicitado pelo jogador.",
+	"reason_signal_emitted": "Emitiu um símbolo pelo canal de sinais; seu significado não é presumido.",
+	"reason_signal_rejected": "A emissão de sinal foi recusada pelas regras do canal.",
+	"action_emit_signal_0": "Emitir sinal 0",
+	"action_emit_signal_1": "Emitir sinal 1",
+	"action_emit_signal_2": "Emitir sinal 2",
+	"action_emit_signal_3": "Emitir sinal 3",
+	"action_emit_signal_4": "Emitir sinal 4",
+	"action_emit_signal_5": "Emitir sinal 5",
+	"action_emit_signal_6": "Emitir sinal 6",
+	"action_emit_signal_7": "Emitir sinal 7",
 	"reason_age": "Morte por idade: chegou ao limite de vida deste mundo.",
 	"reason_external": "A criatura foi marcada como sem vida por uma intervenção externa.",
 	"evolution_generations": "Gerações alcançadas",
@@ -50,12 +162,12 @@ const CATALOGO := {
 	"create_garden": "Criar jardim",
 	"keep_exploring": "Continuar explorando",
 	"begin_name": "Tudo começa com um nome.",
-	"dialog_intro": "Um ecossistema com semente e 16 criaturas autônomas.\nCriar um jardim substitui o mundo atual não salvo.",
+	"dialog_intro": "Um ecossistema com semente e população configurável.\nCriar um jardim substitui o mundo atual não salvo.",
 	"garden_name": "Nome do jardim",
 	"pet_name": "Nome do seu companheiro",
 	"seed_caption": "Semente do mundo: repita-a para recriar o estado inicial",
 	"seed_default": "7421",
-	"pet_rules": "Seu companheiro segue as mesmas regras de sobrevivência das outras criaturas.",
+	"pet_rules": "Ajustes permite escolher proteção por pausa preventiva ou sobrevivência, com risco de morte permanente. Confira o modo no Cuidador.",
 	"names_required": "Dê um nome ao jardim e ao seu companheiro.",
 	"seed_invalid": "Use uma semente inteira entre 0 e 2147483647.",
 	"inside_boundary": "Escolha um ponto dentro dos limites do jardim.",
@@ -85,7 +197,7 @@ const CATALOGO := {
 	"screenshot_graphics": "A captura de tela requer uma janela gráfica.",
 	"screenshot_saved": "Captura de tela salva: %s",
 	"screenshot_failed": "Não foi possível salvar a captura de tela (código %d).",
-	"action_forward": "Avan?ar",
+	"action_forward": "Avançar",
 	"action_turn_left": "Virar à esquerda",
 	"action_turn_right": "Virar à direita",
 	"reason_q_explore": "Experimentando uma ação para aprender com seu resultado.",
@@ -181,6 +293,13 @@ const MENUS := {
 }
 
 const RAZOES := {
+	"signal.emitted": "reason_signal_emitted",
+	"signal.rejected": "reason_signal_rejected",
+	"dialogo.stop": "reason_command_stop",
+	"dialogo.arrived": "reason_command_arrived",
+	"dialogo.chamar": "reason_command_move",
+	"dialogo.seguir": "reason_command_move",
+	"dialogo.brincar": "reason_command_move",
 	"evolution.age": "reason_age",
 	"evolution.external": "reason_external",
 	"brain.q_explore": "reason_q_explore",
@@ -229,6 +348,46 @@ static func texto(codigo: String, valores: Array = []) -> String:
 
 static func numero(valor: float, casas: int = 1) -> String:
 	return ("%.*f" % [casas, valor]).replace(".", ",")
+
+static func gene(codigo: String) -> String:
+	return texto("gene_" + codigo)
+
+static func sinal(row: Dictionary) -> String:
+	var context: Dictionary = row.get("context", {})
+	var receivers: Array = row.get("receivers", [])
+	var ids := str(receivers.slice(0, 12))
+	if receivers.size() > 12:
+		ids += " " + texto("lab_more", [receivers.size() - 12])
+	var result := texto("signals_row", [int(row.get("tick", 0)), int(row.get("symbol", 0)), int(row.get("emitter", -1)),
+		texto("yes" if context.get("saw_food", false) else "no"), texto("yes" if context.get("low_energy", false) else "no"), ids])
+	var changes: Array = row.get("action_changes", [])
+	for change in changes.slice(0, 12):
+		result += "\n" + texto("signals_change", [int(change.get("receiver", -1)), int(change.get("tick", 0)), acao(str(change.get("before", ""))), acao(str(change.get("after", "")))])
+	if changes.size() > 12:
+		result += "\n" + texto("lab_more", [changes.size() - 12])
+	return result
+
+static func evento(event: Dictionary) -> String:
+	var tick := int(event.get("tick", 0))
+	var id := int(event.get("creature_id", -1))
+	match str(event.get("type", "")):
+		"spawn":
+			return texto("event_spawn", [tick, nome_criatura(str(event.get("name", ""))), id])
+		"birth":
+			return texto("event_birth", [tick, id, int(event.get("parent_id", -1)), int(event.get("generation", 0))])
+		"death":
+			var cause := "death_" + str(event.get("reason", "unknown"))
+			return texto("event_death", [tick, id, texto(cause if CATALOGO.has(cause) else "death_unknown")])
+		"eat":
+			return texto("event_eat", [tick, id, int(event.get("food_id", -1)), numero(float(event.get("energy", 0)))])
+		"mutation":
+			return texto("event_mutation", [tick, id, gene(str(event.get("gene", ""))), numero(float(event.get("delta", 0)), 4)])
+	# Gancho de apresentação para eventos de comunicação; nunca mostra códigos
+	# internos como português nem atribui significado humano aos símbolos.
+	if str(event.get("type", "")).begins_with("signal"):
+		return texto("event_signal", [tick, str(event.get("symbol", event.get("token", "—"))),
+			int(event.get("sender_id", event.get("emitter_id", id))), int(event.get("receiver_id", -1)), acao(str(event.get("action", "")))])
+	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
 	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) else texto("action_unknown")

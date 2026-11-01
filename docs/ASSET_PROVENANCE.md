@@ -76,3 +76,17 @@ Registro auditado de proveniência de todas as dependências, ferramentas e paco
 | `white01.png` | 68 | `260865134B6E69CA7BAFA9E8DDCD59FB6FFBF727F50A3D2DD186DE4BC8213697` | Pixel 1x1 branco para modulação de cor procedural |
 | `white10.png` | 68 | `260865134B6E69CA7BAFA9E8DDCD59FB6FFBF727F50A3D2DD186DE4BC8213697` | Pixel 1x1 opacidade/tom |
 | `white20.png` | 68 | `260865134B6E69CA7BAFA9E8DDCD59FB6FFBF727F50A3D2DD186DE4BC8213697` | Pixel 1x1 opacidade/tom |
+
+## Uso visual verificado — UI2 (01/11/2026)
+
+O render atual usa o atlas original CC0 sem modificar o arquivo ou a licença. As coordenadas abaixo são índices de coluna/linha começando em zero; cada célula tem 16×16 pixels e passo de 17 pixels (incluindo espaçamento). Os recortes foram ampliados e inspecionados visualmente antes do uso.
+
+| Recurso exibido | Origem utilizada pelo render | Aplicação |
+|---|---|---|
+| Textura discreta de terreno | `tiles/terrain/grass.png`, origem (5, 1) | Fundo com opacidade baixa, sem criar biomas com regras inexistentes |
+| Vegetal comestível | Atlas original, célula (28, 10), região (476, 170, 16, 16) | Ícone de vegetação com halo claro para distinguir alimento do terreno |
+| Rocha | Atlas original, célula (54, 21), região (918, 357, 16, 16) | Sprite de pedra com sombra; a colisão continua circular e vem do simulador |
+
+Correção de uso: os nomes históricos `tiles/food/apple.png` e `tiles/obstacles/rock.png` não correspondem visualmente a uma maçã e uma rocha no atlas incorporado. Eles permanecem preservados, mas não são usados pela UI2. O render usa as regiões auditadas acima; não houve alteração nos hashes dos arquivos de terceiros.
+
+As criaturas continuam procedurais, pois precisam refletir tamanho, matiz e velocidade herdáveis. A decoração usa RNG visual independente, não consome a sequência da simulação e não altera os dados salvos.
