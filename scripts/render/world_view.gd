@@ -161,6 +161,13 @@ func _tile(atlas: Texture2D, cell: Vector2i) -> AtlasTexture:
 func _creature(creature) -> void:
 	var radius: float = creature.genome.size
 	var pos: Vector2 = creature.pos
+	var state: Dictionary = creature.expression_state()
+	var valence := float(state.valence)
+	var arousal := float(state.arousal)
+	var enabled: bool = creature.personality != null
+	# Tick time freezes the sway when paused; no random or cosmetic emotion state.
+	var sway := sin(float(world.tick) * (0.18 + arousal * 0.4) + creature.id) * arousal * 0.12 if enabled else 0.0
+	var posture := Vector2(1.15 + valence * 0.12, 0.88 - valence * 0.08)
 	var selected: bool = creature.id == selected_id
 	if selected:
 		draw_arc(pos, radius + 6, 0, TAU, 48, Color("f3e2aa"), 2, true)
@@ -168,8 +175,8 @@ func _creature(creature) -> void:
 		draw_circle(pos + Vector2(0, -radius - 12), 2.4, Color("f3e2aa"))
 	draw_set_transform(pos + Vector2(1.5, 3), creature.heading, Vector2(1.15, 0.88))
 	draw_circle(Vector2.ZERO, radius + 1, Color(0.12, 0.22, 0.18, 0.4))
-	draw_set_transform(pos, creature.heading, Vector2(1.15, 0.88))
-	var color := Color.from_hsv(creature.genome.hue, 0.44, 0.88)
+	draw_set_transform(pos, creature.heading + sway, posture)
+	var color := Color.from_hsv(creature.genome.hue, 0.44, clampf(0.88 + valence * 0.16, 0.65, 1.0))
 	# A faster genome has a longer visible tail; body radius is the size gene.
 	var tail: float = 4.0 + creature.genome.speed * 0.11
 	draw_colored_polygon(PackedVector2Array([Vector2(-radius + 2, -radius * 0.45),
@@ -182,6 +189,16 @@ func _creature(creature) -> void:
 		draw_circle(eye, maxf(2.1, radius * 0.23), Color("f9f3db"))
 		draw_circle(eye + Vector2(0.8, 0), maxf(1.0, radius * 0.11), Color("263d35"))
 	draw_set_transform(Vector2.ZERO)
+	if enabled and (selected or _show_name(creature)):
+		var zoom := get_viewport().get_camera_2d().zoom.x
+		var center := pos + Vector2(0, -radius - 21 / zoom)
+		var tint := Color("f2d3a0") if valence < -0.25 else Color("c8e8cd")
+		draw_circle(center, 5.5 / zoom, Color("193329"))
+		var points := PackedVector2Array()
+		for index in range(9):
+			var x := float(index) / 8.0 * 2.0 - 1.0
+			points.append(center + Vector2(x * 3.5, valence * (1.0 - x * x) * 4.0) / zoom)
+		draw_polyline(points, tint, 1.4 / zoom, true)
 
 func _sensor(creature) -> void:
 	var points := PackedVector2Array([creature.pos])

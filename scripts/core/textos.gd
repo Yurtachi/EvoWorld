@@ -343,7 +343,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
-	var modelo: String = E1_UI.get(codigo, E1_CATALOGO.get(codigo, CATALOGO.get(codigo, CATALOGO.text_unknown)))
+	var modelo: String = E2_UI.get(codigo, E2_CATALOGO.get(codigo, E1_UI.get(codigo, E1_CATALOGO.get(codigo, CATALOGO.get(codigo, CATALOGO.text_unknown)))))
 	return modelo if valores.is_empty() else modelo % valores
 
 static func numero(valor: float, casas: int = 1) -> String:
@@ -392,9 +392,11 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
-	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) else texto("action_unknown")
+	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) or E2_CATALOGO.has("action_" + codigo) else texto("action_unknown")
 
 static func razao(original: String) -> String:
+	if E2_RAZOES.has(original):
+		return texto(E2_RAZOES[original])
 	if E1_RAZOES.has(original):
 		return texto(E1_RAZOES[original])
 	if RAZOES.has(original):
@@ -504,3 +506,46 @@ const E2_RAZOES := {
 	"personality.fatigue": "reason_fatigue", "personality.curiosity": "reason_curiosity",
 	"personality.contact": "reason_contact", "personality.survival": "reason_survival"
 }
+
+
+# Apresentação E2: chaves persistidas permanecem estáveis.
+const NOMES_INICIAIS := ["Mel", "Bento", "Tica", "Juca", "Lola", "Zeca", "Nina", "Dora", "Caju", "Bia", "Chico", "Lia"]
+const E2_UI := {
+	"pet_default": "Mel",
+	"tab_needs": "Corpo", "tab_traits": "Traços", "tab_memory": "Memória", "tab_preferences": "Comida", "tab_bonds": "Vínculos",
+	"needs_note": "Estado atual · barras maiores indicam maior necessidade.",
+	"need_hunger": "Fome", "need_thirst": "Sede", "need_fatigue": "Fadiga", "need_boredom": "Estímulo", "need_loneliness": "Contato",
+	"need_value": "%s · %s%%", "need_disabled": "%s · desativada", "urgent": "%s %s%%", "urgent_none": "necessidades baixas",
+	"traits_note": "Traço herdado · tendências do genoma. Não é o estado atual; necessidades variam durante a vida.",
+	"trait_value": "%s · %s%%", "learned_note": "Aprendido · vem de experiências individuais. Preferências, episódios e familiaridade não são herdados.",
+	"legacy_personality": "Personalidade desativada neste mundo legado. Nenhum perfil foi criado ao carregar.",
+	"memory_note": "Últimos episódios registrados: ação e consequência medida. A memória é limitada e esquece com o tempo.",
+	"memory_empty": "Ainda não há episódios registrados.", "episode": "Passo %d · %s\n%s\nEnergia %s · água %s · fadiga %s",
+	"episode_metabolism": "Custo corporal medido.", "episode_food": "Ingeriu %s.", "episode_toxic_food": "Ingeriu %s com toxicidade.",
+	"episode_water": "Bebeu água ao alcance.", "episode_rest": "Descansou; fadiga medida.", "episode_exploration": "Explorou com deslocamento real.",
+	"episode_contact": "Encontrou outra criatura ao alcance.", "episode_collision": "Movimento bloqueado.", "episode_player_contact": "Contato com o cuidador registrado.",
+	"preferences_note": "Preferência aprendida por ingestão: −1 aversão, 0 neutra, +1 preferência. Oferecer ou ver não ensina a preferência.",
+	"preference_value": "%s · %s", "preference_unknown": "%s · sem experiência", "bonds_note": "Quem conhece · familiaridade cresce com encontros ao alcance e diminui com o tempo.",
+	"bonds_empty": "Nenhum vínculo registrado.", "bond_player": "Você (cuidador)", "bond_unknown": "Criatura #%d (fora do jardim)",
+	"bond_row": "%s\nFamiliaridade %s%% · encontros: %d\nÚltimo contato: passo %d", "no_selection_e2": "Selecione uma criatura para examinar.",
+	"expression_calm": "Aparenta baixa ativação", "expression_active": "Aparenta maior ativação", "expression_strained": "Aparenta tensão corporal",
+	"expression_scores": "%s\nValência %s · ativação %s%%", "expression_legend": "Expressão: brilho e postura = valência; balanço = ativação. Ícone: arco baixo, reto ou alto. Aparência derivada de necessidades e eventos; não indica consciência.",
+	"tool_attention": "Carinho", "place_attention": "contato no corpo da seleção", "attention_help": "Carinho/atenção: selecione uma criatura e clique sobre seu corpo. Exige alcance e intervalo de 30 passos (3 s de simulação).",
+	"attention_none": "Carinho recusado: selecione uma criatura viva.", "attention_legacy": "Carinho recusado: personalidade desativada neste mundo legado.",
+	"attention_far": "Carinho recusado: o clique precisa alcançar o corpo da seleção; nenhum contato foi registrado.",
+	"attention_wait": "Carinho recusado: aguarde %d passos de simulação para outro contato. Pausado, o intervalo não avança.",
+	"attention_blocked": "Carinho recusado pelo simulador: contato sem alcance ou obstruído; nenhum encontro foi registrado.",
+	"attention_ok": "Passo %d: contato com %s registrado. Familiaridade atualizada; energia, água e posição preservadas.",
+	"food_profile": "%s · palatabilidade %s\nNutrição %s · hidratação %s · toxicidade %s\nPreferências individuais na aba Comida.",
+	"receipt_empty": "Nenhuma intervenção nesta sessão. Oferecer não significa consumir.",
+	"help_body": "Crie um jardim, nomeie o companheiro e escolha a população (padrão: 12). Começa pausado.\n\nSelecione por clique, nome ou lista do Cuidador, que mostra a necessidade mais urgente. Corpo: estado atual. Traços: temperamento herdado. Memória, Comida e Vínculos: experiências individuais.\n\nPostura e brilho representam valência; balanço representa ativação. A criatura aparenta ativação ou tensão corporal. A expressão não indica consciência.\n\nCarinho: selecione e clique no corpo. Exige alcance e intervalo de 30 passos (3 segundos de simulação). Confira o recibo, inclusive nas recusas.\n\nFruta, Semente, Folha e Cogumelo são físicos; cogumelo tem toxicidade. + Água permite beber na margem. Oferecer coloca comida próxima; só ingerir ensina preferências.\n\nExpandir: direita/inferior, custo zero, limite 100.000 por eixo. Laboratório: genes, famílias e sinais.\n\nRoda: zoom · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: captura. Ctrl+S salva; Ctrl+L carrega.\n\nSaves antigos preservam nomes e população, com personalidade desativada. Proteção pausa por energia baixa/idade; não repõe reservas. Morte é permanente naquele mundo."
+}
+
+static func episodio(item: Dictionary) -> String:
+	var effect: Dictionary = item["consequence"]
+	var event: String = effect["event"]
+	var result := texto("episode_" + event, [texto("food_" + str(item["context"]["food_type"]))]) if event in ["food", "toxic_food"] else texto("episode_" + event)
+	return texto("episode", [int(item["tick"]), acao(str(item["action"])), result, numero(float(effect["energy"]), 2), numero(float(effect["hydration"]), 2), numero(float(effect["fatigue"]), 3)])
+
+static func expressao(state: Dictionary) -> String:
+	return texto("expression_strained" if float(state["valence"]) < -0.25 else ("expression_active" if float(state["arousal"]) >= 0.5 else "expression_calm"))
