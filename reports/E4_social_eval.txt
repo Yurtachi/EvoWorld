@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+TRAIN episodes=96 checkpoint=[[0.0, 0.99886011048146], [0.99999734826915, 0.0], [0.99999226900628, 0.0]]
+active: { "successes": 18, "arrivals": 18, "steps": 44.2, "receiver_energy_cost": 4.0268, "sender_energy_cost": 3.5708, "signal_cost": 0.3 }
+disabled: { "successes": 8, "arrivals": 8, "steps": 75.2, "receiver_energy_cost": 6.4008, "sender_energy_cost": 5.5648, "signal_cost": 0.0 }
+shuffled: { "successes": 10, "arrivals": 10, "steps": 69.0, "receiver_energy_cost": 5.926, "sender_energy_cost": 5.406, "signal_cost": 0.3 }
+E4 gate: PASS comparisons={ "disabled": { "wins": 10, "losses": 0, "ties": 10, "gain": 0.5 }, "shuffled": { "wins": 8, "losses": 0, "ties": 12, "gain": 0.4 } }

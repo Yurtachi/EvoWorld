@@ -2,6 +2,10 @@ extends RefCounted
 ## Catálogo exclusivo do diálogo; não altera identificadores ou dados salvos.
 const Base = preload("res://scripts/core/textos.gd")
 const CATALOGO := {
+	"nao_sei": "Não sei; não tenho evidência suficiente nos meus registros.",
+	"gosto_aprendido": "Minha experiência com %s teve preferência positiva (%s).",
+	"habilidade_aprendida": "Aprendi %s: %d sucessos em %d tentativas autônomas recentes.",
+	"agua_observada": "Vejo a margem de água em (%s, %s) no passo %d.",
 	"indisponivel": "Não há uma criatura viva neste mundo para consultar.",
 	"desconhecido": "Não reconheci o pedido. Você pode chamar, oferecer comida, perguntar sobre o estado, seguir, parar, brincar ou proteger.",
 	"energia_baixa": "Estou com pouca energia: %s de %s.",
@@ -32,4 +36,4 @@ static func texto(chave: String, valores: Array = []) -> String:
 	return modelo if valores.is_empty() else modelo % valores
 
 static func acao(codigo: String) -> String:
-	return texto("action_forward") if codigo == "forward" else Base.acao(codigo)
+	return texto("action_forward") if codigo == "forward" else Base.e4_acao(codigo)
