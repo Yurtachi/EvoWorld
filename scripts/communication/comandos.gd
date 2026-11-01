@@ -12,6 +12,11 @@ var _mundo: WeakRef
 var _ordens: Dictionary = {}
 var _protecao: Dictionary = {}
 
+## Sobrevivência prevalece: com fome acima do limite a ordem fica suspensa e o
+## comportamento autônomo assume. Ordens expiram para não prender o pet em obstáculos.
+const FOME_SUSPENDE_ORDEM := 0.6
+const TICKS_ORDEM := {"chamar": 600, "brincar": 300, "parar": 300, "seguir": 3000}
+
 ## alvo é uma posição no mundo, fornecida pela UI, nunca extraída de texto livre.
 ## aplicado=true confirma apenas colocação real de alimento ou consulta sem efeito.
 func aplicar(pedido: Variant, mundo, alvo: Vector2 = Vector2.INF) -> Dictionary:
@@ -42,7 +47,7 @@ func aplicar(pedido: Variant, mundo, alvo: Vector2 = Vector2.INF) -> Dictionary:
 		alvo = (pet.pos + Vector2.from_angle(pet.heading) * 40.0).clamp(Vector2.ONE * pet.genome.size, mundo.size - Vector2.ONE * pet.genome.size)
 	if intent in ["chamar", "seguir", "brincar"] and not _alvo_valido(alvo, mundo):
 		return _resultado(false, false, "alvo_invalido")
-	_ordens[pet.id] = {"intent": intent, "alvo": alvo if intent != "parar" else pet.pos}
+	_ordens[pet.id] = {"intent": intent, "alvo": alvo if intent != "parar" else pet.pos, "restante": int(TICKS_ORDEM[intent])}
 	return _resultado(true, false, "ok")
 
 ## Atualiza o alvo móvel de seguir sem reaplicar comandos ou consumir RNG.
@@ -64,6 +69,12 @@ func acao_pendente(criatura: SimCreature, mundo) -> Dictionary:
 	if ordem.is_empty():
 		return {"ativo": false}
 	var intent: String = ordem["intent"]
+	ordem["restante"] = int(ordem.get("restante", TICKS_ORDEM[intent])) - 1
+	if ordem["restante"] <= 0:
+		_ordens.erase(criatura.id)
+		return {"ativo": false}
+	if criatura.hunger > FOME_SUSPENDE_ORDEM:
+		return {"ativo": false}
 	if intent == "parar":
 		return {"ativo": true, "acao": Actions.REST, "razao": "dialogo.stop"}
 	var deslocamento: Vector2 = ordem["alvo"] - criatura.pos
@@ -110,7 +121,7 @@ func restore(data: Variant, mundo) -> bool:
 	limpar()
 	_vincular(mundo)
 	if not order.is_empty():
-		_ordens[mundo.pet_id] = {"intent": order["intent"], "alvo": Data.unpack_vector(order["target"])}
+		_ordens[mundo.pet_id] = {"intent": order["intent"], "alvo": Data.unpack_vector(order["target"]), "restante": int(TICKS_ORDEM[order["intent"]])}
 	if data["protection_requested"]:
 		_protecao[mundo.pet_id] = true
 	return true
