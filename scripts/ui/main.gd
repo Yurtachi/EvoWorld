@@ -8,6 +8,7 @@ const ComandosAPI = preload("res://scripts/communication/comandos.gd")
 const Laboratory = preload("res://scripts/ui/laboratory.gd")
 const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
 const FpsChart = preload("res://scripts/ui/fps_chart.gd")
+const PersonalityInspector = preload("res://scripts/ui/personality_inspector.gd")
 const SIDEBAR := 350.0
 var world: World
 var store := Store.new()
@@ -75,6 +76,7 @@ var receipts: Label
 var receipt_rows: Array[String] = []
 var pending_offers: Array[Dictionary] = []
 var observed_drinks: Dictionary = {}
+var personality_inspector: TabContainer
 var roster: OptionButton
 var roster_ids: Array = []
 var expand_dialog: ConfirmationDialog
@@ -120,16 +122,28 @@ func _ready() -> void:
 			capture_path = argument.trim_prefix("--capture=")
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--fps-benchmark=") and capture_path.is_empty():
-			capture_path = "reports/E1-fps-%d.png" % initial_population
+			capture_path = "reports/E2-fps-%d.png" % initial_population
 	if not capture_path.is_empty():
 		_capture_demo.call_deferred(capture_path)
 	else:
 		_open_new_world.call_deferred()
 
 func create_world(garden_name: String, creature_name: String, world_seed: int) -> void:
-	world = World.new_world(world_seed, {"creature_count": initial_population})
+	world = World.new_world(world_seed, {"creature_count": initial_population, "initial_names": Texto.NOMES_INICIAIS})
+	# The name catalog applies only at this new-world boundary, never on load.
+	var index := 0
+	for creature in world.creatures.values():
+		creature.name = Texto.NOMES_INICIAIS[index % Texto.NOMES_INICIAIS.size()]
+		if index >= Texto.NOMES_INICIAIS.size():
+			creature.name += " %d" % (index / Texto.NOMES_INICIAIS.size() + 1)
+		index += 1
 	world_name = garden_name
 	world.creatures[world.pet_id].name = creature_name
+	for creature in world.creatures.values():
+		world.genealogy.records[creature.id]["name"] = creature.name
+	for event in world.events:
+		if event.get("type") == "spawn" and world.creatures.has(int(event.get("creature_id", -1))):
+			event["name"] = world.creatures[int(event.creature_id)].name
 	selected_id = world.pet_id
 	paused = true
 	accumulator = 0
@@ -234,6 +248,12 @@ func _build_ui() -> void:
 		follow = false
 		_refresh())
 	inspector.add_child(roster)
+	personality_inspector = PersonalityInspector.new()
+	inspector.add_child(personality_inspector)
+	var attention := _button(inspector, Texto.texto("tool_attention"), _set_tool.bind("attention"))
+	attention.tooltip_text = Texto.texto("attention_help")
+	attention.toggle_mode = true
+	tool_buttons["attention"] = attention
 	_separator(inspector)
 	energy_text = _label(inspector, Texto.texto("energy"), 15)
 	energy_bar = ProgressBar.new()
@@ -428,6 +448,8 @@ func _apply_tool(pos: Vector2) -> void:
 					selected_id = creature.id
 					nearest = distance
 			follow = false
+		"attention":
+			_give_attention(pos)
 		"food":
 			var id := world.place_food(pos, food_type)
 			_notify(Texto.texto("food_placed" if id >= 0 else "food_blocked"))
@@ -477,8 +499,10 @@ func _refresh() -> void:
 		genes_text.text = ""
 		hydration_text.text = ""
 		last_event_text.text = ""
+		personality_inspector.observe(null, world)
 		return
 	var creature = world.creatures[selected_id]
+	personality_inspector.observe(creature, world)
 	pet_name.text = Texto.nome_criatura(creature.name)
 	identity.text = Texto.texto("identity", [Texto.texto("your_pet" if selected_id == world.pet_id else "organism"), creature.id, creature.genome.generation])
 	energy_text.text = Texto.texto("energy_value", [Texto.numero(creature.energy), Texto.numero(creature.max_energy)])
@@ -827,6 +851,10 @@ func _capture_demo(path: String) -> void:
 			await _benchmark_fps(path)
 			get_tree().quit()
 			return
+	if state.begins_with("e2-"):
+		await _capture_e2(state, path)
+		get_tree().quit()
+		return
 	if state.begins_with("e1-"):
 		await _capture_e1(state, path)
 		get_tree().quit()
@@ -981,6 +1009,9 @@ func _refresh_roster() -> void:
 		for id in ids:
 			var creature = world.creatures[id]
 			roster.add_item("%s · #%d" % [Texto.nome_criatura(creature.name), id], id)
+	for index in range(ids.size()):
+		var creature = world.creatures[ids[index]]
+		roster.set_item_text(index, "%s · %s" % [Texto.nome_criatura(creature.name), PersonalityInspector.urgent(creature, world)])
 	roster.tooltip_text = Texto.texto("roster", [ids.size()])
 	roster.select(ids.find(selected_id))
 
@@ -1195,3 +1226,59 @@ func _compact_buttons(row: Container) -> void:
 			child.add_theme_stylebox_override("normal", GardenTheme.panel(Color("354e42"), 8, 8))
 			child.add_theme_stylebox_override("hover", GardenTheme.panel(Color("496454"), 8, 8))
 			child.add_theme_stylebox_override("pressed", GardenTheme.panel(Color("d5deaa"), 8, 8))
+
+
+func _give_attention(pos: Vector2) -> void:
+	if not world.creatures.has(selected_id):
+		_receipt(Texto.texto("attention_none"))
+		return
+	if not world.personality_enabled:
+		_receipt(Texto.texto("attention_legacy"))
+		return
+	var creature = world.creatures[selected_id]
+	# Always let the simulator validate range, occlusion and the encounter interval.
+	if world.interagir_jogador(selected_id, pos):
+		_receipt(Texto.texto("attention_ok", [world.tick, Texto.nome_criatura(creature.name)]))
+		_world_dirty = true
+	elif creature.pos.distance_to(pos) > creature.genome.size + 5:
+		_receipt(Texto.texto("attention_far"))
+	elif creature.personality.bonds.has("player") and world.tick - int(creature.personality.bonds.player.last_tick) < 30:
+		_receipt(Texto.texto("attention_wait", [30 - (world.tick - int(creature.personality.bonds.player.last_tick))]))
+	else:
+		_receipt(Texto.texto("attention_blocked"))
+
+func _capture_e2(state: String, path: String) -> void:
+	# Explicit fixture: physiological deficits, then real physical ingest/contact.
+	var creature = world.creatures[selected_id]
+	if state not in ["e2-garden", "e2-roster"]:
+		creature.energy = 48
+		creature.hydration = 35
+		creature.personality.fatigue = 0.72
+		creature.personality.boredom = 0.43
+		creature.personality.loneliness = 0.58
+		# Food, rather than the creature, is placed at contact range for this fixture.
+		world.place_food(creature.pos, "fruta")
+		var item: Dictionary = world.foods.back()
+		world._eat(creature, item.id)
+		_give_attention(creature.pos)
+		if state == "e2-attention":
+			_give_attention(creature.pos)
+		camera.zoom = Vector2.ONE * 1.25
+		camera.position = creature.pos + _camera_bias()
+	_refresh()
+	var tabs := {"e2-traits": 1, "e2-memory": 2, "e2-preferences": 3, "e2-bonds": 4}
+	personality_inspector.current_tab = tabs.get(state, 0)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	caregiver_scroll.scroll_vertical = int(personality_inspector.position.y) - 6 if state not in ["e2-garden", "e2-roster"] else 0
+	if state == "e2-roster":
+		roster.show_popup()
+	if state == "e2-attention":
+		caregiver_scroll.scroll_vertical = int(receipts.position.y) - 24
+	if state == "e2-expression":
+		var body_scroll: ScrollContainer = personality_inspector.get_child(0)
+		body_scroll.scroll_vertical = int(personality_inspector.expression.position.y) - 8
+	var warmup := Time.get_ticks_msec() + 1200
+	while Time.get_ticks_msec() < warmup:
+		await get_tree().process_frame
+	await capture_screenshot(path)

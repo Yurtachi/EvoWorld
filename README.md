@@ -23,11 +23,23 @@ O primeiro comando deve indicar 4.7.2. Se `godot` não estiver no PATH, substitu
 
 ## Criar e cuidar de um jardim
 
-Ao abrir, escolha os nomes do jardim e do companheiro, uma semente inteira de 0 a 2147483647 e a população inicial de 1 a 100. O padrão é **Jardim de Musgo**, **Pip** e **12 organismos, com três regiões de água**. Essa criação usa `SimWorld.new_world`; o seletor explícito continua prevalecendo e carregar saves mantém a população gravada. A semente recria condições iniciais; as intervenções do jogador mudam a trajetória. Criar um jardim substitui o mundo não salvo; **Continuar explorando** mantém o mundo aberto.
+Ao abrir, escolha os nomes do jardim e do companheiro, uma semente inteira de 0 a 2147483647 e a população inicial de 1 a 100. O padrão é **Jardim de Musgo**, **Mel** e **12 organismos, com três regiões de água e personalidade ativa**. Os fundadores recebem nomes do catálogo brasileiro (Mel, Bento, Tica, Juca, Lola, Zeca, Nina, Dora, Caju, Bia, Chico e Lia); o nome escolhido para o companheiro prevalece. Essa criação usa `SimWorld.new_world`; o seletor explícito continua prevalecendo e carregar saves mantém população e nomes gravados. A semente recria condições iniciais; as intervenções do jogador mudam a trajetória. Criar um jardim substitui o mundo não salvo; **Continuar explorando** mantém o mundo aberto.
 
-O jardim começa pausado. Use **Iniciar/Pausar** e **1×, 2× ou 5×**. **Inspecionar** seleciona uma criatura e mostra energia, hidratação, sede, idade, ação e último evento no **Cuidador**. A lista do painel e os nomes desenhados no terreno também selecionam criaturas; genes e parentesco ficam no **Laboratório**. Acima de 30 criaturas, o enquadramento geral mostra nomes só da seleção e do companheiro; aproximar a câmera revela os demais, e a lista continua disponível. Rótulos que colidiriam são omitidos, priorizando a seleção; os corpos continuam visíveis. **Encontrar** volta ao companheiro; **Acompanhar** segue a seleção; **Mostrar alcance da visão** desenha o campo geométrico, sujeito à oclusão por rochas.
+O jardim começa pausado. Use **Iniciar/Pausar** e **1×, 2× ou 5×**. **Inspecionar** seleciona uma criatura e mostra energia, hidratação, sede, idade, ação e último evento no **Cuidador**. A lista selecionável mostra o nome e a necessidade mais urgente; os nomes desenhados no terreno também selecionam criaturas. Genes e parentesco ficam no **Laboratório**. Acima de 30 criaturas, o enquadramento geral mostra nomes só da seleção e do companheiro; aproximar a câmera revela os demais, e a lista continua disponível. Rótulos que colidiriam são omitidos, priorizando a seleção; os corpos continuam visíveis. **Encontrar** volta ao companheiro; **Acompanhar** segue a seleção; **Mostrar alcance da visão** desenha o campo geométrico, sujeito à oclusão por rochas.
 
-Escolha **Fruta**, **Semente**, **Folha** ou **Cogumelo** e clique no terreno para plantar. Os quatro têm cores e formas próprias. **+ Água** chama `place_water` para colocar uma região circular de raio 30; beber exige alcançar a margem. Uma gota, um anel azul e “Bebeu +…” aparecem por dois segundos de simulação após um evento físico com ganho positivo. **+ Rocha** e **+ Criatura** continuam disponíveis. Comida precisa ser percebida, alcançada e consumida; colocá-la não aumenta a energia diretamente. O teto padrão é 150 organismos vivos, contando descendentes. Os corpos são procedurais: tamanho, matiz e velocidade dos genes afetam a aparência. Terreno e rochas usam sprites Kenney CC0; água, alimentos e corpos são desenhos procedurais próprios. O arquivo `water.png` não é usado. A palatabilidade é a do catálogo por alimento; esta etapa não registra preferência individual. Cogumelo tem toxicidade 8 e pode causar perda líquida de energia (valores fictícios da simulação).
+O Cuidador oferece cinco abas, com rolagem para conteúdo longo:
+
+- **Corpo**: fome, sede, fadiga, necessidade de estímulo e contato. Barras maiores indicam maior necessidade no estado atual.
+- **Traços**: curiosidade, cautela, sociabilidade e impulsividade do genoma. São tendências herdadas, distintas das necessidades atuais e do aprendizado.
+- **Memória**: os oito episódios mais recentes disponíveis, com ação, consequência e variações físicas medidas. A memória tem limites e esquecimento.
+- **Comida**: preferências aprendidas após ingestão, entre −1 e +1. Ausência de experiência aparece explicitamente; ver ou oferecer alimento não ensina uma preferência.
+- **Vínculos**: quem conhece, familiaridade, número de encontros e último contato. Familiaridade diminui com o tempo.
+
+Brilho, postura e um pequeno arco sobre a criatura representam a valência de `expression_state()`; o balanço acompanha a ativação e para com a simulação pausada. A aba Corpo traz valores e legenda. A criatura **aparenta** ativação ou tensão corporal; esses escores não demonstram consciência.
+
+**Carinho** ativa a ferramenta de atenção: selecione uma criatura e clique sobre seu corpo no jardim. A UI chama `world.interagir_jogador`, que exige alcance físico, caminho desobstruído e intervalo de **30 passos (3 segundos de simulação)**. Pausado, o intervalo não avança. Recibos distinguem contato registrado, clique distante, intervalo pendente e mundo legado sem personalidade. Um contato aceito registra familiaridade e episódio sem repor energia ou água nem mover a criatura.
+
+Escolha **Fruta**, **Semente**, **Folha** ou **Cogumelo** e clique no terreno para plantar. Os quatro têm cores e formas próprias. **+ Água** chama `place_water` para colocar uma região circular de raio 30; beber exige alcançar a margem. Uma gota, um anel azul e “Bebeu +…” aparecem por dois segundos de simulação após um evento físico com ganho positivo. **+ Rocha** e **+ Criatura** continuam disponíveis. Comida precisa ser percebida, alcançada e consumida; colocá-la não aumenta a energia diretamente. O teto padrão é 150 organismos vivos, contando descendentes. Os corpos são procedurais: tamanho, matiz e velocidade dos genes afetam a aparência. Terreno e rochas usam sprites Kenney CC0; água, alimentos e corpos são desenhos procedurais próprios. O arquivo `water.png` não é usado. A palatabilidade é a do catálogo por alimento; as preferências individuais aprendidas ficam na aba Comida. Cogumelo tem toxicidade 8 e pode causar perda líquida de energia (valores fictícios da simulação).
 
 **Oferecer alimento à seleção** chama `oferecer_alimento` com o tipo escolhido e registra seu ID, sem alterar reservas nem posição. Os recibos acompanham aproximação medida, ingestão pelo destinatário com ganho positivo e bebida confirmada pelo simulador. Desaparecimento sem evento de ganho positivo não conta como refeição; colocar não garante aceitação. O painel mostra os quatro recibos mais recentes; o histórico temporário é limitado a 32 e reinicia ao criar/carregar.
 
@@ -78,7 +90,7 @@ As curvas começam ao criar/carregar e não são persistidas. Os dados genealóg
 
 Cada ponto tem sua revisão válida anterior em `.json.bak`. `SaveStore` escreve um temporário, valida dados e soma SHA-256, preserva a cópia e substitui o principal por renomeação. Ao carregar um principal inválido, tenta a cópia; se ambos falharem, mantém o mundo aberto e mostra o erro em português. O limite por arquivo é 32 MiB. Alterações posteriores à última gravação podem se perder em uma interrupção.
 
-No Windows, `user://` normalmente corresponde a `%APPDATA%/Godot/app_userdata/EvoWorld/`. Preferências da interface ficam em `ui-settings.cfg`; capturas F12 ficam em `screenshots/`. Esta entrega usa **save v4**, com migração das versões anteriores fornecida pelo simulador. A migração preserva população e fisiologia histórica: em saves antigos a sede permanece desativada, mesmo se o jogador colocar água. Nenhum campo da simulação foi acrescentado ou renomeado pela UI.
+No Windows, `user://` normalmente corresponde a `%APPDATA%/Godot/app_userdata/EvoWorld/`. Preferências da interface ficam em `ui-settings.cfg`; capturas F12 ficam em `screenshots/`. Esta entrega usa **save v5**, com migração de v1–v4 fornecida pelo simulador. A migração preserva população, nomes e fisiologia histórica: em saves anteriores ao E1 a sede permanece desativada; nos anteriores ao E2, a personalidade permanece desativada. Nenhum campo de save foi acrescentado ou renomeado pela UI.
 
 ## Testes e capturas
 
@@ -113,7 +125,7 @@ godot --path . -- --fps-benchmark=12
 godot --path . -- --fps-benchmark=30
 ```
 
-Esses comandos usam seed 7421, janela de 1280×720 e escrevem `reports/E1-fps-12.json`/`.png` e `reports/E1-fps-30.json`/`.png`, com média de quadros/s, p95 de duração, população final e adaptador. Exigem modo gráfico; não use `--headless`. Não acessam saves nem preferências pessoais. Valores dependem de hardware, carga e sincronização da janela; não constituem um gate de eficácia do aprendizado.
+Esses comandos usam seed 7421, janela de 1280×720 e escrevem `reports/E2-fps-12.json`/`.png` e `reports/E2-fps-30.json`/`.png`, com média de quadros/s, p95 de duração, população final e adaptador. Exigem modo gráfico; não use `--headless`. Não acessam saves nem preferências pessoais. Valores dependem de hardware, carga e sincronização da janela; não constituem um gate de eficácia do aprendizado.
 
 ```powershell
 godot --path . -- --capture=reports/E1-12-criaturas-agua.png --capture-state=e1-garden
@@ -131,6 +143,8 @@ godot --path . -- --capture=reports/E1-laboratorio.png --capture-state=laborator
 As capturas E1 usam a mesma cena e os mesmos controles. Os cenários `e1-offer`, `e1-inspector` e `e1-water` são fixtures explícitas: reduzem reservas para observar bebida/ingestão sem esperar muitos minutos; os dois primeiros removem comida concorrente e colocam água perto da seleção. Não deslocam criaturas nem simulam sucesso: os eventos, ganhos e movimento são executados por `world.step`. O inspector rebaixa hidratação depois para exibir o aviso de sede. A captura de expansão posterior confirma +300 à direita e +200 na borda inferior. Evidências e limites em [reports/E1_ui.md](reports/E1_ui.md).
 
 ## Estrutura e licenças
+
+As capturas E2 e o benchmark estão documentados em [reports/E2_ui.md](reports/E2_ui.md). Para reproduzir uma aba, use `godot --path . -- --capture=reports/E2-memoria.png --capture-state=e2-memory --capture-minimum`. Os estados disponíveis são `e2-garden`, `e2-roster`, `e2-needs`, `e2-traits`, `e2-memory`, `e2-preferences`, `e2-bonds` e `e2-attention`. As cenas de detalhe são fixtures explícitas: ajustam carências e colocam uma fruta ao alcance; ingestão e contato passam pelas APIs reais. Não escrevem saves pessoais.
 
 | Caminho | Responsabilidade |
 |---|---|

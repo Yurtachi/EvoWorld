@@ -115,7 +115,8 @@ func _verify() -> void:
 	root.size = Vector2i(1100, 680)
 	await process_frame
 	await process_frame
-	for button in main.tool_buttons.values():
+	for key in ["select", "food", "water", "obstacle", "creature"]:
+		var button: Button = main.tool_buttons[key]
 		_expect(button.get_global_rect().end.x < main.get_viewport_rect().size.x - main.SIDEBAR - 30, "Portuguese tool buttons fit at minimum width")
 	_expect(main.follow_button.get_global_rect().end.x <= 1100, "follow button fits at minimum width")
 	_expect(main.status.get_global_rect().end.y < 680, "long load error fits at minimum height")
@@ -234,6 +235,7 @@ func _verify() -> void:
 	main._process(0.05)
 	_expect(main.world.to_dict() == automatic_snapshot, "primeiro quadro pausado não sobrescreve a ordem restaurada")
 	await _verify_e1(main, folder)
+	await _verify_e2(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
 	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog]:
 		dialog.popup_centered()
@@ -254,6 +256,67 @@ func _verify() -> void:
 		printerr("FALHA UI: ", message)
 	print("Integração da UI: ", "ok" if errors.is_empty() else "FALHOU")
 	quit(0 if errors.is_empty() else 1)
+
+func _verify_e2(main, folder: String) -> void:
+	main.create_world("Jardim E2", "Mel escolhida", 7421)
+	var creature = main.world.creatures[main.selected_id]
+	_expect(main.world.personality_enabled and main.personality_inspector.get_tab_count() == 5, "E2 real com cinco abas")
+	_expect(creature.name == "Mel escolhida", "nome escolhido para o pet prevalece")
+	for other in main.world.creatures.values():
+		_expect(not other.name.begins_with("Creature "), "fundadores recebem nomes naturais")
+	_expect(Texto.acao("seek_contact") == "Aproximar-se de outra criatura" and Texto.razao("personality.fatigue").contains("Fadiga"), "lookup integra E2")
+	creature.personality.fatigue = 0.82
+	creature.personality.boredom = 0.33
+	creature.personality.loneliness = 0.41
+	main._refresh()
+	_expect(is_equal_approx(main.personality_inspector.need_bars.fatigue.value, 82), "barra de fadiga usa estado real")
+	_expect(main.roster.get_item_text(0).contains("Fadiga 82%"), "lista mostra necessidade mais urgente")
+	_expect(main.personality_inspector.traits.text.contains("Curiosidade"), "temperamento herdado é legível")
+	_expect(main.personality_inspector.preferences.text.contains("sem experiência"), "sem ingestão não inventa preferência")
+	var before: Dictionary = creature.to_dict()
+	main.tool_buttons.attention.pressed.emit()
+	main._apply_tool(creature.pos + (main.world.size * 0.5 - creature.pos).normalized() * 60)
+	_expect(creature.to_dict() == before and main.receipt_rows.back().contains("recusado"), "carinho distante falha sem mudar criatura")
+	var energy: float = creature.energy
+	var hydration: float = creature.hydration
+	var position: Vector2 = creature.pos
+	main._apply_tool(creature.pos)
+	_expect(creature.personality.bonds.player.count == 1, "contato pelo controle cria vínculo real")
+	_expect(creature.energy == energy and creature.hydration == hydration and creature.pos == position, "carinho não cria recursos físicos")
+	main._apply_tool(creature.pos)
+	_expect(creature.personality.bonds.player.count == 1 and main.receipt_rows.back().contains("aguarde 30"), "repetição gera recibo de intervalo")
+	main._refresh()
+	_expect(main.personality_inspector.memory.text.contains("Contato com o cuidador"), "episódio traduz o que fez e aconteceu")
+	_expect(main.personality_inspector.bonds.text.contains("Você (cuidador)"), "vínculo mostra cuidador e familiaridade")
+	_expect(main.personality_inspector.expression.text.contains("Aparenta") and not main.personality_inspector.expression.text.contains("sente"), "expressão usa aparência observada")
+	main.world.place_food(creature.pos, "fruta")
+	var item: Dictionary = main.world.foods.back()
+	creature.energy = 45
+	main.world._eat(creature, item.id)
+	main._refresh()
+	_expect(main.personality_inspector.preferences.text.contains(Texto.numero(creature.personality.preferences.fruta, 3)), "preferência vem de ingestão real")
+	main.store.save_world(main.world, "e2", {"name": "E2 salvo"})
+	var snapshot: Dictionary = main.world.to_dict()
+	main._load("e2")
+	_expect(main.world.to_dict() == snapshot, "UI preserva save v5 completo e nomes")
+	main.selected_id = -1
+	main._refresh()
+	_expect(main.personality_inspector.memory.text.is_empty(), "sem seleção apaga memória da criatura anterior")
+	# Percorre todas as abas na menor janela sem cortar largura.
+	main.selected_id = main.world.pet_id
+	main._refresh()
+	for index in range(5):
+		main.personality_inspector.current_tab = index
+		await process_frame
+		await process_frame
+		var tab: Control = main.personality_inspector.get_child(index)
+		_expect(tab.size.x <= main.caregiver_scroll.size.x, "aba E2 cabe na largura mínima")
+		_expect(tab.get_child(0).size.x <= tab.size.x, "conteúdo E2 quebra linhas dentro da aba")
+	main.personality_inspector.current_tab = 0
+	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var path := folder.path_join("e2.json" + suffix)
+		if FileAccess.file_exists(path):
+			DirAccess.remove_absolute(path)
 
 func _free_point(world, radius: float) -> Vector2:
 	for y in range(32, int(world.size.y) - 32, 33):
@@ -397,7 +460,11 @@ func _verify_e1(main, folder: String) -> void:
 	main.initial_population = 12
 	main._load("legacy")
 	_expect(main.world.creatures.size() == 3 and not main.world.water_enabled, "carregar mantém população e fisiologia do save v3")
+	_expect(main.world.to_dict() == legacy.to_dict(), "carregar legado preserva snapshot e nomes sem aplicar catálogo de fundadores")
 	_expect(main.hydration_text.text == Texto.texto("hydration_off"), "inspector explica fisiologia legada")
+	_expect(main.personality_inspector.traits.text == Texto.texto("legacy_personality"), "UI não inventa temperamento ao carregar legado")
+	main._give_attention(main.world.creatures[main.selected_id].pos)
+	_expect(main.receipt_rows.back() == Texto.texto("attention_legacy"), "carinho legado retorna recusa explícita")
 	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
 		var file := folder.path_join("legacy.json" + suffix)
 		if FileAccess.file_exists(file):
