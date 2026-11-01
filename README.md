@@ -23,11 +23,15 @@ O primeiro comando deve indicar 4.7.2. Se `godot` não estiver no PATH, substitu
 
 ## Criar e cuidar de um jardim
 
-Ao abrir, escolha os nomes do jardim e do companheiro, uma semente inteira de 0 a 2147483647 e a população inicial de 1 a 100. O padrão é **Jardim de Musgo**, **Pip** e 16 organismos. A semente recria condições iniciais; as intervenções do jogador mudam a trajetória. Criar um jardim substitui o mundo não salvo; **Continuar explorando** mantém o mundo aberto.
+Ao abrir, escolha os nomes do jardim e do companheiro, uma semente inteira de 0 a 2147483647 e a população inicial de 1 a 100. O padrão é **Jardim de Musgo**, **Pip** e **12 organismos, com três regiões de água**. Essa criação usa `SimWorld.new_world`; o seletor explícito continua prevalecendo e carregar saves mantém a população gravada. A semente recria condições iniciais; as intervenções do jogador mudam a trajetória. Criar um jardim substitui o mundo não salvo; **Continuar explorando** mantém o mundo aberto.
 
-O jardim começa pausado. Use **Iniciar/Pausar** e **1×, 2× ou 5×**. **Inspecionar** seleciona uma criatura e mostra energia, idade, ação, razão e genes no **Cuidador**. **Encontrar** volta ao companheiro; **Acompanhar** segue a seleção; **Mostrar alcance da visão** desenha o campo geométrico, sujeito à oclusão por rochas.
+O jardim começa pausado. Use **Iniciar/Pausar** e **1×, 2× ou 5×**. **Inspecionar** seleciona uma criatura e mostra energia, hidratação, sede, idade, ação e último evento no **Cuidador**. A lista do painel e os nomes desenhados no terreno também selecionam criaturas; genes e parentesco ficam no **Laboratório**. Acima de 30 criaturas, o enquadramento geral mostra nomes só da seleção e do companheiro; aproximar a câmera revela os demais, e a lista continua disponível. Rótulos que colidiriam são omitidos, priorizando a seleção; os corpos continuam visíveis. **Encontrar** volta ao companheiro; **Acompanhar** segue a seleção; **Mostrar alcance da visão** desenha o campo geométrico, sujeito à oclusão por rochas.
 
-Escolha **+ Alimento**, **+ Rocha** ou **+ Criatura** e clique no terreno. Comida precisa ser percebida, alcançada e consumida; colocá-la não aumenta a energia diretamente. O teto padrão é 150 organismos vivos, contando descendentes. Os corpos são procedurais: tamanho, matiz e velocidade dos genes afetam a aparência. Terreno, alimento vegetal e rochas usam sprites Kenney CC0.
+Escolha **Fruta**, **Semente**, **Folha** ou **Cogumelo** e clique no terreno para plantar. Os quatro têm cores e formas próprias. **+ Água** chama `place_water` para colocar uma região circular de raio 30; beber exige alcançar a margem. Uma gota, um anel azul e “Bebeu +…” aparecem por dois segundos de simulação após um evento físico com ganho positivo. **+ Rocha** e **+ Criatura** continuam disponíveis. Comida precisa ser percebida, alcançada e consumida; colocá-la não aumenta a energia diretamente. O teto padrão é 150 organismos vivos, contando descendentes. Os corpos são procedurais: tamanho, matiz e velocidade dos genes afetam a aparência. Terreno e rochas usam sprites Kenney CC0; água, alimentos e corpos são desenhos procedurais próprios. O arquivo `water.png` não é usado. A palatabilidade é a do catálogo por alimento; esta etapa não registra preferência individual. Cogumelo tem toxicidade 8 e pode causar perda líquida de energia (valores fictícios da simulação).
+
+**Oferecer alimento à seleção** chama `oferecer_alimento` com o tipo escolhido e registra seu ID, sem alterar reservas nem posição. Os recibos acompanham aproximação medida, ingestão pelo destinatário com ganho positivo e bebida confirmada pelo simulador. Desaparecimento sem evento de ganho positivo não conta como refeição; colocar não garante aceitação. O painel mostra os quatro recibos mais recentes; o histórico temporário é limitado a 32 e reinicia ao criar/carregar.
+
+**Expandir terreno** abre confirmação com borda direita/inferior, quantidade, tamanho resultante, área, custo **zero** (não há moeda no contrato E1) e limite de **100.000 por eixo**. Confirmar chama `world.expand` e reenquadra a câmera. Não acrescenta recursos automaticamente. Coordenadas, IDs e RNG permanecem preservados. O desenho do terreno percorre apenas os ladrilhos visíveis, inclusive em áreas grandes.
 
 Em **Ajustes**, configure velocidade, população do próximo jardim, proteção e salvamento automático. A proteção é uma **pausa preventiva**: impede o próximo passo quando o companheiro está com 15% de energia ou menos, ou a um passo do limite de idade. Não repõe energia nem rejuvenesce. Para avançar nessas condições, desligue a proteção assumindo o risco indicado; colocar alimento não remove o bloqueio enquanto o companheiro ainda não comeu. A pausa interrompe todo o ecossistema e influencia sua observação.
 
@@ -52,7 +56,7 @@ No **Cuidador**, abra **Conversar com o companheiro**, digite e pressione **Envi
 
 A interface chama `Dialogo.interpretar/responder` e usa a instância persistente `world.comandos`. A tela separa resposta, recibo e evidências: passo, energia, fome, idade, ação/razão, alimentos percebidos e evento próprio recente quando houver. A consulta descreve o instante indicado; não é uma leitura de consciência. Entradas fora da gramática não recebem evidências inventadas.
 
-Oferecer comida coloca alimento real sem prometer ingestão. Pedidos de movimento passam pela física, colisões e custos normais; o recibo de registro não significa que o alvo já foi alcançado. **Proteger** ativa a pausa preventiva da interface. O save v3 guarda ordens e alvo; o alvo de seguir é restaurado pela UI. Se a mesma UI for usada com uma base sem executor de comandos, ela indica explicitamente os pedidos pendentes.
+Oferecer comida coloca alimento real sem prometer ingestão. Pedidos de movimento passam pela física, colisões e custos normais; o recibo de registro não significa que o alvo já foi alcançado. **Proteger** ativa a pausa preventiva da interface. O save v4 guarda ordens e alvo; o alvo de seguir é restaurado pela UI. Se a mesma UI for usada com uma base sem executor de comandos, ela indica explicitamente os pedidos pendentes.
 
 ## Investigar no Laboratório
 
@@ -74,7 +78,7 @@ As curvas começam ao criar/carregar e não são persistidas. Os dados genealóg
 
 Cada ponto tem sua revisão válida anterior em `.json.bak`. `SaveStore` escreve um temporário, valida dados e soma SHA-256, preserva a cópia e substitui o principal por renomeação. Ao carregar um principal inválido, tenta a cópia; se ambos falharem, mantém o mundo aberto e mostra o erro em português. O limite por arquivo é 32 MiB. Alterações posteriores à última gravação podem se perder em uma interrupção.
 
-No Windows, `user://` normalmente corresponde a `%APPDATA%/Godot/app_userdata/EvoWorld/`. Preferências da interface ficam em `ui-settings.cfg`; capturas F12 ficam em `screenshots/`. Esta entrega usa **save v3**, com migração das versões anteriores fornecida pelo simulador. Nenhum campo da simulação foi acrescentado ou renomeado pela UI.
+No Windows, `user://` normalmente corresponde a `%APPDATA%/Godot/app_userdata/EvoWorld/`. Preferências da interface ficam em `ui-settings.cfg`; capturas F12 ficam em `screenshots/`. Esta entrega usa **save v4**, com migração das versões anteriores fornecida pelo simulador. A migração preserva população e fisiologia histórica: em saves antigos a sede permanece desativada, mesmo se o jogador colocar água. Nenhum campo da simulação foi acrescentado ou renomeado pela UI.
 
 ## Testes e capturas
 
@@ -99,6 +103,32 @@ godot --path . -- --capture=reports/ui2-novo-mundo.png --show-new-world --captur
 ```
 
 As capturas usam a cena real, desativam autosave e não escrevem preferências pessoais. O laboratório avança naturalmente até o passo 1200 para mostrar descendência, sem forçar genomas ou nascimentos. O cenário de sinais faz uma emissão manual pelo mesmo botão disponível ao jogador e avança um passo. Resultados e limites em [reports/ui2.md](reports/ui2.md).
+
+## E1: capturas e mini gráfico de quadros/s
+
+A barra inferior contém um gráfico das últimas 120 durações de quadro (exibidas como quadros/s). Para medir a cena real, renderizada e em execução a 1×, com dois segundos de aquecimento e oito segundos de coleta:
+
+```powershell
+godot --path . -- --fps-benchmark=12
+godot --path . -- --fps-benchmark=30
+```
+
+Esses comandos usam seed 7421, janela de 1280×720 e escrevem `reports/E1-fps-12.json`/`.png` e `reports/E1-fps-30.json`/`.png`, com média de quadros/s, p95 de duração, população final e adaptador. Exigem modo gráfico; não use `--headless`. Não acessam saves nem preferências pessoais. Valores dependem de hardware, carga e sincronização da janela; não constituem um gate de eficácia do aprendizado.
+
+```powershell
+godot --path . -- --capture=reports/E1-12-criaturas-agua.png --capture-state=e1-garden
+godot --path . -- --capture=reports/E1-4-alimentos.png --capture-state=e1-foods --capture-minimum
+godot --path . -- --capture=reports/E1-expandir-antes.png --capture-state=e1-expand-before
+godot --path . -- --capture=reports/E1-expandir-depois.png --capture-state=e1-expand-after
+godot --path . -- --capture=reports/E1-oferecer-alimento.png --capture-state=e1-offer
+godot --path . -- --capture=reports/E1-inspector.png --capture-state=e1-inspector
+godot --path . -- --capture=reports/E1-agua-bebendo.png --capture-state=e1-water
+godot --path . -- --capture=reports/E1-novo-mundo.png --show-new-world --capture-minimum
+godot --path . -- --capture=reports/E1-ajuda.png --capture-state=help --capture-minimum
+godot --path . -- --capture=reports/E1-laboratorio.png --capture-state=laboratory
+```
+
+As capturas E1 usam a mesma cena e os mesmos controles. Os cenários `e1-offer`, `e1-inspector` e `e1-water` são fixtures explícitas: reduzem reservas para observar bebida/ingestão sem esperar muitos minutos; os dois primeiros removem comida concorrente e colocam água perto da seleção. Não deslocam criaturas nem simulam sucesso: os eventos, ganhos e movimento são executados por `world.step`. O inspector rebaixa hidratação depois para exibir o aviso de sede. A captura de expansão posterior confirma +300 à direita e +200 na borda inferior. Evidências e limites em [reports/E1_ui.md](reports/E1_ui.md).
 
 ## Estrutura e licenças
 
