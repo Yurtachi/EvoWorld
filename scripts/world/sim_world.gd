@@ -17,7 +17,8 @@ const Signals = preload("res://scripts/communication/signal_channel.gd")
 const Commands = preload("res://scripts/communication/comandos.gd")
 const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
 const Water = preload("res://scripts/environment/water_rules.gd")
-const SAVE_VERSION := 4
+const Personality = preload("res://scripts/behavior/personality.gd")
+const SAVE_VERSION := 5
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
@@ -37,6 +38,7 @@ var foods: Array = []
 var obstacles: Array = []
 var waters: Array = []
 var water_enabled := false
+var personality_enabled := false
 var events: Array = []
 var pet_id: int = -1
 var food_regrow: bool = true
@@ -75,7 +77,7 @@ var _in_step := false
 ## Product entry point. The low-level constructor retains historical experiment defaults.
 static func new_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
 	var initial := config.duplicate(true)
-	initial.merge({"creature_count": NEW_WORLD_CREATURE_COUNT, "water_enabled": true, "water_count": 3}, false)
+	initial.merge({"creature_count": NEW_WORLD_CREATURE_COUNT, "water_enabled": true, "water_count": 3, "personality_enabled": true}, false)
 	return load("res://scripts/world/sim_world.gd").new(world_seed, initial)
 
 func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
@@ -108,6 +110,7 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	mutation_rate = snappedf(clampf(mutation_rate, 0.0, 1.0), 0.000001)
 	mutation_scale = snappedf(clampf(mutation_scale, 0.0, 0.1), 0.000001)
 	water_enabled = config.get("water_enabled", false) == true
+	personality_enabled = config.get("personality_enabled", false) == true
 	for index in range(clampi(int(config.get("water_count", 0)), 0, Water.MAX_REGIONS)):
 		var radius := minf(rng.between(18.0, 48.0), minf(size.x, size.y) * 0.2)
 		place_water(_random_position(radius), radius)
@@ -135,6 +138,9 @@ func spawn_creature(pos: Vector2, creature_name: String = "", genome = null) -> 
 		genes = Genes.from_dict(genome.to_dict())
 		if genes == null:
 			return -1
+	if personality_enabled and genes.temperament.is_empty():
+		for disposition in Genes.TEMPERAMENT_KEYS:
+			genes.temperament[disposition] = snappedf(rng.between(0.0, 1.0), 0.000001)
 	genes.bound_genes()
 	# Introductions are founders; reproductive ancestry only comes from reproduce().
 	genes.parents = []
@@ -151,6 +157,9 @@ func _spawn(pos: Vector2, creature_name: String, genes: Genes, initial_energy: f
 	var creature := Creature.new()
 	creature.id = ids.take()
 	creature.genome = genes
+	if personality_enabled:
+		creature.personality = Personality.new()
+		creature.personality_water_enabled = water_enabled
 	creature.name = creature_name.left(64) if not creature_name.is_empty() else Text.texto("creature_default", [creature.id])
 	creature.pos = location
 	creature.heading = snappedf(rng.between(-PI, PI), 0.000001)
@@ -367,26 +376,42 @@ func _update_creature(creature: Creature) -> void:
 		return
 	creature.energy = clampf(creature.energy, 0.0, creature.max_energy)
 	creature.hydration = clampf(creature.hydration, 0.0, Water.CAPACITY)
-	var sensors := sense(creature, false)
+	var before: Dictionary = Personality.context(creature) if personality_enabled else {}
+	if personality_enabled:
+		creature.personality.advance(tick, creature.temperament)
+	var sensors := sense(creature, personality_enabled)
+	if personality_enabled:
+		creature.personality.perceive(sensors, tick)
 	var closest: Dictionary = {}
 	var closest_distance := INF
 	var best_score := INF
 	for food in sensors["foods"]:
 		var distance: float = creature.pos.distance_to(food["pos"])
-		var score: float = (distance + 1.0) / float(FoodCatalog.PARAMETERS[food.get("food_type", "legacy")]["palatability"])
+		var score: float = Obs.food_score(creature, food, distance)
 		if score < best_score:
 			best_score = score
 			closest = food
 			closest_distance = distance
 	var moving := false
 	var order: Dictionary = comandos.acao_pendente(creature, self)
-	if order["ativo"] and not (water_enabled and creature.thirst > Water.THIRST_THRESHOLD):
+	var survival := personality_enabled and (creature.hunger > Commands.FOME_SUSPENDE_ORDEM or (water_enabled and creature.thirst > Water.THIRST_THRESHOLD))
+	var motive: String = creature.personality.motive(creature.temperament) if personality_enabled and not survival else ""
+	if survival:
+		_suspend_brain(creature)
+		if water_enabled and creature.thirst > Water.THIRST_THRESHOLD and (creature.thirst >= creature.hunger or closest.is_empty()):
+			moving = _seek_water(creature, sensors)
+		else:
+			moving = _personality_seek_food(creature, sensors, closest, closest_distance)
+	elif order["ativo"] and not (water_enabled and creature.thirst > Water.THIRST_THRESHOLD):
 		# Never assign the consequences of player actions to a pending Q transition.
 		if creature.brain != null and creature.brain.has_method("suspend_transition"):
 			creature.brain.suspend_transition()
 		creature.last_action = Actions.name_of(int(order["acao"]))
 		creature.last_reason = order["razao"]
 		moving = _apply_action(creature, sensors, int(order["acao"]))
+	elif not motive.is_empty():
+		_suspend_brain(creature)
+		moving = _personality_action(creature, sensors, motive)
 	elif creature.brain != null:
 		moving = _act_with_brain(creature, sensors)
 	elif water_enabled and creature.thirst > Water.THIRST_THRESHOLD:
@@ -407,9 +432,14 @@ func _update_creature(creature: Creature) -> void:
 			creature.last_action = "explore"
 			creature.last_reason = "No food within vision; exploring"
 		moving = _move(creature, sensors["obstacles"])
+	if personality_enabled:
+		_personality_encounters(creature, sensors)
 	Signals.record_reaction(self, creature)
+	var started := {"energy": creature.energy, "hydration": creature.hydration}
 	# Rest reduces the activity cost, never creates nutritional energy.
 	var cost: float = creature.genome.metabolism * (0.52 + creature.genome.size * 0.022) * TICK_DT
+	if personality_enabled and creature.last_action == "rest":
+		cost *= 0.6
 	if moving:
 		cost += creature.genome.speed * creature.genome.size * 0.0005 * TICK_DT
 	if water_enabled:
@@ -418,6 +448,8 @@ func _update_creature(creature: Creature) -> void:
 			cost += Water.DEHYDRATION_ENERGY_PER_SECOND * TICK_DT
 	creature.energy = snappedf(clampf(creature.energy - cost, 0.0, creature.max_energy), 0.000001)
 	creature.heading = snappedf(wrapf(creature.heading, -PI, PI), 0.000001)
+	if personality_enabled:
+		creature.personality.finish_tick(creature, tick, moving, before, started)
 	if creature.energy <= 0.0:
 		_die(creature, "starvation")
 
@@ -486,11 +518,15 @@ func _eat(creature: Creature, food_id: int) -> void:
 		if creature.pos.distance_to(food["pos"]) > Obs.reach(creature) or _occluded(creature.pos, food["pos"]):
 			return
 		var params: Dictionary = FoodCatalog.PARAMETERS[food.get("food_type", "legacy")]
+		var episode_context: Dictionary = Personality.context(creature, food.get("food_type", "legacy")) if personality_enabled else {}
+		var old_hydration := creature.hydration
 		var before := creature.energy
 		creature.energy = snappedf(clampf(minf(creature.max_energy, creature.energy + float(food["energy"])) - float(params["toxicity"]), 0.0, creature.max_energy), 0.000001)
 		if water_enabled:
 			creature.hydration = snappedf(clampf(creature.hydration + float(params["hydration"]), 0.0, Water.CAPACITY), 0.000001)
 		var gained := creature.energy - before
+		if personality_enabled:
+			creature.personality.ingest(creature, tick, episode_context, food["food_type"], gained, creature.hydration - old_hydration, float(params["toxicity"]))
 		foods.remove_at(index)
 		_food_grid.remove(food_id)
 		_food_by_id.erase(food_id)
@@ -538,7 +574,11 @@ func _drink(creature: Creature, water_id: int) -> bool:
 		var gained := snappedf(minf(Water.DRINK_AMOUNT, Water.CAPACITY - creature.hydration), 0.000001)
 		if gained <= 0.0:
 			return false
+		var episode_context: Dictionary = Personality.context(creature) if personality_enabled else {}
 		creature.hydration = snappedf(creature.hydration + gained, 0.000001)
+		if personality_enabled:
+			creature.personality.event_valence = 0.5
+			creature.personality.record(tick, episode_context, "drink", 0.0, gained, 0.0, "water", "drinking")
 		creature.last_action = "drink"
 		creature.last_reason = "ecology.drink"
 		_record({"type": "drink", "creature_id": creature.id, "water_id": water_id, "hydration": gained})
@@ -630,7 +670,7 @@ func to_dict() -> Dictionary:
 	for water in waters:
 		saved_waters.append({"id": water["id"], "pos": Data.pack_vector(water["pos"]), "radius": water["radius"]})
 	var saved_config := {"food_regrow": food_regrow, "food_capacity": food_capacity,
-		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch, "water_enabled": water_enabled}
+		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch, "water_enabled": water_enabled, "personality_enabled": personality_enabled}
 	for key in EVOLUTION_DEFAULTS:
 		saved_config[key] = get(key)
 	for key in Signals.DEFAULTS:
@@ -646,7 +686,7 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -658,6 +698,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			return null
 	if int(data["save_version"]) == 3:
 		data = _migrate_v3(data)
+		if data.is_empty():
+			return null
+	if int(data["save_version"]) == 4:
+		data = _migrate_v4(data)
 		if data.is_empty():
 			return null
 	if not Data.integer_text(data.get("world_seed")):
@@ -682,6 +726,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	for key in ["mutation_rate", "mutation_scale"]:
 		if not Data.number(config.get(key)) or float(config[key]) < 0.0 or float(config[key]) > (1.0 if key == "mutation_rate" else 0.1):
 			return null
+	if not config.get("personality_enabled") is bool:
+		return null
 	if not config.get("water_enabled") is bool:
 		return null
 	if not config.get("food_regrow") is bool:
@@ -729,6 +775,12 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		var creature := Creature.from_dict(entry)
 		if creature == null or not creature.alive or used_ids.has(creature.id) or used_ids.has(creature.genome.id) or creature.id == creature.genome.id or creature.genome.id < 1:
 			return null
+		if result.personality_enabled:
+			if creature.personality == null or Personality.from_dict(entry.get("personality"), result.tick) == null:
+				return null
+			creature.personality_water_enabled = result.water_enabled
+		elif creature.personality != null or not creature.genome.temperament.is_empty():
+			return null
 		if not Signals.valid_received(creature.last_signal, result.tick, int(data["next_id"]), result.signal_count):
 			return null
 		if creature.pos != result._inside(creature.pos, creature.genome.size) or not result._clear(creature.pos, creature.genome.size):
@@ -753,6 +805,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	for creature_id in result.creatures:
 		if not ancestry.records.has(creature_id):
 			return null
+		if result.personality_enabled:
+			for key in result.creatures[creature_id].personality.bonds:
+				if key != "player" and (int(key) == creature_id or not ancestry.records.has(int(key))):
+					return null
 		var heard: Dictionary = result.creatures[creature_id].last_signal
 		if not heard.is_empty() and (int(heard["emitter"]) == creature_id or not ancestry.records.has(int(heard["emitter"]))):
 			return null
@@ -834,7 +890,7 @@ static func _migrate_v2(data: Dictionary) -> Dictionary:
 
 ## Migration never consumes RNG/IDs and never invents water in historical worlds.
 static func _migrate_v3(data: Dictionary) -> Dictionary:
-	if Data.integer(data.get("save_version")) and int(data["save_version"]) == SAVE_VERSION:
+	if Data.integer(data.get("save_version")) and int(data["save_version"]) >= 4:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array or not data.get("foods") is Array:
 		return {}
@@ -849,5 +905,89 @@ static func _migrate_v3(data: Dictionary) -> Dictionary:
 		if not food is Dictionary:
 			return {}
 		food["food_type"] = "legacy"
+	migrated["save_version"] = 4
+	return migrated
+
+## Old worlds retain identical decisions, physiological rules and RNG consumption.
+static func _migrate_v4(data: Dictionary) -> Dictionary:
+	if Data.integer(data.get("save_version")) and int(data["save_version"]) == SAVE_VERSION:
+		return data.duplicate(true)
+	if not data.get("config") is Dictionary:
+		return {}
+	var migrated := data.duplicate(true)
+	migrated["config"]["personality_enabled"] = false
 	migrated["save_version"] = SAVE_VERSION
 	return migrated
+
+func _suspend_brain(creature: Creature) -> void:
+	if creature.brain != null and creature.brain.has_method("suspend_transition"):
+		creature.brain.suspend_transition()
+
+func _personality_seek_food(creature: Creature, sensors: Dictionary, closest: Dictionary, distance: float) -> bool:
+	if not closest.is_empty():
+		if distance <= Obs.reach(creature):
+			_eat(creature, int(closest["id"]))
+			return false
+		creature.heading = (closest["pos"] - creature.pos).angle()
+		creature.last_action = "seek_food"
+		creature.last_reason = "personality.survival"
+	else:
+		if creature.age % 15 == 0:
+			creature.heading += rng.between(-0.9, 0.9)
+		creature.last_action = "explore"
+		creature.last_reason = "personality.survival"
+	return _move(creature, sensors["obstacles"])
+
+func _personality_action(creature: Creature, sensors: Dictionary, motive: String) -> bool:
+	if motive == "rest":
+		creature.last_action = "rest"
+		creature.last_reason = "personality.fatigue"
+		return false
+	if motive == "contact":
+		var nearest: Dictionary = {}
+		var best := INF
+		for other in sensors["creatures"]:
+			var bond: Dictionary = creature.personality.bonds.get(str(other["id"]), {})
+			var score: float = creature.pos.distance_to(other["pos"]) / (1.0 + float(bond.get("familiarity", 0.0)) * maxf(0.0, float(bond.get("valence", 0.0))))
+			if score < best:
+				best = score
+				nearest = other
+		if not nearest.is_empty():
+			var other: Creature = creatures[int(nearest["id"])]
+			creature.last_reason = "personality.contact"
+			if creature.pos.distance_to(other.pos) <= creature.genome.size + other.genome.size + 8.0:
+				creature.last_action = "social_contact"
+				return false
+			creature.heading = (other.pos - creature.pos).angle()
+			creature.last_action = "seek_contact"
+			return _move(creature, sensors["obstacles"])
+	# Searching without a perceived neighbor is an actual exploration, not free contact.
+	creature.last_action = "explore"
+	creature.last_reason = "personality.curiosity"
+	if creature.age % 15 == 0:
+		var turn: float = 0.2 + 0.8 * float(creature.temperament["impulsivity"])
+		creature.heading += rng.between(-turn, turn)
+	return _move(creature, sensors["obstacles"])
+
+func _personality_encounters(creature: Creature, sensors: Dictionary) -> void:
+	for row in sensors["creatures"]:
+		var other: Creature = creatures[int(row["id"])]
+		if not other.alive or creature.pos.distance_to(other.pos) > creature.genome.size + other.genome.size + 8.0 or _occluded(creature.pos, other.pos):
+			continue
+		if creature.personality.meet(str(other.id), tick, 0.25):
+			creature.personality.record(tick, Personality.context(creature), "social_contact", 0.0, 0.0, 0.0, "contact", "encounter")
+
+## A registered interaction requires actual contact range and line of sight.
+## A click far from the organism cannot create familiarity or physical resources.
+func interagir_jogador(creature_id: int, position: Vector2, valencia: float = 0.2) -> bool:
+	if not personality_enabled or not creatures.has(creature_id) or not position.is_finite() or not is_finite(valencia) or absf(valencia) > 1.0:
+		return false
+	var creature: Creature = creatures[creature_id]
+	if not creature.alive or creature.pos.distance_to(position) > Obs.reach(creature) or _occluded(creature.pos, position):
+		return false
+	var where := Personality.context(creature)
+	if not creature.personality.meet("player", tick, valencia):
+		return false
+	creature.personality.stimulus("player", tick)
+	creature.personality.record(tick, where, "player_contact", 0.0, 0.0, 0.0, "player_contact", "player")
+	return true

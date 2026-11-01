@@ -1,0 +1,569 @@
+{
+	"commands": {
+		"order": {},
+		"protection_requested": false
+	},
+	"config": {
+		"food_capacity": 100,
+		"food_regrow": true,
+		"food_regrow_batch": 2,
+		"food_regrow_interval": 10,
+		"max_age": 12000,
+		"max_population": 150,
+		"min_reproduction_age": 300,
+		"mutation_rate": 0.3,
+		"mutation_scale": 0.024999999999999998,
+		"reproduction_cooldown": 300,
+		"reproduction_enabled": true,
+		"signal_cost": 0.3,
+		"signal_count": 4,
+		"signal_enabled": true,
+		"signal_noise": 0.049999999999999996,
+		"signal_range": 180.0,
+		"signal_ttl": 10,
+		"water_enabled": true
+	},
+	"creatures": [
+		{
+			"age": 100,
+			"alive": true,
+			"energy": 106.926808,
+			"genome": {
+				"generation": 0,
+				"hue": 0.266082,
+				"id": 14,
+				"metabolism": 0.9584809999999999,
+				"parents": [],
+				"size": 13.858723999999999,
+				"speed": 51.121970999999995,
+				"version": 1,
+				"vision_fov": 6.202109,
+				"vision_range": 98.863914
+			},
+			"heading": -0.13308,
+			"hydration": 95.329014,
+			"id": 15,
+			"last_action": "rest",
+			"last_reason": "Satiated; conserving energy",
+			"max_energy": 107.71744799999999,
+			"memory": [
+				{
+					"creature_id": 15,
+					"energy": 23.031847,
+					"food_id": 7,
+					"tick": 14,
+					"type": "eat"
+				},
+				{
+					"creature_id": 15,
+					"energy": 6.087928,
+					"food_id": 36,
+					"tick": 91,
+					"type": "eat"
+				}
+			],
+			"name": "Criatura 15",
+			"pos": [
+				362.4265441894531,
+				169.1971893310547
+			],
+			"reproduction_cooldown": 0,
+			"version": 1
+		},
+		{
+			"age": 100,
+			"alive": true,
+			"energy": 107.211406,
+			"genome": {
+				"generation": 0,
+				"hue": 0.202897,
+				"id": 16,
+				"metabolism": 0.964791,
+				"parents": [],
+				"size": 14.620728,
+				"speed": 49.356102,
+				"version": 1,
+				"vision_fov": 2.516787,
+				"vision_range": 188.833588
+			},
+			"heading": -0.673214,
+			"hydration": 94.2817,
+			"id": 17,
+			"last_action": "rest",
+			"last_reason": "Satiated; conserving energy",
+			"max_energy": 109.241456,
+			"memory": [
+				{
+					"creature_id": 17,
+					"energy": 30.247625,
+					"food_id": 27,
+					"tick": 76,
+					"type": "eat"
+				}
+			],
+			"name": "Criatura 17",
+			"pos": [
+				275.9986572265625,
+				508.32958984375
+			],
+			"reproduction_cooldown": 0,
+			"version": 1
+		},
+		{
+			"age": 100,
+			"alive": true,
+			"energy": 97.608632,
+			"genome": {
+				"generation": 0,
+				"hue": 0.733135,
+				"id": 18,
+				"metabolism": 1.5175509999999999,
+				"parents": [],
+				"size": 8.967594,
+				"speed": 30.514629,
+				"version": 1,
+				"vision_fov": 2.725035,
+				"vision_range": 127.999573
+			},
+			"heading": -2.186534,
+			"hydration": 95.8596,
+			"id": 19,
+			"last_action": "rest",
+			"last_reason": "Satiated; conserving energy",
+			"max_energy": 97.935188,
+			"memory": [
+				{
+					"creature_id": 19,
+					"energy": 12,
+					"food_id": 24,
+					"tick": 67,
+					"type": "eat"
+				},
+				{
+					"creature_id": 19,
+					"energy": 19.308652,
+					"food_id": 28,
+					"tick": 98,
+					"type": "eat"
+				}
+			],
+			"name": "Criatura 19",
+			"pos": [
+				380.1379699707031,
+				313.26824951171875
+			],
+			"reproduction_cooldown": 0,
+			"version": 1
+		}
+	],
+	"events": [
+		{
+			"creature_id": 15,
+			"name": "Criatura 15",
+			"tick": 0,
+			"type": "spawn"
+		},
+		{
+			"creature_id": 17,
+			"name": "Criatura 17",
+			"tick": 0,
+			"type": "spawn"
+		},
+		{
+			"creature_id": 19,
+			"name": "Criatura 19",
+			"tick": 0,
+			"type": "spawn"
+		},
+		{
+			"creature_id": 15,
+			"energy": 23.031847,
+			"food_id": 7,
+			"tick": 14,
+			"type": "eat"
+		},
+		{
+			"creature_id": 19,
+			"energy": 12,
+			"food_id": 24,
+			"tick": 67,
+			"type": "eat"
+		},
+		{
+			"creature_id": 17,
+			"energy": 30.247625,
+			"food_id": 27,
+			"tick": 76,
+			"type": "eat"
+		},
+		{
+			"creature_id": 15,
+			"energy": 6.087928,
+			"food_id": 36,
+			"tick": 91,
+			"type": "eat"
+		},
+		{
+			"creature_id": 19,
+			"energy": 19.308652,
+			"food_id": 28,
+			"tick": 98,
+			"type": "eat"
+		}
+	],
+	"foods": [
+		{
+			"energy": 24.0,
+			"food_type": "fruta",
+			"id": 2,
+			"pos": [
+				512.5318603515625,
+				281.5806884765625
+			]
+		},
+		{
+			"energy": 40.0,
+			"food_type": "semente",
+			"id": 3,
+			"pos": [
+				625.871337890625,
+				119.33467864990234
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 4,
+			"pos": [
+				1182.3165283203125,
+				324.65679931640625
+			]
+		},
+		{
+			"energy": 20.0,
+			"food_type": "cogumelo",
+			"id": 5,
+			"pos": [
+				611.7255859375,
+				270.68780517578125
+			]
+		},
+		{
+			"energy": 24.0,
+			"food_type": "fruta",
+			"id": 6,
+			"pos": [
+				1190.061767578125,
+				570.0811157226563
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 8,
+			"pos": [
+				184.57168579101563,
+				460.8843994140625
+			]
+		},
+		{
+			"energy": 20.0,
+			"food_type": "cogumelo",
+			"id": 9,
+			"pos": [
+				22.7915096282959,
+				594.4249877929688
+			]
+		},
+		{
+			"energy": 24.0,
+			"food_type": "fruta",
+			"id": 10,
+			"pos": [
+				1173.9649658203125,
+				143.32412719726563
+			]
+		},
+		{
+			"energy": 40.0,
+			"food_type": "semente",
+			"id": 11,
+			"pos": [
+				859.9673461914063,
+				382.1796875
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 12,
+			"pos": [
+				14.04066276550293,
+				240.15261840820313
+			]
+		},
+		{
+			"energy": 20.0,
+			"food_type": "cogumelo",
+			"id": 13,
+			"pos": [
+				1035.2916259765625,
+				196.97019958496094
+			]
+		},
+		{
+			"energy": 40.0,
+			"food_type": "semente",
+			"id": 20,
+			"pos": [
+				1110.03857421875,
+				501.12396240234375
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 21,
+			"pos": [
+				414.5190734863281,
+				505.56219482421875
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 22,
+			"pos": [
+				1026.0517578125,
+				94.26821899414063
+			]
+		},
+		{
+			"energy": 20.0,
+			"food_type": "cogumelo",
+			"id": 23,
+			"pos": [
+				429.4447937011719,
+				179.8492431640625
+			]
+		},
+		{
+			"energy": 24.0,
+			"food_type": "fruta",
+			"id": 25,
+			"pos": [
+				415.9463806152344,
+				87.66194915771484
+			]
+		},
+		{
+			"energy": 24.0,
+			"food_type": "fruta",
+			"id": 26,
+			"pos": [
+				546.3255004882813,
+				587.397216796875
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 29,
+			"pos": [
+				946.39404296875,
+				194.04354858398438
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 30,
+			"pos": [
+				143.5767822265625,
+				227.62062072753906
+			]
+		},
+		{
+			"energy": 20.0,
+			"food_type": "cogumelo",
+			"id": 31,
+			"pos": [
+				283.6712951660156,
+				620.7236328125
+			]
+		},
+		{
+			"energy": 20.0,
+			"food_type": "cogumelo",
+			"id": 32,
+			"pos": [
+				544.2572631835938,
+				158.345947265625
+			]
+		},
+		{
+			"energy": 24.0,
+			"food_type": "fruta",
+			"id": 33,
+			"pos": [
+				696.1934204101563,
+				75.51899719238281
+			]
+		},
+		{
+			"energy": 24.0,
+			"food_type": "fruta",
+			"id": 34,
+			"pos": [
+				343.4054260253906,
+				200.35000610351563
+			]
+		},
+		{
+			"energy": 40.0,
+			"food_type": "semente",
+			"id": 35,
+			"pos": [
+				1085.6998291015625,
+				382.2059326171875
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 37,
+			"pos": [
+				902.5570068359375,
+				177.8111114501953
+			]
+		},
+		{
+			"energy": 12.0,
+			"food_type": "folha",
+			"id": 38,
+			"pos": [
+				428.0367736816406,
+				115.88704681396484
+			]
+		},
+		{
+			"energy": 20.0,
+			"food_type": "cogumelo",
+			"id": 39,
+			"pos": [
+				780.4906616210938,
+				408.67449951171875
+			]
+		}
+	],
+	"genealogy": [
+		{
+			"birth_tick": 0,
+			"creature_id": 15,
+			"death_reason": "",
+			"death_tick": -1,
+			"generation": 0,
+			"genome": {
+				"generation": 0,
+				"hue": 0.266082,
+				"id": 14,
+				"metabolism": 0.9584809999999999,
+				"parents": [],
+				"size": 13.858723999999999,
+				"speed": 51.121970999999995,
+				"version": 1,
+				"vision_fov": 6.202109,
+				"vision_range": 98.863914
+			},
+			"legacy_root": false,
+			"mutations": [],
+			"name": "Criatura 15",
+			"parents": []
+		},
+		{
+			"birth_tick": 0,
+			"creature_id": 17,
+			"death_reason": "",
+			"death_tick": -1,
+			"generation": 0,
+			"genome": {
+				"generation": 0,
+				"hue": 0.202897,
+				"id": 16,
+				"metabolism": 0.964791,
+				"parents": [],
+				"size": 14.620728,
+				"speed": 49.356102,
+				"version": 1,
+				"vision_fov": 2.516787,
+				"vision_range": 188.833588
+			},
+			"legacy_root": false,
+			"mutations": [],
+			"name": "Criatura 17",
+			"parents": []
+		},
+		{
+			"birth_tick": 0,
+			"creature_id": 19,
+			"death_reason": "",
+			"death_tick": -1,
+			"generation": 0,
+			"genome": {
+				"generation": 0,
+				"hue": 0.733135,
+				"id": 18,
+				"metabolism": 1.5175509999999999,
+				"parents": [],
+				"size": 8.967594,
+				"speed": 30.514629,
+				"version": 1,
+				"vision_fov": 2.725035,
+				"vision_range": 127.999573
+			},
+			"legacy_root": false,
+			"mutations": [],
+			"name": "Criatura 19",
+			"parents": []
+		}
+	],
+	"next_id": 40,
+	"obstacles": [
+		{
+			"pos": [
+				784.4080200195313,
+				582.355712890625
+			],
+			"radius": 16.903506999999998
+		},
+		{
+			"pos": [
+				1095.9952392578125,
+				342.4425354003906
+			],
+			"radius": 19.288197
+		}
+	],
+	"pet_id": 15,
+	"rng_state": {
+		"state": "1256086878041553163"
+	},
+	"save_version": 4,
+	"signal_log": [],
+	"size": [
+		1200.0,
+		760.0
+	],
+	"tick": 100,
+	"waters": [
+		{
+			"id": 1,
+			"pos": [
+				505.79449462890625,
+				397.29345703125
+			],
+			"radius": 32.627224
+		}
+	],
+	"world_seed": "20261101"
+}

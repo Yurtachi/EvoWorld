@@ -450,3 +450,25 @@ const E1_RAZOES := {
 	"ecology.drink_empty": "reason_drink_empty", "ecology.no_water": "reason_no_water",
 	"ecology.thirst": "reason_thirst", "ecology.food_toxic": "reason_food_toxic"
 }
+
+
+# E2-SIM — chaves aditivas; integração nos formatadores pertence à UI.
+const E2_CATALOGO := {
+	"fatigue": "Fadiga", "boredom": "Necessidade de estímulo", "loneliness": "Necessidade de contato",
+	"gene_curiosity": "Curiosidade", "gene_caution": "Cautela",
+	"gene_sociability": "Sociabilidade", "gene_impulsivity": "Impulsividade",
+	"action_seek_contact": "Aproximar-se de outra criatura", "action_social_contact": "Contato com outra criatura",
+	"action_player_contact": "Contato com o cuidador",
+	"reason_fatigue": "Fadiga elevada; descansa e reduz o gasto de energia.",
+	"reason_curiosity": "Busca estímulo por movimento e exploração do ambiente.",
+	"reason_contact": "Busca contato com uma criatura percebida.",
+	"reason_survival": "Fome ou sede crítica; prioriza recursos físicos.",
+	"expression_valence": "Valência observada", "expression_arousal": "Ativação observada",
+	"expression_note": "A expressão aparente deriva das necessidades e dos eventos registrados.",
+	"episodic_memory": "Memória episódica", "familiarity": "Familiaridade",
+	"food_preference": "Preferência alimentar aprendida"
+}
+const E2_RAZOES := {
+	"personality.fatigue": "reason_fatigue", "personality.curiosity": "reason_curiosity",
+	"personality.contact": "reason_contact", "personality.survival": "reason_survival"
+}

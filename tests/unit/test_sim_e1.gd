@@ -98,7 +98,7 @@ func _legacy_and_expansion(f: Array) -> void:
 		if version == 1:
 			legacy.erase("genealogy")
 		var migrated := World.from_dict(legacy)
-		_check(migrated != null and migrated.to_dict().save_version == 4 and migrated.creatures.size() == 3, "Migração v%d falhou" % version, f)
+		_check(migrated != null and migrated.to_dict().save_version == World.SAVE_VERSION and migrated.creatures.size() == 3, "Migração v%d falhou" % version, f)
 
 func _food_effects(f: Array) -> void:
 	var measured: Array = []
@@ -274,7 +274,7 @@ func _new_world_and_round_trip(f: Array) -> void:
 	file.store_string("corrompido")
 	file.close()
 	var recovered: Dictionary = store.load_world()
-	_check(recovered.ok and recovered.recovered and recovered.world.to_dict().save_version == 4, "Backup v4 não recuperou corrupção", f)
+	_check(recovered.ok and recovered.recovered and recovered.world.to_dict().save_version == World.SAVE_VERSION, "Backup v4 não recuperou corrupção", f)
 	for suffix in ["/world.json", "/world.json.bak"]:
 		DirAccess.remove_absolute(directory + suffix)
 	DirAccess.remove_absolute(directory)

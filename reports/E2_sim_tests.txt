@@ -1,0 +1,20 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+test_behavior_learn.gd: ok
+test_comandos_sobrevivencia.gd: ok
+test_dialogo.gd: ok
+test_evolution.gd: ok
+test_save_store.gd: ok
+test_signal_channel.gd: ok
+test_sim_e1.gd: ok
+E2 physical rest_cost=0.041760 movement_cost=0.081600 fatigue_after_rest=0.925000 boredom_after_move=0.939500
+E2 experience mushroom_a=-0.530180 mushroom_b=-0.848288 choice_a=1 choice_b=2
+E2 profiles seed=17 unique=12 actions={"explore":10,"rest":2} neutral_actions=1
+E2 profiles seed=89 unique=12 actions={"explore":5,"rest":2,"seek_contact":5} neutral_actions=1
+E2 profiles seed=9181 unique=12 actions={"explore":4,"rest":5,"seek_contact":3} neutral_actions=1
+E2 profiles seed=20261101 unique=12 actions={"explore":5,"rest":5,"seek_contact":2} neutral_actions=1
+test_sim_e2.gd: ok
+test_sim_review.gd: ok
+test_sim_world.gd: ok
+test_smoke.gd: ok
+test_textos.gd: ok
+process_exit_code=0

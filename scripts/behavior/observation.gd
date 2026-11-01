@@ -45,7 +45,7 @@ static func features(creature, sensors: Dictionary, world_size: Vector2) -> Dict
 	var best_score := INF
 	for food in sensors.get("foods", []):
 		var distance: float = creature.pos.distance_to(food["pos"])
-		var score: float = (distance + 1.0) / float(FoodCatalog.PARAMETERS[food.get("food_type", "legacy")]["palatability"])
+		var score: float = food_score(creature, food, distance)
 		if score < best_score:
 			best_score = score
 			closest_distance = distance
@@ -111,3 +111,11 @@ static func _segment_hits(start: Vector2, finish: Vector2, center: Vector2, radi
 	var delta := finish - start
 	var fraction := 0.0 if delta.is_zero_approx() else clampf((center - start).dot(delta) / delta.length_squared(), 0.0, 1.0)
 	return (start + delta * fraction).distance_squared_to(center) < radius * radius
+
+## Shared appraisal keeps the heuristic and pluggable brain on the same physical target.
+static func food_score(creature, food: Dictionary, distance: float) -> float:
+	var food_type: String = food.get("food_type", "legacy")
+	var weight := 1.0
+	if creature.personality != null:
+		weight = creature.personality.food_weight(creature, food_type)
+	return (distance + 1.0) / (float(FoodCatalog.PARAMETERS[food_type]["palatability"]) * weight)
