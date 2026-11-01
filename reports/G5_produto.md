@@ -33,3 +33,13 @@ Comunicação útil entre criaturas; adaptação evolutiva medida; superar a heu
 
 ## Próxima ação segura
 Quando houver cota: rodar a revisão final independente (`reports/review_final.md`), benchmark gráfico de FPS (30/60/100) e experimento de comunicação com tarefa que realmente exija coordenação.
+
+## Revisão final independente (subagente Claude, somente leitura)
+Executada porque Codex e AGY estavam sem cota. 2 graves, 8 médios, 4 menores.
+- **Corrigido** (commit "fix: ordens do jogador…", teste `test_comandos_sobrevivencia.gd`, comprovado que falha sem o fix): ordens `parar/chamar/seguir/brincar` impediam o pet de comer e podiam prendê-lo em obstáculo até morrer. Agora a fome acima de 0,6 suspende a ordem e todas expiram (chamar 600, brincar/parar 300, seguir 3000 ticks).
+- **Abertos (não corrigidos)**:
+  - Gate H1/H2 do G2 usa o braço `learner_trained` que continua aprendendo no holdout (adaptação online; o relatório já declara isso); o braço congelado vence o aleatório em alimento 10/10, mas o critério não foi reescrito após ver resultados.
+  - Contador de comida do experimento conta ingestões com ganho 0 (energia cheia).
+  - Save: limite de 32 MiB pode ser atingido antes do teto de 100000 registros de genealogia; saves são confiáveis apenas localmente (checksum detecta corrupção, não adulteração; `max_energy` não amarrado ao genoma).
+  - `proteger` não persiste na UI; recibo de `chamar/seguir` não mostra o alvo; `descendants()` O(n) a cada 0,5 s no Laboratório; teto de 150 criaturas fixo na UI; RegEx recompilada por frame em `Textos.razao`.
+  - Proveniência: `dirt.png` e `water.png` são idênticos (provável erro de fatiamento); hashes de `white01/10/20` duplicados.
