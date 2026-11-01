@@ -39,7 +39,9 @@ func to_dict() -> Dictionary:
 	for gene in BOUNDS:
 		result[gene] = get(gene)
 	if not temperament.is_empty():
-		result["temperament"] = temperament.duplicate()
+		# Use the same numeric representation as the reader and ancestry serializer,
+		# including mutations that land exactly on 0 or 1.
+		result["temperament"] = Data.restore_precision(temperament)
 	return result
 
 static func valid_temperament(value: Variant) -> bool:

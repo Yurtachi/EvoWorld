@@ -51,21 +51,32 @@ static func restore_precision(value: Variant) -> Variant:
 		return result
 	return value
 
-static func json_data(value: Variant, depth: int = 0) -> bool:
-	if depth > 12:
+static func json_data(value: Variant, depth: int = 0, budget: Array = []) -> bool:
+	# Bound hostile/unknown fields before any migration duplicates them. The node
+	# budget is shared by recursion, including repeated references and cycles.
+	if budget.is_empty():
+		budget = [8000000]
+	budget[0] -= 1
+	if depth > 12 or budget[0] < 0:
 		return false
-	if value == null or value is bool or value is String:
+	if value is String:
+		return value.length() <= 4096
+	if value == null or value is bool:
 		return true
 	if number(value):
 		return true
 	if value is Array:
+		if value.size() > 100000:
+			return false
 		for item in value:
-			if not json_data(item, depth + 1):
+			if not json_data(item, depth + 1, budget):
 				return false
 		return true
 	if value is Dictionary:
+		if value.size() > 128:
+			return false
 		for key in value:
-			if not key is String or not json_data(value[key], depth + 1):
+			if not key is String or key.length() > 128 or not json_data(value[key], depth + 1, budget):
 				return false
 		return true
 	return false

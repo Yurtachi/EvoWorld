@@ -10,6 +10,7 @@ const STIMULUS_LIMIT := 24
 const CONTEXT_LIMIT := 45 # five food types x three energy x three hydration buckets
 const ENCOUNTER_INTERVAL := 30
 const EVENTS := ["metabolism", "food", "toxic_food", "water", "rest", "exploration", "contact", "collision", "player_contact", "resource_contention"]
+const ROUTINE_SOURCES := ["body", "movement", "rest"]
 const SOURCES := ["body", "ingestion", "drinking", "movement", "rest", "encounter", "player"]
 const ACTIONS := ["social_approach", "social_follow", "social_avoid", "social_share", "social_compete", "rest", "explore", "seek_contact", "social_contact", "seek_food", "seek_water", "eat", "drink", "forward", "turn_left", "turn_right", "avoid_obstacle", "player_contact", "emit_signal_0", "emit_signal_1", "emit_signal_2", "emit_signal_3", "emit_signal_4", "emit_signal_5", "emit_signal_6", "emit_signal_7"]
 
@@ -40,23 +41,38 @@ func advance(tick: int, traits: Dictionary) -> void:
 	boredom = _unit(boredom + 0.0015 * (0.5 + float(traits["curiosity"])))
 	loneliness = _unit(loneliness + 0.001 * (0.25 + float(traits["sociability"])))
 	event_valence = snappedf(event_valence * 0.97, 0.000001)
-	for key in habituation.keys():
+	var expired: Array = []
+	for key in habituation:
 		var item: Dictionary = habituation[key]
-		item["level"] = _unit(float(item["level"]) - 0.002)
+		item["level"] = snappedf(clampf(float(item["level"]) - 0.002, 0.0, 1.0), 0.000001)
 		if tick - int(item["last_tick"]) > 600:
-			habituation.erase(key)
-	for key in bonds.keys():
+			expired.append(key)
+	for key in expired:
+		habituation.erase(key)
+	expired.clear()
+	for key in bonds:
 		var item: Dictionary = bonds[key]
-		item["familiarity"] = _unit(float(item["familiarity"]) - 0.00002)
+		item["familiarity"] = snappedf(clampf(float(item["familiarity"]) - 0.00002, 0.0, 1.0), 0.000001)
 		item["valence"] = snappedf(float(item["valence"]) * 0.9995, 0.000001)
 		if tick - int(item["last_tick"]) > 12000 and float(item["familiarity"]) <= 0.0:
-			bonds.erase(key)
+			expired.append(key)
+	for key in expired:
+		bonds.erase(key)
 	# Strong measured outcomes persist longer than ordinary metabolic ticks.
-	for index in range(episodes.size() - 1, -1, -1):
+	# Episodes are ordered by tick (validated on load), so everything newer than
+	# the ordinary lifetime is retained without inspecting it.
+	var oldest_kept := tick - 300
+	var index := 0
+	while index < episodes.size():
 		var item: Dictionary = episodes[index]
+		var born := int(item["tick"])
+		if born >= oldest_kept:
+			break
 		var relevant: bool = absf(float(item["consequence"]["energy"])) >= 1.0 or item["reward_source"] in ["encounter", "player", "drinking"]
-		if tick - int(item["tick"]) > (EPISODE_MAX_AGE if relevant else 300):
+		if tick - born > (EPISODE_MAX_AGE if relevant else 300):
 			episodes.remove_at(index)
+		else:
+			index += 1
 
 ## Repetition changes sensory novelty, never nutritional reward or vital reflexes.
 func stimulus(key: String, tick: int) -> float:
@@ -108,7 +124,7 @@ func record(tick: int, where: Dictionary, action: String, de: float, dh: float, 
 		# Keep recent consequential episodes over routine metabolic samples.
 		var victim := 0
 		for index in range(episodes.size() - 1):
-			if episodes[index]["reward_source"] in ["body", "movement", "rest"]:
+			if episodes[index]["reward_source"] in ROUTINE_SOURCES:
 				victim = index
 				break
 		episodes.remove_at(victim)

@@ -702,6 +702,10 @@ func to_dict() -> Dictionary:
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
+	# Migration must not duplicate unbounded structures or silently discard
+	# hostile data in fields introduced by later versions.
+	if not Data.json_data(data):
+		return null
 	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
