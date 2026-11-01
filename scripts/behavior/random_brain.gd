@@ -8,8 +8,9 @@ const VERSION := 1
 
 var last_reason: String = ""
 
-func decide(_creature, _obs: Dictionary, rng) -> int:
-	var action := clampi(int(rng.between(0.0, float(Actions.COUNT))), 0, Actions.COUNT - 1)
+func decide(_creature, obs: Dictionary, rng) -> int:
+	var count: int = obs.get("action_count", Actions.COUNT)
+	var action := clampi(int(rng.between(0.0, float(count))), 0, count - 1)
 	last_reason = "brain.random"
 	return action
 

@@ -14,7 +14,7 @@ const Actions = preload("res://scripts/behavior/actions.gd")
 const TRAIN_SEEDS := [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010]
 const HOLDOUT_SEEDS := [7001, 7002, 7003, 7004, 7005, 7006, 7007, 7008, 7009, 7010]
 const CONFIG := {
-	"reproduction_enabled": false,
+	"reproduction_enabled": false, "signal_enabled": false,
 	"creature_count": 8, "food_count": 30, "food_capacity": 40, "food_regrow": true,
 	"food_regrow_interval": 10, "food_regrow_batch": 1, "obstacle_count": 10
 }

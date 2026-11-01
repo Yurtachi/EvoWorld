@@ -12,7 +12,7 @@ const Obs = preload("res://scripts/behavior/observation.gd")
 const Actions = preload("res://scripts/behavior/actions.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
 const KIND := "q_learning"
-const VERSION := 1
+const VERSION := 2
 const TABLE_SIZE := Obs.STATE_COUNT * Actions.COUNT
 
 var alpha: float = snappedf(0.1, 0.000001)
@@ -37,35 +37,36 @@ func _init() -> void:
 func epsilon() -> float:
 	return maxf(epsilon_min, epsilon_start * epsilon_decay / (epsilon_decay + float(steps)))
 
-func greedy(state: int) -> int:
+func greedy(state: int, action_count: int = Actions.COUNT) -> int:
 	var best := 0
 	var best_value: float = q[state * Actions.COUNT]
-	for action in range(1, Actions.COUNT):
+	for action in range(1, action_count):
 		var value: float = q[state * Actions.COUNT + action]
 		if value > best_value:
 			best_value = value
 			best = action
 	return best
 
-func max_q(state: int) -> float:
-	return q[state * Actions.COUNT + greedy(state)]
+func max_q(state: int, action_count: int = Actions.COUNT) -> float:
+	return q[state * Actions.COUNT + greedy(state, action_count)]
 
 func value(state: int, action: int) -> float:
 	return q[state * Actions.COUNT + action]
 
 func decide(creature, obs: Dictionary, rng) -> int:
 	var state: int = obs["state"]
+	var action_count: int = obs.get("action_count", Actions.COUNT)
 	if prev_state >= 0:
 		var reward: float = creature.energy - prev_energy
 		total_reward = snappedf(total_reward + reward, 0.000001)
 		if learning:
-			update(prev_state, prev_action, reward, state, false)
-	var action := greedy(state)
+			update(prev_state, prev_action, reward, state, false, action_count)
+	var action := greedy(state, action_count)
 	var explored := false
 	if learning:
 		var eps := epsilon()
 		if rng.between(0.0, 1.0) < eps:
-			action = clampi(int(rng.between(0.0, float(Actions.COUNT))), 0, Actions.COUNT - 1)
+			action = clampi(int(rng.between(0.0, float(action_count))), 0, action_count - 1)
 			explored = true
 	steps += 1
 	prev_state = state
@@ -84,17 +85,21 @@ func on_death(creature) -> void:
 	prev_state = -1
 	prev_action = -1
 
-func update(state: int, action: int, reward: float, next_state: int, terminal: bool) -> void:
+func update(state: int, action: int, reward: float, next_state: int, terminal: bool, action_count: int = Actions.COUNT) -> void:
 	var index := state * Actions.COUNT + action
-	var target := reward if terminal else reward + gamma * max_q(next_state)
+	var target := reward if terminal else reward + gamma * max_q(next_state, action_count)
 	q[index] = snappedf(float(q[index]) + alpha * (target - float(q[index])), 0.000001)
 
 ## Forget the in-flight transition (e.g. when a checkpoint is copied into a new body).
 func reset_episode() -> void:
+	suspend_transition()
+	total_reward = 0.0
+
+## Player control cancels the pending transition without erasing reward history.
+func suspend_transition() -> void:
 	prev_state = -1
 	prev_action = -1
 	prev_energy = 0.0
-	total_reward = 0.0
 
 func copy():
 	return from_dict(to_dict())
@@ -109,6 +114,8 @@ func to_dict() -> Dictionary:
 	}
 
 static func from_dict(data: Dictionary):
+	if Data.integer(data.get("version")) and int(data["version"]) == 1:
+		data = _migrate_v1(data)
 	if not data.get("kind") is String or data["kind"] != KIND or not Data.integer(data.get("version")) or int(data["version"]) != VERSION:
 		return null
 	for field in ["alpha", "gamma", "epsilon_start", "epsilon_min", "epsilon_decay", "death_penalty", "prev_energy", "total_reward"]:
@@ -149,3 +156,19 @@ static func from_dict(data: Dictionary):
 	result.prev_energy = snappedf(float(data["prev_energy"]), 0.000001)
 	result.total_reward = snappedf(float(data["total_reward"]), 0.000001)
 	return result
+
+static func _migrate_v1(data: Dictionary) -> Dictionary:
+	if not data.get("q") is Array or data["q"].size() != 48 * 5:
+		return {}
+	if not Data.integer(data.get("prev_state"), -1) or int(data["prev_state"]) >= 48 or not Data.integer(data.get("prev_action"), -1) or int(data["prev_action"]) >= 5:
+		return {}
+	var migrated := data.duplicate(true)
+	var table: Array = []
+	table.resize(TABLE_SIZE)
+	table.fill(0.0)
+	for state in range(48):
+		for action in range(5):
+			table[state * Actions.COUNT + action] = data["q"][state * 5 + action]
+	migrated["q"] = table
+	migrated["version"] = VERSION
+	return migrated

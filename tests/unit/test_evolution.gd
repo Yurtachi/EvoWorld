@@ -278,7 +278,7 @@ func _migration(failures: Array) -> void:
 	var restored := World.from_dict(JSON.parse_string(JSON.stringify(old)))
 	_check(restored != null, "Save v1 não migrou", failures)
 	if restored == null: return
-	_check(restored.to_dict().save_version == 2 and restored.genealogy.records.size() == 2, "Migração não adicionou genealogia v2", failures)
+	_check(restored.to_dict().save_version == World.SAVE_VERSION and restored.genealogy.records.size() == 2, "Migração não adicionou genealogia v2", failures)
 	_check(restored.pet_id == world.pet_id and restored.rng.to_dict() == world.rng.to_dict(), "Migração alterou identidade ou RNG", failures)
 	_check(restored.creatures[restored.pet_id].brain.to_dict() == world.creatures[world.pet_id].brain.to_dict(), "Migração perdeu aprendizado", failures)
 	_check(_snapshot(restored) == _snapshot(world), "Migração alterou campos existentes", failures)

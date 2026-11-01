@@ -4,6 +4,7 @@ extends RefCounted
 const Genes = preload("res://scripts/creature/genome.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
 const Brains = preload("res://scripts/behavior/brains.gd")
+const Signals = preload("res://scripts/communication/signal_channel.gd")
 const MEMORY_LIMIT := 16
 
 var id: int = 0
@@ -19,6 +20,7 @@ var genome: Genes = Genes.new()
 var last_action: String = "rest"
 var last_reason: String = "Newly spawned"
 var memory: Array = []
+var last_signal: Dictionary = {}
 ## Optional pluggable policy (see scripts/behavior/brains.gd); null = built-in heuristic.
 var brain = null
 var hunger: float:
@@ -40,9 +42,13 @@ func to_dict() -> Dictionary:
 	# Optional key: heuristic creatures keep the original snapshot layout.
 	if brain != null:
 		result["brain"] = brain.to_dict()
+	if not last_signal.is_empty():
+		result["last_signal"] = last_signal.duplicate(true)
 	return result
 
 static func from_dict(data: Dictionary) -> SimCreature:
+	if not Signals.valid_received(data.get("last_signal", {})):
+		return null
 	if not Data.integer(data.get("reproduction_cooldown", 0)):
 		return null
 	if not Data.integer(data.get("version")) or int(data["version"]) != 1 or not Data.integer(data.get("id"), 1) or not Data.integer(data.get("age")):
@@ -88,4 +94,5 @@ static func from_dict(data: Dictionary) -> SimCreature:
 	result.last_action = data["last_action"]
 	result.last_reason = data["last_reason"]
 	result.memory = Data.restore_precision(data["memory"])
+	result.last_signal = Data.restore_precision(data.get("last_signal", {}))
 	return result

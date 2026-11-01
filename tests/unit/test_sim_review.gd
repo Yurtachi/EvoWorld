@@ -98,7 +98,7 @@ func _grid(failures: Array) -> void:
 	for index in range(15):
 		world.step()
 		for creature in world.creatures.values():
-			var expected := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger}
+			var expected := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger, "signal": {}, "action_count": 5}
 			for food in world.foods:
 				if world._visible(creature, food["pos"]) and not world._occluded(creature.pos, food["pos"]):
 					expected["foods"].append(food)
