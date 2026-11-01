@@ -1,0 +1,104 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+EvoWorld learn_eval  dev=false  max_ticks=3000  creatures=8
+train pass=0 seed=1001 food/creature=8.88 survival=1532 eps=0.059 (1459 ms)
+train pass=0 seed=1002 food/creature=27.63 survival=2508 eps=0.025 (3326 ms)
+train pass=0 seed=1003 food/creature=29.75 survival=2662 eps=0.020 (5778 ms)
+train pass=0 seed=1004 food/creature=31.13 survival=2760 eps=0.020 (8337 ms)
+train pass=0 seed=1005 food/creature=38.63 survival=2819 eps=0.020 (10902 ms)
+train pass=0 seed=1006 food/creature=31.63 survival=2857 eps=0.020 (14256 ms)
+train pass=0 seed=1007 food/creature=37.75 survival=2846 eps=0.020 (18388 ms)
+train pass=0 seed=1008 food/creature=31.88 survival=2741 eps=0.020 (21900 ms)
+train pass=0 seed=1009 food/creature=35.75 survival=2994 eps=0.020 (24993 ms)
+train pass=0 seed=1010 food/creature=31.25 survival=2410 eps=0.020 (27571 ms)
+train pass=1 seed=1001 food/creature=34.88 survival=2706 eps=0.020 (30387 ms)
+train pass=1 seed=1002 food/creature=32.88 survival=2293 eps=0.020 (32904 ms)
+train pass=1 seed=1003 food/creature=33.75 survival=2678 eps=0.020 (35652 ms)
+train pass=1 seed=1004 food/creature=37.50 survival=2540 eps=0.020 (38382 ms)
+train pass=1 seed=1005 food/creature=37.25 survival=2899 eps=0.020 (41467 ms)
+train pass=1 seed=1006 food/creature=38.50 survival=3000 eps=0.020 (44631 ms)
+train pass=1 seed=1007 food/creature=33.63 survival=2717 eps=0.020 (47966 ms)
+train pass=1 seed=1008 food/creature=38.25 survival=3000 eps=0.020 (51895 ms)
+train pass=1 seed=1009 food/creature=33.63 survival=2557 eps=0.020 (55090 ms)
+train pass=1 seed=1010 food/creature=14.38 survival=2222 eps=0.020 (57473 ms)
+train pass=2 seed=1001 food/creature=35.88 survival=2581 eps=0.020 (60301 ms)
+train pass=2 seed=1002 food/creature=31.13 survival=2490 eps=0.020 (63091 ms)
+train pass=2 seed=1003 food/creature=36.25 survival=2791 eps=0.020 (66228 ms)
+train pass=2 seed=1004 food/creature=36.00 survival=2753 eps=0.020 (70481 ms)
+train pass=2 seed=1005 food/creature=37.50 survival=2774 eps=0.020 (74247 ms)
+train pass=2 seed=1006 food/creature=37.38 survival=3000 eps=0.020 (77846 ms)
+train pass=2 seed=1007 food/creature=38.25 survival=3000 eps=0.020 (81165 ms)
+train pass=2 seed=1008 food/creature=38.13 survival=2888 eps=0.020 (83945 ms)
+train pass=2 seed=1009 food/creature=37.13 survival=3000 eps=0.020 (86017 ms)
+train pass=2 seed=1010 food/creature=32.00 survival=2896 eps=0.020 (88201 ms)
+train pass=3 seed=1001 food/creature=36.38 survival=2754 eps=0.020 (90932 ms)
+train pass=3 seed=1002 food/creature=28.75 survival=2330 eps=0.020 (94785 ms)
+train pass=3 seed=1003 food/creature=38.00 survival=3000 eps=0.020 (99680 ms)
+train pass=3 seed=1004 food/creature=36.50 survival=2636 eps=0.020 (103492 ms)
+train pass=3 seed=1005 food/creature=38.13 survival=2625 eps=0.020 (107114 ms)
+train pass=3 seed=1006 food/creature=39.13 survival=3000 eps=0.020 (109965 ms)
+train pass=3 seed=1007 food/creature=37.25 survival=2951 eps=0.020 (113961 ms)
+train pass=3 seed=1008 food/creature=34.38 survival=2476 eps=0.020 (117515 ms)
+train pass=3 seed=1009 food/creature=29.50 survival=2522 eps=0.020 (121291 ms)
+train pass=3 seed=1010 food/creature=36.38 survival=2535 eps=0.020 (124409 ms)
+eval train   random           food/creature=2.39 survival=1598 (152692 ms)
+eval train   heuristic        food/creature=14.90 survival=2861 (179109 ms)
+eval train   learner_naive    food/creature=1.04 survival=1234 (198086 ms)
+eval train   learner_trained  food/creature=35.27 survival=2702 (232914 ms)
+eval train   learner_frozen   food/creature=20.14 survival=2345 (260553 ms)
+eval holdout random           food/creature=2.26 survival=1474 (281965 ms)
+eval holdout heuristic        food/creature=15.73 survival=2931 (312648 ms)
+eval holdout learner_naive    food/creature=0.97 survival=1181 (328275 ms)
+eval holdout learner_trained  food/creature=33.48 survival=2682 (349509 ms)
+eval holdout learner_frozen   food/creature=14.69 survival=2188 (372129 ms)
+
+training curve: first pass food/creature=30.43 survival=2613 | last pass food/creature=35.44 survival=2683
+
+[train] condition | food/creature mean (sd) | survival ticks mean (sd) | survivors/8 | energy gained/creature
+  random           |   2.39 ( 0.87) |  1597.9 ( 219.7) | 1.30 | 65.1
+  heuristic        |  14.90 ( 1.69) |  2861.4 ( 109.8) | 7.30 | 259.6
+  learner_naive    |   1.04 ( 0.75) |  1234.3 ( 165.7) | 0.60 | 22.2
+  learner_trained  |  35.27 ( 2.10) |  2702.3 ( 197.5) | 6.30 | 248.9
+  learner_frozen   |  20.14 ( 7.49) |  2345.0 ( 418.0) | 4.50 | 170.4
+  trained_vs_random_food         wins 10/10  p=0.0010  mean_diff=32.89
+  trained_vs_random_survival     wins 10/10  p=0.0010  mean_diff=1104.44
+  trained_vs_naive_food          wins 10/10  p=0.0010  mean_diff=34.24
+  naive_vs_random_food           wins 1/10  p=0.9990  mean_diff=-1.35
+  frozen_vs_random_food          wins 10/10  p=0.0010  mean_diff=17.75
+  trained_vs_heuristic_food      wins 10/10  p=0.0010  mean_diff=20.38
+  trained_vs_heuristic_survival  wins 1/10  p=0.9990  mean_diff=-159.05
+  trained_vs_random_energy       wins 10/10  p=0.0010  mean_diff=183.78
+  trained_vs_heuristic_energy    wins 5/10  p=0.6230  mean_diff=-10.65
+  survival ratio trained/random=1.69  H1=true  H2=true  H3(naive>random)=false
+
+[holdout] condition | food/creature mean (sd) | survival ticks mean (sd) | survivors/8 | energy gained/creature
+  random           |   2.26 ( 1.18) |  1473.7 ( 348.1) | 1.20 | 61.6
+  heuristic        |  15.73 ( 1.29) |  2930.5 ( 132.6) | 7.50 | 282.3
+  learner_naive    |   0.97 ( 0.94) |  1181.1 ( 191.7) | 0.40 | 24.7
+  learner_trained  |  33.48 ( 4.73) |  2682.1 ( 305.6) | 6.10 | 260.2
+  learner_frozen   |  14.69 ( 9.01) |  2188.0 ( 383.0) | 3.20 | 147.3
+  trained_vs_random_food         wins 10/10  p=0.0010  mean_diff=31.21
+  trained_vs_random_survival     wins 10/10  p=0.0010  mean_diff=1208.45
+  trained_vs_naive_food          wins 10/10  p=0.0010  mean_diff=32.50
+  naive_vs_random_food           wins 2/10  p=0.9893  mean_diff=-1.29
+  frozen_vs_random_food          wins 10/10  p=0.0010  mean_diff=12.43
+  trained_vs_heuristic_food      wins 10/10  p=0.0010  mean_diff=17.75
+  trained_vs_heuristic_survival  wins 2/10  p=0.9893  mean_diff=-248.40
+  trained_vs_random_energy       wins 10/10  p=0.0010  mean_diff=198.59
+  trained_vs_heuristic_energy    wins 2/10  p=0.9893  mean_diff=-22.16
+  survival ratio trained/random=1.82  H1=true  H2=true  H3(naive>random)=false
+
+PRE-REGISTERED SUCCESS (holdout H1 and H2): true
+
+trained greedy policy (energy=mid):
+  food=none       clear->turn_right obstacle->turn_left
+  food=reach      clear->eat        obstacle->eat
+  food=near_left  clear->turn_left  obstacle->turn_left
+  food=near_ahead clear->turn_right obstacle->turn_left
+  food=near_right clear->turn_right obstacle->turn_right
+  food=far_left   clear->turn_left  obstacle->turn_left
+  food=far_ahead  clear->turn_left  obstacle->turn_left
+  food=far_right  clear->turn_right obstacle->turn_right
+trained_brain.json sha256=a1c83a19f05ac2f54b16fbfb051480794747a919777bc9314e4694338fa9b7db
+elapsed_ms=372144
+EXPERIMENT_EXIT_CODE=0

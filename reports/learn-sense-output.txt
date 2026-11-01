@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+creatures=30 indexed_ms=2.656 exhaustive_ms=5.414 equal_snapshot=true
+creatures=100 indexed_ms=7.955 exhaustive_ms=29.833 equal_snapshot=true
+creatures=300 indexed_ms=11.433 exhaustive_ms=171.899 equal_snapshot=true
+creatures=1000 indexed_ms=37.291 exhaustive_ms=2668.927 equal_snapshot=true
+BENCHMARK_EXIT_CODE=0

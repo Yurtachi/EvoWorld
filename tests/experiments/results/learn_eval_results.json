@@ -1,0 +1,2700 @@
+{
+	"elapsed_ms": 372144,
+	"evaluation": {
+		"holdout": {
+			"heuristic": [
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						130,
+						19798
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 265.88813675,
+					"food_mean": 16.25,
+					"seed": 7001,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						130,
+						16399
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 319.730913,
+					"food_mean": 16.25,
+					"seed": 7002,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						134,
+						16478
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 295.176396125,
+					"food_mean": 16.75,
+					"seed": 7003,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						99,
+						12498
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 225.325253625,
+					"food_mean": 12.375,
+					"seed": 7004,
+					"survival_mean": 2614.5,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						133,
+						14853
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 321.13369575,
+					"food_mean": 16.625,
+					"seed": 7005,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						133,
+						16632
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 303.07443925000007,
+					"food_mean": 16.625,
+					"seed": 7006,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						129,
+						18153
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 275.970892375,
+					"food_mean": 16.125,
+					"seed": 7007,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						124,
+						17106
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 255.55349812499998,
+					"food_mean": 15.5,
+					"seed": 7008,
+					"survival_mean": 2774.25,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						121,
+						15688
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 289.022146375,
+					"food_mean": 15.125,
+					"seed": 7009,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						125,
+						15304
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 272.4192055,
+					"food_mean": 15.625,
+					"seed": 7010,
+					"survival_mean": 2916.25,
+					"survivors": 7,
+					"ticks": 3000
+				}
+			],
+			"learner_frozen": [
+				{
+					"action_counts": [
+						286,
+						1263,
+						4076,
+						6646,
+						3291
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 70.557953,
+					"food_mean": 6.25,
+					"seed": 7001,
+					"survival_mean": 1946.0,
+					"survivors": 2,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						343,
+						2555,
+						3266,
+						9430,
+						1056
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 142.70583925,
+					"food_mean": 16.625,
+					"seed": 7002,
+					"survival_mean": 2081.75,
+					"survivors": 4,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						42,
+						3343,
+						4432,
+						14116,
+						459
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 263.7114535,
+					"food_mean": 29.75,
+					"seed": 7003,
+					"survival_mean": 2799.125,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						58,
+						1674,
+						4039,
+						8167,
+						2796
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 124.00862137499999,
+					"food_mean": 9.875,
+					"seed": 7004,
+					"survival_mean": 2092.625,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						649,
+						2872,
+						5477,
+						2729
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 78.49360425,
+					"food_mean": 3.625,
+					"seed": 7005,
+					"survival_mean": 1466.75,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						8,
+						1930,
+						3971,
+						7018,
+						3352
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 111.83994587500001,
+					"food_mean": 9.5,
+					"seed": 7006,
+					"survival_mean": 2035.75,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1,
+						2544,
+						4057,
+						7865,
+						1530
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 117.509690375,
+					"food_mean": 11.625,
+					"seed": 7007,
+					"survival_mean": 2000.25,
+					"survivors": 3,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						32,
+						4767,
+						7007,
+						6498,
+						2179
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 181.76875962500003,
+					"food_mean": 18.125,
+					"seed": 7008,
+					"survival_mean": 2561.0,
+					"survivors": 3,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						5,
+						2824,
+						5382,
+						8220,
+						2466
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 159.719328875,
+					"food_mean": 11.75,
+					"seed": 7009,
+					"survival_mean": 2362.625,
+					"survivors": 4,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						38,
+						2748,
+						5475,
+						10850,
+						1159
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 222.514769875,
+					"food_mean": 29.75,
+					"seed": 7010,
+					"survival_mean": 2534.0,
+					"survivors": 6,
+					"ticks": 3000
+				}
+			],
+			"learner_naive": [
+				{
+					"action_counts": [
+						2372,
+						2346,
+						2403,
+						2692,
+						2663
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 38.627085125,
+					"food_mean": 1.25,
+					"seed": 7001,
+					"survival_mean": 1560.375,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1824,
+						1869,
+						1816,
+						2025,
+						2011
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 31.958678999999997,
+					"food_mean": 1.125,
+					"seed": 7002,
+					"survival_mean": 1194.125,
+					"survivors": 0,
+					"ticks": 2203
+				},
+				{
+					"action_counts": [
+						1946,
+						2016,
+						1924,
+						2143,
+						2123
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 50.529212,
+					"food_mean": 1.625,
+					"seed": 7003,
+					"survival_mean": 1269.875,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1814,
+						1834,
+						1802,
+						1933,
+						1915
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 15.206670875,
+					"food_mean": 0.5,
+					"seed": 7004,
+					"survival_mean": 1163.125,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1542,
+						1541,
+						1560,
+						1642,
+						1630
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 8.0,
+					"food_mean": 0.25,
+					"seed": 7005,
+					"survival_mean": 990.375,
+					"survivors": 0,
+					"ticks": 2898
+				},
+				{
+					"action_counts": [
+						1818,
+						1831,
+						1852,
+						1982,
+						1964
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 19.872338374999998,
+					"food_mean": 0.875,
+					"seed": 7006,
+					"survival_mean": 1181.875,
+					"survivors": 0,
+					"ticks": 2389
+				},
+				{
+					"action_counts": [
+						1591,
+						1617,
+						1608,
+						1739,
+						1722
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 7.398352624999999,
+					"food_mean": 0.25,
+					"seed": 7007,
+					"survival_mean": 1035.625,
+					"survivors": 0,
+					"ticks": 1559
+				},
+				{
+					"action_counts": [
+						1579,
+						1596,
+						1587,
+						1674,
+						1656
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 7.325071375,
+					"food_mean": 0.25,
+					"seed": 7008,
+					"survival_mean": 1012.5,
+					"survivors": 0,
+					"ticks": 1835
+				},
+				{
+					"action_counts": [
+						2166,
+						2197,
+						2241,
+						2374,
+						2341
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 57.478513500000005,
+					"food_mean": 3.25,
+					"seed": 7009,
+					"survival_mean": 1415.75,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1528,
+						1521,
+						1554,
+						1650,
+						1636
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 10.9115595,
+					"food_mean": 0.375,
+					"seed": 7010,
+					"survival_mean": 987.125,
+					"survivors": 0,
+					"ticks": 1417
+				}
+			],
+			"learner_trained": [
+				{
+					"action_counts": [
+						1905,
+						5877,
+						5922,
+						6519,
+						2143
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 235.283695625,
+					"food_mean": 36.875,
+					"seed": 7001,
+					"survival_mean": 2796.0,
+					"survivors": 6,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						3763,
+						5122,
+						7646,
+						3768,
+						2329
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 312.67066750000004,
+					"food_mean": 36.625,
+					"seed": 7002,
+					"survival_mean": 2828.625,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2289,
+						5768,
+						6896,
+						6317,
+						1082
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 285.47992725,
+					"food_mean": 37.5,
+					"seed": 7003,
+					"survival_mean": 2794.125,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						3201,
+						6059,
+						7118,
+						3757,
+						1980
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 276.973158625,
+					"food_mean": 35.0,
+					"seed": 7004,
+					"survival_mean": 2764.5,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						4145,
+						4364,
+						5889,
+						3321,
+						2872
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 269.53045599999996,
+					"food_mean": 36.5,
+					"seed": 7005,
+					"survival_mean": 2574.25,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2470,
+						5410,
+						5067,
+						4863,
+						3070
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 239.85171874999997,
+					"food_mean": 29.375,
+					"seed": 7006,
+					"survival_mean": 2610.375,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						3274,
+						8560,
+						7817,
+						1963,
+						1897
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 267.404451,
+					"food_mean": 30.375,
+					"seed": 7007,
+					"survival_mean": 2939.0,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						3327,
+						6734,
+						7538,
+						3929,
+						2472
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 312.34970350000003,
+					"food_mean": 36.25,
+					"seed": 7008,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2023,
+						3611,
+						4659,
+						1278,
+						3700
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 148.01537237500003,
+					"food_mean": 22.625,
+					"seed": 7009,
+					"survival_mean": 1909.5,
+					"survivors": 3,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2771,
+						6414,
+						6772,
+						2678,
+						2200
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 254.120851375,
+					"food_mean": 33.625,
+					"seed": 7010,
+					"survival_mean": 2604.625,
+					"survivors": 6,
+					"ticks": 3000
+				}
+			],
+			"random": [
+				{
+					"action_counts": [
+						3592,
+						3506,
+						3589,
+						3637,
+						3520
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 109.97912712499999,
+					"food_mean": 4.0,
+					"seed": 7001,
+					"survival_mean": 2231.125,
+					"survivors": 3,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1806,
+						1833,
+						1892,
+						1877,
+						1818
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 20.0,
+					"food_mean": 0.625,
+					"seed": 7002,
+					"survival_mean": 1154.125,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2752,
+						2685,
+						2708,
+						2760,
+						2722
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 86.89237975,
+					"food_mean": 2.75,
+					"seed": 7003,
+					"survival_mean": 1704.25,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2794,
+						2874,
+						2853,
+						2963,
+						2747
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 100.890322625,
+					"food_mean": 3.875,
+					"seed": 7004,
+					"survival_mean": 1779.75,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1711,
+						1737,
+						1748,
+						1676,
+						1705
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 28.0,
+					"food_mean": 0.875,
+					"seed": 7005,
+					"survival_mean": 1073.125,
+					"survivors": 0,
+					"ticks": 1836
+				},
+				{
+					"action_counts": [
+						2059,
+						2199,
+						2088,
+						2100,
+						1987
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 55.704986749999996,
+					"food_mean": 2.375,
+					"seed": 7006,
+					"survival_mean": 1305.0,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2223,
+						2225,
+						2112,
+						2147,
+						2099
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 46.769644125,
+					"food_mean": 1.875,
+					"seed": 7007,
+					"survival_mean": 1351.625,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2279,
+						2377,
+						2324,
+						2444,
+						2279
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 71.235231125,
+					"food_mean": 2.625,
+					"seed": 7008,
+					"survival_mean": 1463.625,
+					"survivors": 2,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1918,
+						2032,
+						1965,
+						1925,
+						1928
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 30.596363625,
+					"food_mean": 1.0,
+					"seed": 7009,
+					"survival_mean": 1221.875,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2209,
+						2329,
+						2360,
+						2394,
+						2317
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 65.7098025,
+					"food_mean": 2.625,
+					"seed": 7010,
+					"survival_mean": 1452.0,
+					"survivors": 1,
+					"ticks": 3000
+				}
+			]
+		},
+		"train": {
+			"heuristic": [
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						120,
+						16021
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 281.17011575000004,
+					"food_mean": 15.0,
+					"seed": 1001,
+					"survival_mean": 2717.5,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						144,
+						18515
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 313.77192237500003,
+					"food_mean": 18.0,
+					"seed": 1002,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						110,
+						16546
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 237.78779312499998,
+					"food_mean": 13.75,
+					"seed": 1003,
+					"survival_mean": 2784.75,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						122,
+						18161
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 251.33859487499998,
+					"food_mean": 15.25,
+					"seed": 1004,
+					"survival_mean": 2863.375,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						104,
+						17868
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 210.79774824999998,
+					"food_mean": 13.0,
+					"seed": 1005,
+					"survival_mean": 2781.375,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						119,
+						19913
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 235.97320175,
+					"food_mean": 14.875,
+					"seed": 1006,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						109,
+						16007
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 246.422943875,
+					"food_mean": 13.625,
+					"seed": 1007,
+					"survival_mean": 2847.875,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						105,
+						14810
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 246.05501050000004,
+					"food_mean": 13.125,
+					"seed": 1008,
+					"survival_mean": 2731.0,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						120,
+						17300
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 260.74971662499996,
+					"food_mean": 15.0,
+					"seed": 1009,
+					"survival_mean": 2888.125,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						0,
+						0,
+						139,
+						18158
+					],
+					"condition": "heuristic",
+					"creatures": 8,
+					"energy_gained_mean": 311.486965125,
+					"food_mean": 17.375,
+					"seed": 1010,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				}
+			],
+			"learner_frozen": [
+				{
+					"action_counts": [
+						9,
+						3414,
+						4211,
+						10842,
+						877
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 215.32383037499994,
+					"food_mean": 24.625,
+					"seed": 1001,
+					"survival_mean": 2419.5,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						0,
+						2019,
+						4230,
+						7933,
+						1680
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 126.33154562499999,
+					"food_mean": 13.625,
+					"seed": 1002,
+					"survival_mean": 1983.25,
+					"survivors": 4,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						7,
+						2548,
+						5020,
+						11463,
+						1114
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 171.81327512499996,
+					"food_mean": 11.0,
+					"seed": 1003,
+					"survival_mean": 2519.5,
+					"survivors": 4,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						16,
+						2781,
+						4590,
+						9783,
+						1857
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 186.7928755,
+					"food_mean": 20.0,
+					"seed": 1004,
+					"survival_mean": 2378.75,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						8,
+						3111,
+						5392,
+						8324,
+						1248
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 122.67215187500001,
+					"food_mean": 19.5,
+					"seed": 1005,
+					"survival_mean": 2260.75,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						85,
+						4705,
+						5242,
+						12475,
+						1255
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 226.97980412500002,
+					"food_mean": 31.5,
+					"seed": 1006,
+					"survival_mean": 2970.375,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						6,
+						1788,
+						3955,
+						3016,
+						2994
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 52.20368024999999,
+					"food_mean": 7.375,
+					"seed": 1007,
+					"survival_mean": 1470.75,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						100,
+						2531,
+						5007,
+						8121,
+						1548
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 160.75767937499998,
+					"food_mean": 23.75,
+					"seed": 1008,
+					"survival_mean": 2163.875,
+					"survivors": 4,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						14,
+						4176,
+						5191,
+						11539,
+						1246
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 241.28774887499998,
+					"food_mean": 26.75,
+					"seed": 1009,
+					"survival_mean": 2771.125,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1,
+						2621,
+						5144,
+						11658,
+						670
+					],
+					"condition": "learner_frozen",
+					"creatures": 8,
+					"energy_gained_mean": 199.48732387500002,
+					"food_mean": 23.25,
+					"seed": 1010,
+					"survival_mean": 2512.125,
+					"survivors": 5,
+					"ticks": 3000
+				}
+			],
+			"learner_naive": [
+				{
+					"action_counts": [
+						1469,
+						1511,
+						1474,
+						1683,
+						1670
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 8.0,
+					"food_mean": 0.25,
+					"seed": 1001,
+					"survival_mean": 976.875,
+					"survivors": 0,
+					"ticks": 1797
+				},
+				{
+					"action_counts": [
+						1972,
+						2005,
+						2015,
+						2197,
+						2165
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 35.53784575,
+					"food_mean": 1.625,
+					"seed": 1002,
+					"survival_mean": 1295.125,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1662,
+						1670,
+						1631,
+						1715,
+						1707
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 4.0,
+					"food_mean": 0.125,
+					"seed": 1003,
+					"survival_mean": 1049.125,
+					"survivors": 0,
+					"ticks": 1532
+				},
+				{
+					"action_counts": [
+						1984,
+						2011,
+						1978,
+						2194,
+						2174
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 27.595999875,
+					"food_mean": 0.875,
+					"seed": 1004,
+					"survival_mean": 1293.625,
+					"survivors": 0,
+					"ticks": 2132
+				},
+				{
+					"action_counts": [
+						2247,
+						2245,
+						2263,
+						2696,
+						2678
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 35.983560499999996,
+					"food_mean": 2.5,
+					"seed": 1005,
+					"survival_mean": 1517.0,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2043,
+						2034,
+						2007,
+						2203,
+						2201
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 18.060357999999997,
+					"food_mean": 1.375,
+					"seed": 1006,
+					"survival_mean": 1311.875,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1923,
+						1958,
+						1956,
+						2142,
+						2124
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 25.5780535,
+					"food_mean": 1.25,
+					"seed": 1007,
+					"survival_mean": 1263.75,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2133,
+						2117,
+						2126,
+						2327,
+						2327
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 40.469341375,
+					"food_mean": 1.375,
+					"seed": 1008,
+					"survival_mean": 1379.625,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1847,
+						1803,
+						1848,
+						2039,
+						2017
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 22.862249,
+					"food_mean": 0.875,
+					"seed": 1009,
+					"survival_mean": 1195.125,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1636,
+						1665,
+						1614,
+						1788,
+						1780
+					],
+					"condition": "learner_naive",
+					"creatures": 8,
+					"energy_gained_mean": 4.0,
+					"food_mean": 0.125,
+					"seed": 1010,
+					"survival_mean": 1061.375,
+					"survivors": 0,
+					"ticks": 2596
+				}
+			],
+			"learner_trained": [
+				{
+					"action_counts": [
+						1894,
+						5875,
+						5409,
+						4292,
+						2572
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 254.29492349999992,
+					"food_mean": 34.125,
+					"seed": 1001,
+					"survival_mean": 2505.5,
+					"survivors": 6,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1898,
+						4957,
+						4933,
+						5621,
+						2114
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 221.19913599999998,
+					"food_mean": 33.25,
+					"seed": 1002,
+					"survival_mean": 2440.75,
+					"survivors": 5,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2751,
+						6363,
+						7666,
+						2388,
+						2828
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 246.14645412500002,
+					"food_mean": 36.75,
+					"seed": 1003,
+					"survival_mean": 2749.75,
+					"survivors": 6,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						4434,
+						5355,
+						5712,
+						4279,
+						2863
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 272.144191,
+					"food_mean": 37.625,
+					"seed": 1004,
+					"survival_mean": 2830.625,
+					"survivors": 6,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1739,
+						5814,
+						7198,
+						3745,
+						2058
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 203.76513262499998,
+					"food_mean": 36.25,
+					"seed": 1005,
+					"survival_mean": 2569.5,
+					"survivors": 6,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						3974,
+						5379,
+						5535,
+						8152,
+						960
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 265.064982875,
+					"food_mean": 38.875,
+					"seed": 1006,
+					"survival_mean": 3000.0,
+					"survivors": 8,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1823,
+						6349,
+						7494,
+						4216,
+						3723
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 271.89759825000004,
+					"food_mean": 33.0,
+					"seed": 1007,
+					"survival_mean": 2950.75,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1653,
+						5220,
+						6232,
+						4232,
+						2848
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 214.38543824999994,
+					"food_mean": 34.75,
+					"seed": 1008,
+					"survival_mean": 2523.375,
+					"survivors": 6,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2772,
+						5449,
+						8058,
+						4146,
+						2263
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 293.85701274999997,
+					"food_mean": 35.5,
+					"seed": 1009,
+					"survival_mean": 2836.125,
+					"survivors": 7,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2500,
+						4983,
+						6356,
+						5326,
+						1770
+					],
+					"condition": "learner_trained",
+					"creatures": 8,
+					"energy_gained_mean": 246.319052875,
+					"food_mean": 32.625,
+					"seed": 1010,
+					"survival_mean": 2617.125,
+					"survivors": 6,
+					"ticks": 3000
+				}
+			],
+			"random": [
+				{
+					"action_counts": [
+						1894,
+						2022,
+						2001,
+						1929,
+						1934
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 33.826964375,
+					"food_mean": 1.125,
+					"seed": 1001,
+					"survival_mean": 1223.5,
+					"survivors": 0,
+					"ticks": 2469
+				},
+				{
+					"action_counts": [
+						2984,
+						2857,
+						2898,
+						2920,
+						2867
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 91.92643675,
+					"food_mean": 3.25,
+					"seed": 1002,
+					"survival_mean": 1816.5,
+					"survivors": 2,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2773,
+						2689,
+						2710,
+						2646,
+						2709
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 67.89817037499999,
+					"food_mean": 2.625,
+					"seed": 1003,
+					"survival_mean": 1691.75,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2469,
+						2446,
+						2364,
+						2476,
+						2451
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 57.668210375,
+					"food_mean": 2.0,
+					"seed": 1004,
+					"survival_mean": 1526.625,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2518,
+						2423,
+						2379,
+						2370,
+						2457
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 38.260114,
+					"food_mean": 1.375,
+					"seed": 1005,
+					"survival_mean": 1519.25,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2788,
+						2818,
+						2803,
+						2741,
+						2867
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 62.421847625000005,
+					"food_mean": 2.125,
+					"seed": 1006,
+					"survival_mean": 1752.875,
+					"survivors": 2,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2668,
+						2568,
+						2638,
+						2564,
+						2496
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 73.2394425,
+					"food_mean": 2.625,
+					"seed": 1007,
+					"survival_mean": 1617.625,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2994,
+						3062,
+						2978,
+						3031,
+						3050
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 106.887231125,
+					"food_mean": 4.0,
+					"seed": 1008,
+					"survival_mean": 1890.125,
+					"survivors": 2,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						1971,
+						2103,
+						1985,
+						2003,
+						2056
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 46.015516125,
+					"food_mean": 1.875,
+					"seed": 1009,
+					"survival_mean": 1265.625,
+					"survivors": 1,
+					"ticks": 3000
+				},
+				{
+					"action_counts": [
+						2626,
+						2682,
+						2715,
+						2672,
+						2701
+					],
+					"condition": "random",
+					"creatures": 8,
+					"energy_gained_mean": 73.088543625,
+					"food_mean": 2.875,
+					"seed": 1010,
+					"survival_mean": 1675.25,
+					"survivors": 2,
+					"ticks": 3000
+				}
+			]
+		}
+	},
+	"protocol": {
+		"config": {
+			"creature_count": 8,
+			"food_capacity": 40,
+			"food_count": 30,
+			"food_regrow": true,
+			"food_regrow_batch": 1,
+			"food_regrow_interval": 10,
+			"obstacle_count": 10
+		},
+		"dev": false,
+		"engine": "4.7.2-stable (official)",
+		"holdout_seeds": [
+			7001,
+			7002,
+			7003,
+			7004,
+			7005,
+			7006,
+			7007,
+			7008,
+			7009,
+			7010
+		],
+		"max_ticks": 3000,
+		"train_passes": 4,
+		"train_seeds": [
+			1001,
+			1002,
+			1003,
+			1004,
+			1005,
+			1006,
+			1007,
+			1008,
+			1009,
+			1010
+		]
+	},
+	"summary": {
+		"SUCCESS": true,
+		"sets": {
+			"holdout": {
+				"H1_pass": true,
+				"H2_pass": true,
+				"H3_naive_vs_random_pass": false,
+				"frozen_vs_random_food": {
+					"mean_diff": 12.425,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"heuristic": {
+					"energy_gained_mean": 282.32945768749994,
+					"food_mean": 15.725,
+					"food_sd": 1.2920698295542872,
+					"survival_mean": 2930.5,
+					"survival_sd": 132.61677244350855,
+					"survivors_mean": 7.5
+				},
+				"learner_frozen": {
+					"energy_gained_mean": 147.2829966,
+					"food_mean": 14.6875,
+					"food_sd": 9.012192744030475,
+					"survival_mean": 2187.9875,
+					"survival_sd": 383.02796464669376,
+					"survivors_mean": 3.2
+				},
+				"learner_naive": {
+					"energy_gained_mean": 24.730748237500002,
+					"food_mean": 0.975,
+					"food_sd": 0.9350430768448882,
+					"survival_mean": 1181.075,
+					"survival_sd": 191.73933586165015,
+					"survivors_mean": 0.4
+				},
+				"learner_trained": {
+					"energy_gained_mean": 260.16800019999994,
+					"food_mean": 33.475,
+					"food_sd": 4.726109511121289,
+					"survival_mean": 2682.1,
+					"survival_sd": 305.60130162608203,
+					"survivors_mean": 6.1
+				},
+				"naive_vs_random_food": {
+					"mean_diff": -1.2875,
+					"n": 10,
+					"p_one_sided": 0.9892578125,
+					"wins": 2
+				},
+				"random": {
+					"energy_gained_mean": 61.5777857625,
+					"food_mean": 2.2625,
+					"food_sd": 1.1777007967504591,
+					"survival_mean": 1473.65,
+					"survival_sd": 348.0822450306185,
+					"survivors_mean": 1.2
+				},
+				"trained_over_random_survival_ratio": 1.8200386794693446,
+				"trained_vs_heuristic_energy": {
+					"mean_diff": -22.161457487499995,
+					"n": 10,
+					"p_one_sided": 0.9892578125,
+					"wins": 2
+				},
+				"trained_vs_heuristic_food": {
+					"mean_diff": 17.75,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_heuristic_survival": {
+					"mean_diff": -248.4,
+					"n": 10,
+					"p_one_sided": 0.9892578125,
+					"wins": 2
+				},
+				"trained_vs_naive_food": {
+					"mean_diff": 32.5,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_random_energy": {
+					"mean_diff": 198.59021443750004,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_random_food": {
+					"mean_diff": 31.2125,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_random_survival": {
+					"mean_diff": 1208.45,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				}
+			},
+			"train": {
+				"H1_pass": true,
+				"H2_pass": true,
+				"H3_naive_vs_random_pass": false,
+				"frozen_vs_random_food": {
+					"mean_diff": 17.75,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"heuristic": {
+					"energy_gained_mean": 259.555401225,
+					"food_mean": 14.9,
+					"food_sd": 1.6861362802441433,
+					"survival_mean": 2861.4,
+					"survival_sd": 109.80868463934091,
+					"survivors_mean": 7.3
+				},
+				"learner_frozen": {
+					"energy_gained_mean": 170.3649915,
+					"food_mean": 20.1375,
+					"food_sd": 7.490143986896676,
+					"survival_mean": 2345.0,
+					"survival_sd": 418.0413572708912,
+					"survivors_mean": 4.5
+				},
+				"learner_naive": {
+					"energy_gained_mean": 22.2087408,
+					"food_mean": 1.0375,
+					"food_sd": 0.752426629867214,
+					"survival_mean": 1234.35,
+					"survival_sd": 165.70994991249017,
+					"survivors_mean": 0.6
+				},
+				"learner_trained": {
+					"energy_gained_mean": 248.90739222499997,
+					"food_mean": 35.275,
+					"food_sd": 2.096458654228337,
+					"survival_mean": 2702.35,
+					"survival_sd": 197.49093509435932,
+					"survivors_mean": 6.3
+				},
+				"naive_vs_random_food": {
+					"mean_diff": -1.35,
+					"n": 10,
+					"p_one_sided": 0.9990234375,
+					"wins": 1
+				},
+				"random": {
+					"energy_gained_mean": 65.1232476875,
+					"food_mean": 2.3875,
+					"food_sd": 0.8689273400130889,
+					"survival_mean": 1597.9125,
+					"survival_sd": 219.65289892679414,
+					"survivors_mean": 1.3
+				},
+				"trained_over_random_survival_ratio": 1.6911752051504698,
+				"trained_vs_heuristic_energy": {
+					"mean_diff": -10.648009000000012,
+					"n": 10,
+					"p_one_sided": 0.623046875,
+					"wins": 5
+				},
+				"trained_vs_heuristic_food": {
+					"mean_diff": 20.375,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_heuristic_survival": {
+					"mean_diff": -159.05,
+					"n": 10,
+					"p_one_sided": 0.9990234375,
+					"wins": 1
+				},
+				"trained_vs_naive_food": {
+					"mean_diff": 34.2375,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_random_energy": {
+					"mean_diff": 183.7841445375,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_random_food": {
+					"mean_diff": 32.8875,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				},
+				"trained_vs_random_survival": {
+					"mean_diff": 1104.4375,
+					"n": 10,
+					"p_one_sided": 0.0009765625,
+					"wins": 10
+				}
+			}
+		},
+		"training_first_pass_food": 30.425,
+		"training_first_pass_survival": 2612.8625,
+		"training_last_pass_food": 35.4375,
+		"training_last_pass_survival": 2682.8
+	},
+	"trained_brain_sha256": "a1c83a19f05ac2f54b16fbfb051480794747a919777bc9314e4694338fa9b7db",
+	"training_curve": [
+		{
+			"action_counts": [
+				2497,
+				2689,
+				2487,
+				2304,
+				2274
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 71.98850762500001,
+			"food_mean": 8.875,
+			"pass": 0,
+			"seed": 1001,
+			"survival_mean": 1532.0,
+			"survivors": 3,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3334,
+				5239,
+				5902,
+				2777,
+				2812
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 230.148296875,
+			"food_mean": 27.625,
+			"pass": 0,
+			"seed": 1002,
+			"survival_mean": 2508.375,
+			"survivors": 5,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3150,
+				4820,
+				8994,
+				2451,
+				1875
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 229.44988600000002,
+			"food_mean": 29.75,
+			"pass": 0,
+			"seed": 1003,
+			"survival_mean": 2661.5,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2657,
+				7095,
+				7093,
+				3105,
+				2128
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 251.82756112500002,
+			"food_mean": 31.125,
+			"pass": 0,
+			"seed": 1004,
+			"survival_mean": 2760.125,
+			"survivors": 5,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3157,
+				6968,
+				7008,
+				2820,
+				2594
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 245.46311412499998,
+			"food_mean": 38.625,
+			"pass": 0,
+			"seed": 1005,
+			"survival_mean": 2818.5,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3091,
+				6654,
+				6453,
+				3726,
+				2934
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 235.892554375,
+			"food_mean": 31.625,
+			"pass": 0,
+			"seed": 1006,
+			"survival_mean": 2857.375,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4298,
+				7476,
+				8010,
+				1319,
+				1661
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 266.37506325,
+			"food_mean": 37.75,
+			"pass": 0,
+			"seed": 1007,
+			"survival_mean": 2845.625,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				1633,
+				7423,
+				7518,
+				3555,
+				1799
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 242.943563625,
+			"food_mean": 31.875,
+			"pass": 0,
+			"seed": 1008,
+			"survival_mean": 2741.25,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				5693,
+				6791,
+				6282,
+				2944,
+				2242
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 309.207872625,
+			"food_mean": 35.75,
+			"pass": 0,
+			"seed": 1009,
+			"survival_mean": 2994.125,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4179,
+				4702,
+				4582,
+				4474,
+				1338
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 214.71986487499996,
+			"food_mean": 31.25,
+			"pass": 0,
+			"seed": 1010,
+			"survival_mean": 2409.75,
+			"survivors": 5,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3290,
+				7783,
+				7578,
+				2189,
+				806
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 282.148532125,
+			"food_mean": 34.875,
+			"pass": 1,
+			"seed": 1001,
+			"survival_mean": 2706.0,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3948,
+				5081,
+				5013,
+				2128,
+				2167
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 223.243529625,
+			"food_mean": 32.875,
+			"pass": 1,
+			"seed": 1002,
+			"survival_mean": 2292.5,
+			"survivors": 5,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2675,
+				7741,
+				8145,
+				1624,
+				1240
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 239.80964925,
+			"food_mean": 33.75,
+			"pass": 1,
+			"seed": 1003,
+			"survival_mean": 2678.375,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				6660,
+				6029,
+				5634,
+				1206,
+				788
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 226.97596774999997,
+			"food_mean": 37.5,
+			"pass": 1,
+			"seed": 1004,
+			"survival_mean": 2539.875,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				1966,
+				9986,
+				7156,
+				1800,
+				2286
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 256.70494199999996,
+			"food_mean": 37.25,
+			"pass": 1,
+			"seed": 1005,
+			"survival_mean": 2899.375,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2098,
+				8107,
+				7593,
+				3628,
+				2574
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 267.06783925,
+			"food_mean": 38.5,
+			"pass": 1,
+			"seed": 1006,
+			"survival_mean": 3000.0,
+			"survivors": 8,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3158,
+				7488,
+				6604,
+				1981,
+				2502
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 265.21047337499994,
+			"food_mean": 33.625,
+			"pass": 1,
+			"seed": 1007,
+			"survival_mean": 2716.75,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				5445,
+				7702,
+				6383,
+				2037,
+				2433
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 325.497450375,
+			"food_mean": 38.25,
+			"pass": 1,
+			"seed": 1008,
+			"survival_mean": 3000.0,
+			"survivors": 8,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4689,
+				4240,
+				8053,
+				1683,
+				1785
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 254.28345625000003,
+			"food_mean": 33.625,
+			"pass": 1,
+			"seed": 1009,
+			"survival_mean": 2556.5,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2263,
+				3407,
+				4801,
+				3937,
+				3364
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 151.142197375,
+			"food_mean": 14.375,
+			"pass": 1,
+			"seed": 1010,
+			"survival_mean": 2222.0,
+			"survivors": 4,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4021,
+				5790,
+				8006,
+				1942,
+				884
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 272.8201453749999,
+			"food_mean": 35.875,
+			"pass": 2,
+			"seed": 1001,
+			"survival_mean": 2580.75,
+			"survivors": 5,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3274,
+				5034,
+				5343,
+				1440,
+				4823
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 231.13427300000004,
+			"food_mean": 31.125,
+			"pass": 2,
+			"seed": 1002,
+			"survival_mean": 2489.5,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				5745,
+				7252,
+				6468,
+				1681,
+				1181
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 272.66598775,
+			"food_mean": 36.25,
+			"pass": 2,
+			"seed": 1003,
+			"survival_mean": 2791.0,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2293,
+				8647,
+				7411,
+				1815,
+				1859
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 275.20638575,
+			"food_mean": 36.0,
+			"pass": 2,
+			"seed": 1004,
+			"survival_mean": 2753.25,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2748,
+				7378,
+				6603,
+				3009,
+				2453
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 245.919584875,
+			"food_mean": 37.5,
+			"pass": 2,
+			"seed": 1005,
+			"survival_mean": 2774.0,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4465,
+				7092,
+				7135,
+				2251,
+				3057
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 273.66341775,
+			"food_mean": 37.375,
+			"pass": 2,
+			"seed": 1006,
+			"survival_mean": 3000.0,
+			"survivors": 8,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4051,
+				7547,
+				8968,
+				1455,
+				1979
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 304.6230515,
+			"food_mean": 38.25,
+			"pass": 2,
+			"seed": 1007,
+			"survival_mean": 3000.0,
+			"survivors": 8,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3045,
+				7467,
+				7968,
+				3025,
+				1595
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 289.51876474999995,
+			"food_mean": 38.125,
+			"pass": 2,
+			"seed": 1008,
+			"survival_mean": 2887.625,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4961,
+				6437,
+				9197,
+				1435,
+				1970
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 330.16434325,
+			"food_mean": 37.125,
+			"pass": 2,
+			"seed": 1009,
+			"survival_mean": 3000.0,
+			"survivors": 8,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4047,
+				7031,
+				7295,
+				3234,
+				1558
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 291.145646625,
+			"food_mean": 32.0,
+			"pass": 2,
+			"seed": 1010,
+			"survival_mean": 2895.75,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4322,
+				7533,
+				6631,
+				1841,
+				1700
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 309.48419275000003,
+			"food_mean": 36.375,
+			"pass": 3,
+			"seed": 1001,
+			"survival_mean": 2753.625,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2282,
+				4251,
+				7672,
+				1313,
+				3119
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 214.77971049999996,
+			"food_mean": 28.75,
+			"pass": 3,
+			"seed": 1002,
+			"survival_mean": 2330.0,
+			"survivors": 5,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4054,
+				8187,
+				9133,
+				1190,
+				1436
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 303.223584875,
+			"food_mean": 38.0,
+			"pass": 3,
+			"seed": 1003,
+			"survival_mean": 3000.0,
+			"survivors": 8,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3148,
+				5702,
+				8405,
+				2856,
+				974
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 245.12680874999998,
+			"food_mean": 36.5,
+			"pass": 3,
+			"seed": 1004,
+			"survival_mean": 2635.875,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				1897,
+				6223,
+				6707,
+				3261,
+				2910
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 213.62823099999997,
+			"food_mean": 38.125,
+			"pass": 3,
+			"seed": 1005,
+			"survival_mean": 2625.0,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3349,
+				8800,
+				7406,
+				2908,
+				1537
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 277.51585324999996,
+			"food_mean": 39.125,
+			"pass": 3,
+			"seed": 1006,
+			"survival_mean": 3000.0,
+			"survivors": 8,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				4116,
+				8562,
+				6594,
+				2810,
+				1524
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 294.37611175,
+			"food_mean": 37.25,
+			"pass": 3,
+			"seed": 1007,
+			"survival_mean": 2950.875,
+			"survivors": 7,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2549,
+				6480,
+				6457,
+				1558,
+				2762
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 217.26966349999998,
+			"food_mean": 34.375,
+			"pass": 3,
+			"seed": 1008,
+			"survival_mean": 2476.0,
+			"survivors": 6,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				3109,
+				6794,
+				7124,
+				1635,
+				1510
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 231.27446775,
+			"food_mean": 29.5,
+			"pass": 3,
+			"seed": 1009,
+			"survival_mean": 2521.875,
+			"survivors": 5,
+			"ticks": 3000
+		},
+		{
+			"action_counts": [
+				2100,
+				5863,
+				8329,
+				2234,
+				1750
+			],
+			"condition": "train",
+			"creatures": 8,
+			"energy_gained_mean": 247.306479125,
+			"food_mean": 36.375,
+			"pass": 3,
+			"seed": 1010,
+			"survival_mean": 2534.75,
+			"survivors": 6,
+			"ticks": 3000
+		}
+	]
+}
