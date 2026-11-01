@@ -2,11 +2,20 @@ extends RefCounted
 const World = preload("res://scripts/world/sim_world.gd")
 const Store = preload("res://scripts/persistence/save_store.gd")
 
+class FaultStore extends Store:
+	var mode := "truncated"
+	func _write(path: String, contents: String) -> Dictionary:
+		var result := super._write(path, contents.left(contents.length() / 2))
+		return {"ok": false, "message": "Injected disk failure"} if mode == "error" else result
+
 func run() -> Array:
 	var failures: Array = []
 	_hostile_versions(failures)
 	_migration_roundtrips(failures)
 	_bound_trait_roundtrip(failures)
+	_atomic_failures(failures)
+	_compressed_envelopes(failures)
+	_new_world_generations(failures)
 	return failures
 
 func _check(ok: bool, message: String, failures: Array) -> void:
@@ -117,6 +126,11 @@ func _migration_roundtrips(f: Array) -> void:
 			loaded.world.step()
 		_check(_snapshot(migrated) == _snapshot(loaded.world), "continuacao apos migracao v%d divergiu" % version, f)
 
+func _put(path: String, contents: String) -> void:
+	var file := FileAccess.open(path, FileAccess.WRITE)
+	file.store_string(contents)
+	file.close()
+
 func _bound_trait_roundtrip(f: Array) -> void:
 	var world := World.new_world(60, {"creature_count": 1})
 	var creature = world.creatures[world.pet_id]
@@ -126,3 +140,120 @@ func _bound_trait_roundtrip(f: Array) -> void:
 	var snapshot := _snapshot(world)
 	var restored := World.from_dict(JSON.parse_string(snapshot))
 	_check(restored != null and _snapshot(restored) == snapshot, "temperamento nos limites 0/1 muda de float para int no roundtrip", f)
+
+func _atomic_failures(f: Array) -> void:
+	var folder := "user://e5_atomic_%d" % OS.get_process_id()
+	DirAccess.make_dir_recursive_absolute(folder)
+	var store := Store.new(folder)
+	var fault := FaultStore.new(folder)
+	var world := World.new_world(751, {"creature_count": 2})
+	_check(store.save_world(world, "atomic").ok, "primeiro checkpoint atomico", f)
+	var previous := _snapshot(world)
+	world.step()
+	_check(store.save_world(world, "atomic").ok, "segundo checkpoint atomico", f)
+	var committed := _snapshot(world)
+	var path := folder.path_join("atomic.json")
+	var primary := FileAccess.get_file_as_string(path)
+	var backup := FileAccess.get_file_as_string(path + ".bak")
+	world.step()
+	for mode in ["truncated", "error"]:
+		fault.mode = mode
+		_check(not fault.save_world(world, "atomic").ok, "escrita interrompida deve falhar: " + mode, f)
+		_check(FileAccess.get_file_as_string(path) == primary and FileAccess.get_file_as_string(path + ".bak") == backup, "falha rotacionou primario/backup: " + mode, f)
+		var loaded := store.load_world("atomic")
+		_check(loaded.ok and not loaded.recovered and _snapshot(loaded.world) == committed, "temporario truncado mascarou checkpoint: " + mode, f)
+	# Even a complete but uncommitted temporary file must never be promoted.
+	_put(path + ".tmp", primary)
+	_put(path + ".bak.tmp", primary)
+	_put(path, "{autosave interrupted")
+	var recovered := store.load_world("atomic")
+	_check(recovered.ok and recovered.recovered and recovered.get("repair_ok", false), "backup nao reparou primario automaticamente", f)
+	if recovered.ok:
+		_check(_snapshot(recovered.world) == previous, "rollback nao retornou checkpoint anterior", f)
+	_check(FileAccess.get_file_as_string(path) == backup and FileAccess.get_file_as_string(path + ".bak") == backup, "reparo alterou backup ou nao restaurou primario", f)
+	DirAccess.remove_absolute(path + ".bak")
+	recovered = store.load_world("atomic")
+	_check(recovered.ok and not recovered.recovered, "reparo nao persistiu sem o backup", f)
+	_check(not store.save_world(world, "atomic", {"number": NAN}).ok, "metadado NaN aceito", f)
+	_check(FileAccess.get_file_as_string(path) == backup, "metadado invalido alterou checkpoint", f)
+	# Oversized files are rejected by length, before allocating/parsing their JSON.
+	var oversized := FileAccess.open(folder.path_join("oversized.json"), FileAccess.WRITE)
+	oversized.seek(Store.MAX_BYTES)
+	oversized.store_8(0)
+	oversized.close()
+	_check(not store.load_world("oversized").ok, "arquivo maior que 32 MiB aceito", f)
+	for slot in ["atomic", "oversized"]:
+		for suffix in ["", ".bak", ".tmp", ".bak.tmp", ".recover.tmp"]:
+			var candidate := folder.path_join(slot + ".json" + suffix)
+			if FileAccess.file_exists(candidate): DirAccess.remove_absolute(candidate)
+	DirAccess.remove_absolute(folder)
+
+func _compressed_envelopes(f: Array) -> void:
+	var folder := "user://e5_compressed_%d" % OS.get_process_id()
+	DirAccess.make_dir_recursive_absolute(folder)
+	var store := Store.new(folder)
+	var world := World.new_world(817, {"creature_count": 2})
+	var payload := JSON.stringify({"world": world.to_dict(), "metadata": {"unicode": "agua e memoria: ação"}}, "", true, true)
+	var encoded := store._encode(payload, true)
+	_check(encoded.ok, "codificacao gzip falhou", f)
+	if not encoded.ok: return
+	var path := folder.path_join("compressed.json")
+	_put(path, encoded.text)
+	var loaded := store.load_world("compressed")
+	_check(loaded.ok and _snapshot(loaded.world) == _snapshot(world) and loaded.metadata.unicode == "agua e memoria: ação", "envelope v2 perdeu estado/UTF-8", f)
+	var header: Dictionary = JSON.parse_string(encoded.text)
+	for field in ["encoding", "uncompressed_bytes", "compressed_sha256"]:
+		var bad := header.duplicate(true)
+		bad.erase(field)
+		_put(path, JSON.stringify(bad))
+		_check(not store.load_world("compressed").ok, "cabecalho comprimido incompleto aceito: " + field, f)
+	for declared_size in [0, -1, 1, null, Store.MAX_PAYLOAD_BYTES + 1]:
+		var bad := header.duplicate(true)
+		bad.uncompressed_bytes = declared_size
+		_put(path, JSON.stringify(bad))
+		_check(not store.load_world("compressed").ok, "limite descomprimido invalido aceito", f)
+	for contents in ["!bad", "A", "AAAA", header.payload.left(header.payload.length() - 4)]:
+		var bad := header.duplicate(true)
+		bad.payload = contents
+		_put(path, JSON.stringify(bad))
+		_check(not store.load_world("compressed").ok, "payload comprimido adulterado aceito", f)
+	# Legal JSON padding exercises the real >24 MiB threshold without discarding
+	# genealogy or inventing non-schema world fields. The decoded cap is enforced.
+	var padded := " ".repeat(Store.COMPRESS_AT_BYTES) + payload
+	encoded = store._encode(padded)
+	_check(encoded.ok and int(JSON.parse_string(encoded.text).version) == 2 and encoded.text.length() < Store.MAX_BYTES, "limiar automatico de compressao falhou", f)
+	if encoded.ok:
+		_put(path, encoded.text)
+		loaded = store.load_world("compressed")
+		_check(loaded.ok and _snapshot(loaded.world) == _snapshot(world), "checkpoint grande comprimido nao carrega", f)
+	_check(not store._encode(" ".repeat(Store.MAX_PAYLOAD_BYTES + 1)).ok, "limite de 128 MiB nao aplicado na escrita", f)
+	DirAccess.remove_absolute(path)
+	DirAccess.remove_absolute(folder)
+
+func _new_world_generations(f: Array) -> void:
+	for seed_value in [7421, 9181]:
+		var world := World.new_world(seed_value, {"signal_enabled": true})
+		for i in 1800: world.step()
+		var deepest := 0
+		for record in world.genealogy.records.values(): deepest = maxi(deepest, record.generation)
+		print("E5 geracoes seed=%d ticks=1800 generation=%d births=%d alive=%d" % [seed_value, deepest, world.genealogy.records.size() - 12, world.creatures.size()])
+		_check(deepest >= 3, "mundo novo E1-E4 sem tres geracoes seed=%d" % seed_value, f)
+	# Acquired state is deliberately distinguishable from hereditary temperament.
+	var world := World.new_world(713, {"creature_count": 1, "obstacle_count": 0, "food_count": 0})
+	var parent = world.creatures[world.pet_id]
+	parent.age = world.min_reproduction_age
+	parent.energy = parent.max_energy
+	parent.personality.preferences["fruta"] = 0.75
+	parent.personality.conditioning["fruta:2:2"] = 0.5
+	parent.personality.stimulus("player", world.tick)
+	world.interagir_jogador(parent.id, parent.pos)
+	parent.remember({"type": "eat", "tick": 0, "creature_id": parent.id, "food_id": world.ids.take(), "energy": 1.0})
+	var child_id := world.reproduce(parent.id)
+	_check(child_id != -1, "reproducao E1-E4 falhou", f)
+	if child_id == -1: return
+	var child = world.creatures[child_id]
+	_check(not parent.personality.episodes.is_empty() and not parent.memory.is_empty(), "fixture sem memoria adquirida", f)
+	_check(child.personality != parent.personality and child.personality.episodes.is_empty() and child.personality.preferences.is_empty() and child.personality.conditioning.is_empty() and child.personality.habituation.is_empty() and child.personality.bonds.is_empty() and child.ensino == null and child.brain == null, "experiencia adquirida herdada", f)
+	for event in child.memory:
+		_check(event.type == "birth" and event.creature_id == child_id, "filhote herdou memoria do genitor", f)
+	_check(child.genome.temperament.size() == 4 and child.genome.parents == [parent.id] and child.genome.generation == 1, "novos tracos/ancestralidade nao herdados", f)

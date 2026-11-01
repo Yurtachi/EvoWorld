@@ -66,6 +66,10 @@ func run() -> Array:
 	_expect(not store.save_world(world, "../escape").ok, "path traversal rejected", errors)
 	_expect(not store.load_world("missing").ok, "missing checkpoint returns error", errors)
 	DirAccess.remove_absolute(folder.path_join("roundtrip.json.bak"))
+	# Recovery now repairs the primary; corrupt it again to exercise both-invalid.
+	corrupt = FileAccess.open(folder.path_join("roundtrip.json"), FileAccess.WRITE)
+	corrupt.store_string("[]")
+	corrupt.close()
 	_expect(not store.load_world("roundtrip").ok, "both-invalid returns error", errors)
 	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
 		var path := folder.path_join("roundtrip.json" + suffix)

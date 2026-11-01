@@ -2,7 +2,12 @@ extends RefCounted
 ## Data-only checkpoints. Validated temporary files replace files in the same
 ## directory; a corrupt primary never rotates over a known-good backup.
 const World = preload("res://scripts/world/sim_world.gd")
+const Data = preload("res://scripts/core/sim_data.gd")
 const MAX_BYTES := 32 * 1024 * 1024
+# Envelope v2 compresses losslessly before the disk limit becomes a problem.
+# The world schema remains v7; v1 envelopes remain readable and writable.
+const COMPRESS_AT_BYTES := 24 * 1024 * 1024
+const MAX_PAYLOAD_BYTES := 128 * 1024 * 1024
 var directory: String
 
 func _init(save_directory: String = "user://saves") -> void:
@@ -11,16 +16,17 @@ func _init(save_directory: String = "user://saves") -> void:
 func save_world(world: World, slot: String = "world", metadata: Dictionary = {}) -> Dictionary:
 	if not _valid_slot(slot):
 		return _error("Invalid checkpoint name.")
+	if not Data.json_data(metadata):
+		return _error("Invalid checkpoint metadata.")
 	var error := DirAccess.make_dir_recursive_absolute(directory)
 	if error != OK:
 		return _error("Cannot create save directory: %s" % error_string(error))
 	var path := _path(slot)
 	var payload := JSON.stringify({"world": world.to_dict(), "metadata": metadata}, "", true, true)
-	var envelope := JSON.stringify({"format": "evoworld-checkpoint", "version": 1,
-		"sha256": payload.sha256_text(), "payload": payload})
-	if envelope.to_utf8_buffer().size() > MAX_BYTES:
-		return _error("Checkpoint exceeds the 32 MiB limit.")
-	var written := _write(path + ".tmp", envelope)
+	var encoded := _encode(payload)
+	if not encoded.ok:
+		return encoded
+	var written := _write(path + ".tmp", encoded.text)
 	if not written.ok:
 		return written
 	if not _read(path + ".tmp").ok:
@@ -47,6 +53,16 @@ func load_world(slot: String = "world") -> Dictionary:
 		return primary
 	var backup := _read(path + ".bak")
 	if backup.ok:
+		# Restore through another validated temporary file, keeping the backup
+		# untouched even when repair fails (e.g. a read-only save directory).
+		var repair_error := DirAccess.copy_absolute(path + ".bak", path + ".recover.tmp")
+		if repair_error == OK:
+			if _read(path + ".recover.tmp").ok:
+				repair_error = DirAccess.rename_absolute(path + ".recover.tmp", path)
+			else:
+				repair_error = ERR_FILE_CORRUPT
+		backup["repair_ok"] = repair_error == OK
+		backup["path"] = path if repair_error == OK else path + ".bak"
 		backup["recovered"] = true
 		backup["message"] = "Primary unavailable or invalid; recovered the previous checkpoint from backup."
 		return backup
@@ -67,11 +83,29 @@ func _read(path: String) -> Dictionary:
 	if parser.parse(text) != OK or not parser.data is Dictionary:
 		return _error("Invalid checkpoint JSON.")
 	var envelope: Dictionary = parser.data
-	if envelope.get("format") != "evoworld-checkpoint" or envelope.get("version") != 1:
+	if envelope.get("format") != "evoworld-checkpoint" or not Data.integer(envelope.get("version"), 1) or int(envelope.version) not in [1, 2]:
 		return _error("Unsupported checkpoint format.")
 	if not envelope.get("payload") is String or not envelope.get("sha256") is String:
 		return _error("Missing checkpoint payload or checksum.")
 	var payload: String = envelope.payload
+	if int(envelope.version) == 2:
+		if envelope.get("encoding") != "gzip-base64" or not Data.integer(envelope.get("uncompressed_bytes"), 1) or int(envelope.uncompressed_bytes) > MAX_PAYLOAD_BYTES or not envelope.get("compressed_sha256") is String:
+			return _error("Invalid compressed checkpoint header.")
+		# Check canonical base64 and compressed integrity before decompression.
+		if payload.length() % 4 != 0:
+			return _error("Invalid compressed checkpoint encoding.")
+		for character in payload:
+			if not character in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=":
+				return _error("Invalid compressed checkpoint encoding.")
+		var compressed := Marshalls.base64_to_raw(payload)
+		if compressed.is_empty() or Marshalls.raw_to_base64(compressed) != payload or payload.sha256_text() != envelope.compressed_sha256:
+			return _error("Compressed checkpoint checksum does not match.")
+		if compressed.size() < 18 or compressed[0] != 0x1f or compressed[1] != 0x8b or compressed[2] != 8 or compressed.decode_u32(compressed.size() - 4) != int(envelope.uncompressed_bytes):
+			return _error("Invalid compressed checkpoint size or header.")
+		var expanded := compressed.decompress_dynamic(int(envelope.uncompressed_bytes), FileAccess.COMPRESSION_GZIP)
+		if expanded.size() != int(envelope.uncompressed_bytes):
+			return _error("Compressed checkpoint exceeds its declared size or is corrupt.")
+		payload = expanded.get_string_from_utf8()
 	if payload.sha256_text() != envelope.sha256:
 		return _error("Checkpoint checksum does not match.")
 	if parser.parse(payload) != OK or not parser.data is Dictionary:
@@ -79,10 +113,29 @@ func _read(path: String) -> Dictionary:
 	var data: Dictionary = parser.data
 	if not data.get("world") is Dictionary or not data.get("metadata") is Dictionary:
 		return _error("Missing world or metadata.")
+	if not Data.json_data(data.metadata):
+		return _error("Invalid checkpoint metadata.")
 	var world := World.from_dict(data.world)
 	if world == null:
 		return _error("World data failed schema validation.")
 	return {"ok": true, "world": world, "metadata": data.metadata, "path": path}
+
+func _encode(payload: String, force_compression: bool = false) -> Dictionary:
+	var bytes := payload.to_utf8_buffer()
+	if bytes.size() > MAX_PAYLOAD_BYTES:
+		return _error("Checkpoint payload exceeds the 128 MiB decoded limit.")
+	var envelope := {"format": "evoworld-checkpoint", "version": 1,
+		"sha256": payload.sha256_text(), "payload": payload}
+	if force_compression or bytes.size() >= COMPRESS_AT_BYTES:
+		var compressed := bytes.compress(FileAccess.COMPRESSION_GZIP)
+		if compressed.is_empty():
+			return _error("Cannot compress checkpoint.")
+		envelope.merge({"version": 2, "encoding": "gzip-base64", "uncompressed_bytes": bytes.size(),
+			"compressed_sha256": Marshalls.raw_to_base64(compressed).sha256_text(), "payload": Marshalls.raw_to_base64(compressed)}, true)
+	var text := JSON.stringify(envelope)
+	if text.to_utf8_buffer().size() > MAX_BYTES:
+		return _error("Checkpoint exceeds the 32 MiB limit.")
+	return {"ok": true, "text": text}
 
 func _write(path: String, text: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.WRITE)
