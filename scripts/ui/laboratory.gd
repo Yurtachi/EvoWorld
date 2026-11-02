@@ -2,6 +2,7 @@ extends VBoxContainer
 signal intervention
 ## Consultas somente de leitura; emissão/ativação são intervenções explícitas.
 const Texto = preload("res://scripts/core/textos.gd")
+const SpatialPresenter = preload("res://scripts/ui/spatial_presenter.gd")
 const KnowledgePresenter = preload("res://scripts/ui/knowledge_presenter.gd")
 const TerminalPresenter = preload("res://scripts/ui/terminal_presenter.gd")
 const Genes = preload("res://scripts/creature/genome.gd")
@@ -56,9 +57,28 @@ var atelier_ablation_note: Label
 var atelier_competence: Label
 var atelier_chart: Control
 var atelier_attempts: Label
+var spatial_details: Label
+var spatial_switch: CheckButton
+var spatial_enable: Button
 
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_heading("p1_lab")
+	spatial_switch = CheckButton.new()
+	spatial_switch.text = Texto.texto("p1_spatial_switch")
+	add_child(spatial_switch)
+	spatial_switch.toggled.connect(_ablate_spatial)
+	spatial_enable = Button.new()
+	spatial_enable.text = Texto.texto("p1_enable_spatial")
+	add_child(spatial_enable)
+	spatial_enable.pressed.connect(func():
+		var creature = _world.creatures.get(_last_selection) if _world != null else null
+		if creature != null and creature.mind != null:
+			creature.enable_spatial_memory()
+			intervention.emit()
+			observe(_world, _last_selection, true))
+	_text(Texto.texto("p1_ablation_note"))
+	spatial_details = _text("")
 	_heading("m4b_lab_title")
 	_text(Texto.texto("m4b_x7_honest_text"))
 	_heading("m4b_lab_errors_title")
@@ -179,6 +199,23 @@ func _ready() -> void:
 	_heading("signals_log")
 	signals = _text("")
 
+func _ablate_spatial(enabled: bool) -> void:
+	var creature = _world.creatures.get(_last_selection) if _world != null else null
+	if creature == null or creature.mind == null or creature.mind.spatial.is_empty(): return
+	creature.mind.spatial.enabled = enabled
+	intervention.emit()
+	observe(_world, _last_selection, true)
+
+func _observe_spatial(creature) -> void:
+	var available: bool = creature != null and creature.mind != null
+	var established: bool = available and not creature.mind.spatial.is_empty()
+	spatial_switch.disabled = not established
+	spatial_switch.set_pressed_no_signal(established and creature.mind.spatial.enabled)
+	spatial_enable.visible = available and not established
+	spatial_details.text = SpatialPresenter.details(creature.spatial_snapshot() if creature != null else {}, _world.tick)
+	if established and (not creature.mind.spatial.enabled or not creature.mind.memory_enabled):
+		spatial_details.text = Texto.texto("p1_memory_off") + "\n" + spatial_details.text
+
 func reset() -> void:
 	samples.clear()
 	_last_tick = -1
@@ -206,6 +243,7 @@ func observe(world, selected_id: int, force: bool = false) -> void:
 	if not is_visible_in_tree() and not force:
 		return
 	_observe_mind(world.creatures.get(selected_id))
+	_observe_spatial(world.creatures.get(selected_id))
 	_observe_atelier(world.creatures.get(selected_id))
 	var births := 0
 	var deaths := 0

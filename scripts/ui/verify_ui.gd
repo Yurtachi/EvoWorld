@@ -7,6 +7,7 @@ const World = preload("res://scripts/world/sim_world.gd")
 const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
 const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
 const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
+const SpatialPresenter = preload("res://scripts/ui/spatial_presenter.gd")
 var errors: Array[String] = []
 
 func _init() -> void:
@@ -31,6 +32,7 @@ func _verify() -> void:
 	_expect(main.world.creatures.size() == 1 and not main.world.reproduction_enabled, "one pet without reproduction by default")
 	_expect(main.follow and main.camera.zoom.x >= 3.4, "camera follows expressive pet on launch")
 	_expect(not main.tools_dialog.visible and not main.lab_scroll.is_visible_in_tree(), "science hidden on launch")
+	_expect(not main.spatial_toggle.button_pressed and not main.view.show_spatial, "memory overlay is optional and off on launch")
 	main._open_new_world()
 	_verify_edit_menu(main.pet_input.get_menu())
 	main.world_input.text = "Jardim de Verificação"
@@ -136,6 +138,8 @@ func _verify() -> void:
 	var pet_radius: float = pet.genome.size * main.camera.zoom.x
 	var pet_rect := Rect2(pet_screen - Vector2.ONE * pet_radius, Vector2.ONE * pet_radius * 2)
 	_expect(not main.intro_card.get_global_rect().intersects(pet_rect), "tutorial does not cover the pet at minimum width")
+	_expect(not main.intro_card.get_global_rect().intersects(main.control_hint.get_global_rect()), "tutorial and control hint have separate space")
+	_expect(main.intro_card.get_global_rect().end.x < 1100 - main.SIDEBAR - 36, "tutorial stays inside the habitat area")
 	for key in main.feeding_buttons:
 		_expect(main.caregiver_scroll.get_global_rect().encloses(main.feeding_buttons[key].get_global_rect()), "feeding mode fits without scrolling")
 	var water_before: float = pet.hydration
@@ -305,6 +309,7 @@ func _verify() -> void:
 	await _verify_m3(main, folder)
 	await _verify_m3c(main, folder)
 	await _verify_m4b(main, folder)
+	await _verify_p1(main)
 	main.tools_dialog.hide()
 	# Layouts dos novos painéis também cabem na janela mínima.
 	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog, main.demo_dialog, main.terminal_dialog, main.terminal_console_dialog, main.manual_dialog, main.refuse_dialog]:
@@ -326,6 +331,67 @@ func _verify() -> void:
 		printerr("FALHA UI: ", message)
 	print("Integração da UI: ", "ok" if errors.is_empty() else "FALHOU")
 	quit(0 if errors.is_empty() else 1)
+
+func _verify_p1(main) -> void:
+	main.tools_dialog.hide()
+	main._p1_fixture()
+	var pet = main.world.creatures[main.selected_id]
+	var before: Dictionary = main.world.to_dict()
+	var remembered: Dictionary = pet.spatial_snapshot()
+	_expect(pet.last_action == "seek_place", "P1 fixture obtains a real memory search")
+	main.spatial_toggle.button_pressed = true
+	main._refresh_spatial()
+	main._focus_selected()
+	await process_frame
+	await process_frame
+	var data: Dictionary = main.view.spatial_data
+	_expect(data.remembered.size() == remembered.lugares.size() and data.remembered.size() == 2, "only actual remembered food and water places become memory markers")
+	_expect(data.perceived.size() >= 1, "a newly visible resource has a separate perception marker")
+	_expect(not data.target.is_empty() and data.status.contains(Texto.texto("p1_seeking_comida")), "remembered goal supplies target and natural status with reason")
+	_expect(main.spatial_status.is_visible_in_tree() and main.spatial_key.visible, "care panel explains memory search and map legend is visible")
+	_expect(main.world.to_dict() == before, "inspecting and toggling memory does not mutate simulation or acquire knowledge")
+	var sensor: Dictionary = main.world.sense(pet, false)
+	var presentation: Dictionary = SpatialPresenter.present(remembered, sensor, true, pet.last_action)
+	main.world.place_food(Vector2(660, 460), "fruta")
+	main.world.place_feeder(Vector2(610, 430), {"estoque": 0})
+	var after_hidden: Dictionary = SpatialPresenter.present(pet.spatial_snapshot(), main.world.sense(pet, false), true, pet.last_action)
+	_expect(presentation == after_hidden, "hidden food and feeder never add memory or perception markers")
+	var point: Vector2 = sensor.foods[0].pos
+	main._set_tool("remove_food")
+	main._apply_tool(point)
+	_expect(pet.spatial_snapshot() == remembered, "removing food changes physical truth, not remembered expectation")
+	main._set_tool("select")
+	main.lab.observe(main.world, main.selected_id, true)
+	var body := [pet.pos, pet.energy, pet.hydration]
+	main.lab.spatial_switch.button_pressed = false
+	_expect(not pet.mind.spatial.enabled and pet.spatial_snapshot() == remembered, "spatial ablation preserves memory records")
+	main._refresh_spatial()
+	_expect(main.view.spatial_data.target.is_empty() and main.view.spatial_data.status.is_empty(), "ablated memory has no active search line or status")
+	_expect(body == [pet.pos, pet.energy, pet.hydration], "ablation does not modify the body")
+	var clone = World.from_dict(main.world.to_dict())
+	_expect(clone != null and not clone.creatures[clone.pet_id].mind.spatial.enabled, "spatial ablation survives serialization")
+	main.lab.spatial_switch.button_pressed = true
+	main._refresh_spatial()
+	main._focus_selected()
+	await process_frame
+	await process_frame
+	for control in [main.spatial_toggle, main.feeding_buttons.manual, main.offer_button, main.spatial_status]:
+		_expect(main.caregiver_scroll.get_global_rect().encloses(control.get_global_rect()), "memory care control fits: %s %s inside %s" % [control.text, control.get_global_rect(), main.caregiver_scroll.get_global_rect()])
+	main.spatial_toggle.button_pressed = false
+	_expect(not main.view.show_spatial and not main.spatial_key.visible, "turning overlay off hides marks and map legend")
+	main._p1_fixture(true)
+	var revised: Dictionary = main.world.creatures[main.selected_id].spatial_snapshot()
+	var revised_data := SpatialPresenter.present(revised)
+	_expect(int(revised.lugares[0].falhas) >= 3 and float(revised_data.remembered[0].strength) < float(presentation.remembered[0].strength), "real empty inspections lower expectation and visual intensity")
+	_expect(revised_data.remembered[0].caption.contains(Texto.texto("p1_failures", [3])), "natural map caption explains repeated failed searches")
+	main.lab.observe(main.world, main.selected_id, true)
+	_expect(main.lab.spatial_details.text.contains("expectativa") and main.lab.spatial_details.text.contains("esquec"), "laboratory explains evidence, expectation and forgetting")
+	var legacy = main.world.creatures[main.selected_id]
+	legacy.mind.spatial = {}
+	main.lab.observe(main.world, main.selected_id, true)
+	_expect(main.lab.spatial_enable.visible, "old saves offer explicit memory activation")
+	main.lab.spatial_enable.pressed.emit()
+	_expect(not legacy.mind.spatial.is_empty(), "activation uses the creature API")
 
 func _verify_e2(main, folder: String) -> void:
 	main.create_world("Jardim E2", "Mel escolhida", 7421)

@@ -4,11 +4,16 @@ const COLORS := {"legacy": Color("d9e8a2"), "fruta": Color("ff856e"), "semente":
 
 static func draw(canvas: CanvasItem, pos: Vector2, kind: String) -> void:
 	var color: Color = COLORS.get(kind, COLORS.legacy)
-	canvas.draw_circle(pos + Vector2(1, 2), 7, Color(0.07, 0.17, 0.12, 0.7))
+	canvas.draw_set_transform(pos + Vector2(0, 3), 0, Vector2(1, 0.42))
+	canvas.draw_circle(Vector2.ZERO, 8, Color("3e5f3f"))
+	canvas.draw_set_transform(Vector2.ZERO)
 	match kind:
 		"fruta":
-			canvas.draw_circle(pos, 5.5, color)
-			canvas.draw_line(pos + Vector2(0, -3), pos + Vector2(2, -8), Color("d2f2ad"), 2, true)
+			canvas.draw_circle(pos, 6.5, Color("9b493a"))
+			canvas.draw_circle(pos + Vector2(0, -0.6), 5.5, color)
+			canvas.draw_circle(pos + Vector2(-1.8, -2.3), 1.8, Color("ffd3a2"))
+			canvas.draw_line(pos + Vector2(0, -4), pos + Vector2(1, -8), Color("634732"), 1.4, true)
+			canvas.draw_colored_polygon(PackedVector2Array([pos + Vector2(1, -7), pos + Vector2(6, -9), pos + Vector2(5, -5)]), Color("c1db76"))
 		"semente":
 			canvas.draw_colored_polygon(PackedVector2Array([pos + Vector2(-4, 4), pos + Vector2(-4, -2), pos + Vector2(0, -6), pos + Vector2(4, -2), pos + Vector2(4, 4), pos + Vector2(0, 6)]), color)
 			canvas.draw_line(pos + Vector2(0, -3), pos + Vector2(0, 4), Color("936d37"), 1, true)

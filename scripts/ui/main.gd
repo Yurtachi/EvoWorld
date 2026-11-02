@@ -9,6 +9,7 @@ const ComandosAPI = preload("res://scripts/communication/comandos.gd")
 const Laboratory = preload("res://scripts/ui/laboratory.gd")
 const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
 const FpsChart = preload("res://scripts/ui/fps_chart.gd")
+const SpatialPresenter = preload("res://scripts/ui/spatial_presenter.gd")
 const PersonalityInspector = preload("res://scripts/ui/personality_inspector.gd")
 const TeachingPanel = preload("res://scripts/ui/teaching_panel.gd")
 const KnowledgePresenter = preload("res://scripts/ui/knowledge_presenter.gd")
@@ -90,6 +91,12 @@ var feeder_status: Label
 var feeder_stock: Label
 var selected_feeder_id := -1
 var intro_card: PanelContainer
+var spatial_toggle: CheckButton
+var spatial_status: Label
+var spatial_legend: Label
+var spatial_key: PanelContainer
+var control_hint: Label
+var _spatial_elapsed := 0.0
 var _drag_origin := Vector2.ZERO
 var _dragging := false
 var food_type := "fruta"
@@ -260,11 +267,17 @@ func _process(delta: float) -> void:
 		lab.observe(world, selected_id)
 		_lab_elapsed = 0
 	fps_chart.sample(delta)
+	_spatial_elapsed += delta
+	if _spatial_elapsed >= 0.1:
+		_refresh_spatial()
+		_spatial_elapsed = 0.0
 	_autosave(delta)
 	if follow and world.creatures.has(selected_id):
 		var target_zoom := _pet_zoom()
 		camera.zoom = camera.zoom.lerp(Vector2.ONE * target_zoom, minf(1, delta * 3))
-		camera.position = camera.position.lerp(world.creatures[selected_id].pos + _camera_bias(), minf(1, delta * 6))
+		camera.position = camera.position.lerp(_follow_anchor() + _camera_bias(), minf(1, delta * 6))
+	var habitat_top := maxf(150, intro_card.get_global_rect().end.y + 12) if intro_card.visible else 150.0
+	view.habitat_bounds = Rect2(Vector2(22, habitat_top), Vector2(get_viewport_rect().size.x - SIDEBAR - 64, get_viewport_rect().size.y - 132 - habitat_top))
 	view.selected_id = selected_id
 	view.pointer = get_global_mouse_position()
 	view.show_pointer = _over_world(get_viewport().get_mouse_position()) and not new_dialog.visible and (demo_dialog == null or not demo_dialog.visible)
@@ -685,6 +698,13 @@ func _apply_tool(pos: Vector2) -> void:
 		"food":
 			var id := world.place_food(pos, food_type)
 			_notify(Texto.texto("food_placed" if id >= 0 else "food_blocked"))
+		"remove_food":
+			var removed := 0
+			for index in range(world.foods.size() - 1, -1, -1):
+				if pos.distance_to(world.foods[index].pos) <= 18:
+					world.foods.remove_at(index)
+					removed += 1
+			_notify(Texto.texto("p1_removed_food", [removed]))
 		"object":
 			var id := world.place_object(pos, object_type)
 			_notify(Texto.texto("m2_placed", [id]) if id >= 0 else Texto.texto("m2_blocked"), 10)
@@ -734,6 +754,7 @@ func _apply_tool(pos: Vector2) -> void:
 			_notify(Texto.texto("creature_placed" if id >= 0 else "creature_blocked"))
 	_refresh()
 	_world_dirty = true
+	_refresh_spatial()
 
 
 
@@ -821,15 +842,19 @@ func _toggle_follow() -> void:
 func _find_pet() -> void:
 	if world.creatures.has(world.pet_id):
 		selected_id = world.pet_id
-		camera.position = world.creatures[selected_id].pos + _camera_bias()
+		camera.position = _follow_anchor() + _camera_bias()
 	else:
 		_notify(Texto.texto("pet_dead"))
 
 func _camera_bias() -> Vector2:
-	return Vector2((SIDEBAR + 16) * 0.5, 8) / camera.zoom
+	var height := get_viewport_rect().size.y
+	var top := 150.0
+	if intro_card != null and intro_card.visible:
+		top = maxf(300, intro_card.get_global_rect().end.y + 20)
+	var bottom := height - (216 if spatial_toggle != null and spatial_toggle.button_pressed else 132)
+	return Vector2((SIDEBAR + 16) * 0.5, height * 0.5 - (top + bottom) * 0.5) / camera.zoom
 
 func _fit_world() -> void:
-	if intro_card != null: intro_card.offset_right = minf(348, (get_viewport_rect().size.x - SIDEBAR - 36) * 0.36 + 28)
 	if world == null:
 		return
 	var available := get_viewport_rect().size - Vector2(SIDEBAR + 100, 390)
@@ -871,6 +896,9 @@ func _load(slot: String = "world") -> void:
 
 
 func _reset_session() -> void:
+	view.spatial_data = {}
+	_spatial_elapsed = 0.1
+	if spatial_status != null: spatial_status.hide()
 	_object_sensor_key = ""
 	_gallery_signature = ""
 	_selected_board_id = -1
@@ -1200,6 +1228,10 @@ func _capture_demo(path: String) -> void:
 			return
 	if state.begins_with("p0-"):
 		await _capture_p0(state, path)
+		get_tree().quit()
+		return
+	if state.begins_with("p1-"):
+		await _capture_p1(state, path)
 		get_tree().quit()
 		return
 	if state.begins_with("m4b-"):
@@ -1644,6 +1676,11 @@ func _benchmark_fps(path: String) -> void:
 		get_tree().quit(1)
 		return
 	protected_mode = false
+	if path.get_file().begins_with("P1-"):
+		_p1_fixture()
+		spatial_toggle.button_pressed = true
+		_refresh_spatial()
+		_focus_selected()
 	for offset in [Vector2(24, 0), Vector2(0, 50), Vector2(-45, 0)]:
 		world.place_object(world.creatures[world.pet_id].pos + offset, OBJECT_TYPES[world.objects.size() % OBJECT_TYPES.size()])
 	var bench_board_id := world.place_board(world.creatures[world.pet_id].pos + Vector2(0, -34))
@@ -1678,6 +1715,8 @@ func _benchmark_fps(path: String) -> void:
 	result["boards"] = world.boards.size()
 	result["gallery"] = world.gallery.size()
 	result["pet_mind_active"] = world.creatures.has(world.pet_id) and world.creatures[world.pet_id].mind != null
+	result["memory_overlay"] = spatial_toggle.button_pressed
+	result["remembered_places"] = world.creatures[world.pet_id].spatial_snapshot().lugares.size() if world.creatures.has(world.pet_id) else 0
 	var output := FileAccess.open(path.get_basename() + ".json", FileAccess.WRITE)
 	if output != null:
 		output.store_string(JSON.stringify(result, "\t"))
@@ -1685,7 +1724,9 @@ func _benchmark_fps(path: String) -> void:
 	else:
 		printerr("Benchmark: caminho de saída não gravável; use caminho absoluto.")
 	paused = true
-	if path.get_file().begins_with("M4b-"):
+	if path.get_file().begins_with("P1-"):
+		_notify(Texto.texto("p1_fps", [Texto.numero(mean)]), 15)
+	elif path.get_file().begins_with("M4b-"):
 		_notify(Texto.texto("m4b_fps", [world.creatures.size(), Texto.numero(mean), world.terminals.size(), world.mind_enabled_ids.size()]), 15)
 	elif path.get_file().begins_with("M3c-"):
 		_notify(Texto.texto("m3c_fps", [world.creatures.size(), Texto.numero(mean), world.library.books.size(), world.mind_enabled_ids.size()]), 15)
@@ -1827,7 +1868,7 @@ func _capture_e3(state: String, path: String) -> void:
 func _focus_selected() -> void:
 	if world != null and world.creatures.has(selected_id):
 		camera.zoom = Vector2.ONE * _pet_zoom()
-		camera.position = world.creatures[selected_id].pos + _camera_bias()
+		camera.position = _follow_anchor() + _camera_bias()
 		follow = true
 
 func _refresh_mind() -> void:
@@ -2771,6 +2812,7 @@ func _build_ui() -> void:
 	_build_legacy_ui()
 	# Reuse every existing control and presenter, with one explicit advanced entry.
 	var inspector: VBoxContainer = pet_name.get_parent()
+	inspector.add_theme_constant_override("separation", 3)
 	var modes: Control = care_button.get_parent()
 	modes.hide()
 	roster.hide()
@@ -2824,10 +2866,10 @@ func _build_ui() -> void:
 	tools_tabs.current_tab = 0
 	_label(inspector, Texto.texto("p0_care"), 12, Color("d4dda6"))
 	pet_name.reparent(inspector)
-	pet_name.add_theme_font_size_override("font_size", 32)
+	pet_name.add_theme_font_size_override("font_size", 28)
 	_label(inspector, Texto.texto("p0_mood"), 12, Color("acbfad"))
 	mind_emotion.reparent(inspector)
-	mind_emotion.add_theme_font_size_override("font_size", 19)
+	mind_emotion.add_theme_font_size_override("font_size", 17)
 	var needs_grid := GridContainer.new()
 	needs_grid.columns = 2
 	inspector.add_child(needs_grid)
@@ -2842,7 +2884,8 @@ func _build_ui() -> void:
 		need_column.add_child(bar)
 		needs[key] = {"label": caption, "bar": bar}
 	action_text.reparent(inspector)
-	action_text.add_theme_font_size_override("font_size", 17)
+	action_text.add_theme_font_size_override("font_size", 15)
+	action_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	var primary := GridContainer.new()
 	primary.columns = 2
 	inspector.add_child(primary)
@@ -2874,21 +2917,44 @@ func _build_ui() -> void:
 	feeding_buttons.ecosystem.button_pressed = true
 	var feeder_button := _button(environment, Texto.texto("p0_feeder_title"), _open_feeder)
 	feeder_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	tool_buttons["remove_food"] = _button(environment, Texto.texto("p1_remove_food"), func():
+		_set_tool("remove_food")
+		_notify(Texto.texto("p1_remove_hint"), 15))
+	tool_buttons.remove_food.toggle_mode = true
+	spatial_status = _wrapped(inspector, "")
+	spatial_status.add_theme_color_override("font_color", Color("f5dfad"))
+	spatial_status.hide()
+	spatial_toggle = CheckButton.new()
+	spatial_toggle.text = Texto.texto("p1_map")
+	spatial_toggle.tooltip_text = Texto.texto("p1_map_tip")
+	inspector.add_child(spatial_toggle)
+	spatial_toggle.toggled.connect(func(enabled):
+		view.show_spatial = enabled
+		_refresh_spatial()
+		if follow: _focus_selected())
+	spatial_key = _panel(ui, Vector4(28, -210, -SIDEBAR - 56, -132), Vector4(0, 1, 1, 1))
+	spatial_key.add_theme_stylebox_override("panel", GardenTheme.panel(Color("213a30"), 12, 10))
+	spatial_key.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	spatial_legend = _wrapped(spatial_key, Texto.texto("p1_legend"))
+	spatial_legend.add_theme_font_size_override("font_size", 11)
+	spatial_key.hide()
 	_button(inspector, Texto.texto("p0_tutorial_open"), func():
-		intro_card.visible = not intro_card.visible)
-	intro_card = _panel(ui, Vector4(28, 150, 348, 275), Vector4.ZERO)
-	intro_card.offset_right = minf(348, (get_viewport_rect().size.x - SIDEBAR - 36) * 0.36 + 28)
+		intro_card.visible = not intro_card.visible
+		if follow: _focus_selected())
+	intro_card = _panel(ui, Vector4(28, 150, -SIDEBAR - 56, 280), Vector4(0, 0, 1, 0))
 	intro_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var intro := VBoxContainer.new()
 	intro_card.add_child(intro)
-	var intro_title := _wrapped(intro, Texto.texto("p0_intro"))
+	var intro_title := _wrapped(intro, Texto.texto("p1_intro"))
 	intro_title.add_theme_font_size_override("font_size", 16)
 	intro_title.add_theme_color_override("font_color", Color("f6e8bc"))
-	var guide := _wrapped(intro, Texto.texto("p0_tutorial"))
+	var guide := _wrapped(intro, Texto.texto("p1_tutorial"))
 	guide.add_theme_font_size_override("font_size", 13)
 	for child in ui.get_children():
 		if child is Label:
 			child.text = Texto.texto("p0_hint")
+			control_hint = child
+	for row in [inspector, primary, tool_row, feeding_row]: _compact_buttons(row)
 	_build_feeder_dialog()
 
 func _open_tools(tab: int = 0) -> void:
@@ -2925,7 +2991,18 @@ func _play_with_pet() -> void:
 func _pet_zoom() -> float:
 	if world == null or not world.creatures.has(selected_id): return 3.5
 	var radius: float = world.creatures[selected_id].genome.size
-	return clampf(68.0 / maxf(radius, 1), 3.4, 6.0)
+	var zoom := clampf(46.0 / maxf(radius, 1), 3.4, 4.4)
+	var target: Dictionary = view.spatial_data.get("target", {}) if spatial_toggle != null and spatial_toggle.button_pressed else {}
+	if not target.is_empty():
+		var span: Vector2 = (target.position - world.creatures[selected_id].pos).abs() + Vector2.ONE * (radius * 2 + 50)
+		var available := Vector2(get_viewport_rect().size.x - SIDEBAR - 100, get_viewport_rect().size.y - (510 if intro_card.visible else 360))
+		zoom = maxf(0.6, minf(zoom, minf(available.x / span.x, available.y / span.y)))
+	return zoom
+
+func _follow_anchor() -> Vector2:
+	var pos: Vector2 = world.creatures[selected_id].pos
+	var target: Dictionary = view.spatial_data.get("target", {}) if spatial_toggle != null and spatial_toggle.button_pressed else {}
+	return pos.lerp(target.position, 0.5) if not target.is_empty() else pos
 
 func _refresh_pet_needs() -> void:
 	if needs.is_empty(): return
@@ -2943,6 +3020,25 @@ func _refresh_pet_needs() -> void:
 		needs[key].bar.add_theme_stylebox_override("fill", GardenTheme.panel(Color("e6ac85") if urgent else Color("bad799"), 4, 0))
 	if feeder_dialog != null and feeder_dialog.visible:
 		_refresh_feeder()
+
+func _refresh_spatial() -> void:
+	if spatial_toggle == null or world == null: return
+	var creature = world.creatures.get(selected_id)
+	view.spatial_data = {}
+	spatial_status.hide()
+	spatial_key.visible = spatial_toggle.button_pressed
+	if creature == null:
+		spatial_legend.text = Texto.texto("p1_no_places")
+		return
+	var active: bool = creature.mind != null and creature.mind.memory_enabled and bool(creature.mind.spatial.get("enabled", false)) and creature.mind.policy_mode == "full"
+	var sensory: Dictionary = world.sense(creature, false) if spatial_toggle.button_pressed else {}
+	var data := SpatialPresenter.present(creature.spatial_snapshot(), sensory, active, creature.last_action)
+	spatial_status.text = data.status
+	spatial_status.visible = not data.status.is_empty()
+	spatial_legend.text = data.legend
+	view.spatial_data = data
+	view.spatial_bounds = Rect2(Vector2(28, maxf(150, intro_card.get_global_rect().end.y + 12) if intro_card.visible else 150), Vector2(get_viewport_rect().size.x - SIDEBAR - 84, 1))
+	view.spatial_bounds.size.y = get_viewport_rect().size.y - 220 - view.spatial_bounds.position.y
 
 func _build_feeder_dialog() -> void:
 	feeder_dialog = _window("p0_feeder_title", Vector2i(520, 420))
@@ -2987,6 +3083,99 @@ func _toggle_feeder() -> void:
 		world.call("feeder_set_enabled", int(feeder.id), not feeder.get("enabled", feeder.get("ativo", true)))
 		_world_dirty = true
 	_refresh_feeder()
+
+func _p1_fixture(revise: bool = false) -> void:
+	# Visual QA only; real ingestion trains the memory, step() produces seeking.
+	world = World.new_pet_world(7421, Texto.texto("pet_default"))
+	world.size = Vector2(700, 480)
+	world.set_feeding_mode("manual")
+	selected_id = world.pet_id
+	ecosystem_mode = false
+	roster.hide()
+	var creature = world.creatures[selected_id]
+	world.foods.clear()
+	world.waters.clear()
+	world.obstacles.clear()
+	var learned := Vector2(420, 240)
+	creature.pos = learned
+	creature.heading = 0
+	for visit in range(8):
+		world.tick += 1
+		creature.energy = creature.max_energy * 0.35
+		world._eat(creature, world.place_food(learned, "fruta"))
+	creature.pos = Vector2(330, 185)
+	var water_id := world.place_water(creature.pos, 14)
+	for visit in range(3):
+		world.tick += 1
+		creature.hydration = 40
+		world._drink(creature, water_id)
+	world.waters.clear()
+	world.tick += 30 # Let the temporary drinking badge expire before this memory view.
+	if revise:
+		for visit in range(3):
+			world.tick += 600
+			creature.pos = learned
+			creature.energy = creature.max_energy * 0.4
+			creature.mind.spatial.objetivo_atual = ""
+			for step in range(18): world.step()
+	creature.pos = Vector2(150, 240)
+	creature.heading = 0
+	creature.energy = creature.max_energy * 0.4
+	creature.hydration = 95
+	creature.personality.fatigue = 0.1
+	world.step()
+	world.place_food(Vector2(440, 275), "fruta") # Physical truth, never supplied to memory marks.
+	world.place_food(creature.pos + Vector2(38, 12), "fruta") # Newly perceived, not yet remembered.
+	world.place_water(Vector2(170, 290), 14)
+	_reset_session()
+	view.set_world(world)
+	paused = true
+	protected_mode = false
+	intro_card.hide()
+	_refresh()
+	_refresh_pet_needs()
+	_refresh_spatial()
+
+func _capture_p1(state: String, path: String) -> void:
+	paused = true
+	if state in ["p1-on", "p1-off", "p1-seeking", "p1-revised", "p1-lab"]:
+		_p1_fixture(state == "p1-revised")
+		spatial_toggle.button_pressed = true
+		_refresh_spatial()
+		_focus_selected()
+		if state == "p1-off":
+			follow = false
+			spatial_toggle.set_pressed_no_signal(false)
+			view.show_spatial = false
+			_refresh_spatial()
+		if state == "p1-revised":
+			follow = false
+			camera.zoom = Vector2.ONE * 2.4
+			camera.position = Vector2(286, 240) + _camera_bias()
+		if state == "p1-lab":
+			lab.observe(world, selected_id, true)
+			_open_tools(3)
+		print("P1 visual fixture ", state, " action=", world.creatures[selected_id].last_action, " snapshot=", JSON.stringify(world.creatures[selected_id].spatial_snapshot()))
+	else:
+		intro_card.visible = true
+		_focus_selected()
+		if state == "p1-polish":
+			world.foods.clear()
+			world.waters.clear()
+			world.obstacles.clear()
+			var pos: Vector2 = world.creatures[selected_id].pos
+			world.place_food(pos + Vector2(31, 6), "fruta")
+			world.place_food(pos + Vector2(-25, 15), "semente")
+			world.place_water(pos + Vector2(65, 0), 13)
+			view.terrain.append(pos + Vector2(-70, 14))
+			view.terrain.append(pos + Vector2(5, 23))
+			view.terrain.append(pos + Vector2(88, 17))
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_focus_selected() if follow else null
+	var warmup := Time.get_ticks_msec() + 900
+	while Time.get_ticks_msec() < warmup: await get_tree().process_frame
+	await capture_screenshot(path)
 
 func _capture_p0(state: String, path: String) -> void:
 	# Debug-only controlled scenarios; every displayed action is produced by step().
@@ -3046,8 +3235,6 @@ func _capture_p0(state: String, path: String) -> void:
 	await capture_screenshot(path)
 
 func _resize_layout() -> void:
-	if intro_card != null:
-		intro_card.offset_right = minf(348, (get_viewport_rect().size.x - SIDEBAR - 36) * 0.36 + 28)
 	if follow:
 		_focus_selected()
 	else:

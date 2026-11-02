@@ -12,6 +12,10 @@ var tool := "select"
 var pointer := Vector2.ZERO
 var show_pointer := false
 var show_sensors := false
+var show_spatial := false
+var spatial_data: Dictionary = {}
+var spatial_bounds := Rect2()
+var habitat_bounds := Rect2()
 var terrain := PackedVector2Array()
 var command_target := Vector2.ZERO
 var show_command_target := false
@@ -44,22 +48,29 @@ func _draw() -> void:
 	if world == null:
 		return
 	draw_rect(Rect2(Vector2(-10, -10), world.size + Vector2(20, 20)), Color("233c32"))
-	draw_rect(Rect2(Vector2.ZERO, world.size), Color("537b64"))
+	draw_rect(Rect2(Vector2.ZERO, world.size), Color("63846a"))
 	var visible := get_global_transform_with_canvas().affine_inverse() * get_viewport_rect()
 	visible = visible.intersection(Rect2(Vector2.ZERO, world.size))
 	for point in terrain:
 		if not visible.grow(12).has_point(point): continue
-		var scale_value := 0.35 + fmod(point.x, 11.0) / 35.0
+		if not _whole_in_habitat(point, 10): continue
+		var scale_value := 0.45 + fmod(point.x, 11.0) / 35.0
+		draw_set_transform(point, 0, Vector2(1, 0.35))
+		draw_circle(Vector2(0, 2), 6 * scale_value, Color("54765b"))
+		draw_set_transform(Vector2.ZERO)
 		for side in [-1, 1]:
 			var end := point + Vector2(side * 3.2, -6) * scale_value
-			draw_line(point, end, Color("6d956e"), 1.5, true)
-			draw_circle(end, 2.0 * scale_value, Color("7ca075"))
+			draw_line(point, end, Color("365f40"), 1.6, true)
+			draw_set_transform(end, side * 0.55, Vector2(0.6, 1))
+			draw_circle(Vector2.ZERO, 3 * scale_value, Color("86a25c"))
+			draw_line(Vector2(0, 2), Vector2(0, -1), Color("a3b877"), 0.6, true)
+			draw_set_transform(Vector2.ZERO)
 	for water in world.waters:
-		_water(water.pos, water.radius)
+		if _whole_in_habitat(water.pos, water.radius + 4): _water(water.pos, water.radius)
 	for obstacle in world.obstacles:
-		_rock(obstacle.pos, obstacle.radius)
+		if _whole_in_habitat(obstacle.pos, obstacle.radius): _rock(obstacle.pos, obstacle.radius)
 	for food in world.foods:
-		FoodShapes.draw(self, food.pos, food.get("food_type", "legacy"))
+		if _whole_in_habitat(food.pos, 11): FoodShapes.draw(self, food.pos, food.get("food_type", "legacy"))
 	for row in world.objects:
 		_draw_object(ObjectCatalog.appearance(row))
 	for board in world.boards:
@@ -77,6 +88,7 @@ func _draw() -> void:
 		if creature.id == selected_id and show_sensors:
 			_sensor(creature)
 		_creature(creature)
+	if show_spatial: _draw_spatial()
 	visible_names.clear()
 	var name_order: Array = []
 	for id in [selected_id, world.pet_id]:
@@ -170,12 +182,58 @@ func _draw_terminal_marker(marker: Dictionary) -> void:
 		draw_set_transform(Vector2.ZERO)
 
 func _water(pos: Vector2, radius: float) -> void:
-	draw_circle(pos, radius + 3, Color("aecfc2"))
-	draw_circle(pos, radius, Color("257fa6"))
-	draw_circle(pos + Vector2(-radius * 0.12, -radius * 0.12), radius * 0.72, Color("379cc2"))
+	draw_circle(pos + Vector2(1, 2), radius + 4, Color("48694f"))
+	draw_circle(pos, radius + 2.5, Color("d5d7a6"))
+	draw_circle(pos, radius, Color("439db4"))
+	draw_circle(pos + Vector2(-radius * 0.12, -radius * 0.12), radius * 0.72, Color("67c4cf"))
 	for offset in [-0.35, 0.15, 0.48]:
 		var origin := pos + Vector2(-radius * 0.35, radius * offset)
-		draw_line(origin, origin + Vector2(radius * 0.6, 0), Color("a2e2e8"), 1.5, true)
+		draw_line(origin, origin + Vector2(radius * 0.6, 0), Color("d4f1e7"), 1, true)
+
+func _whole_in_habitat(pos: Vector2, radius: float) -> bool:
+	if habitat_bounds.size == Vector2.ZERO: return true
+	var transform := get_global_transform_with_canvas()
+	var center := transform * pos
+	var extent := Vector2.ONE * radius * transform.get_scale().x
+	return habitat_bounds.encloses(Rect2(center - extent, extent * 2))
+
+func _draw_spatial() -> void:
+	# All positions here come from the presenter: snapshot or sensory channels.
+	var transform := get_global_transform_with_canvas()
+	var zoom := maxf(transform.get_scale().x, 0.05)
+	var creature = world.creatures.get(selected_id)
+	var target: Dictionary = spatial_data.get("target", {})
+	if creature != null and not target.is_empty():
+		draw_dashed_line(creature.pos, target.position, Color("f0d8a2"), 1.4 / zoom, 7 / zoom, true, true)
+	var occupied: Array[Rect2] = []
+	for marker in spatial_data.get("remembered", []):
+		var screen: Vector2 = transform * marker.position
+		if not spatial_bounds.grow(-20).has_point(screen): continue
+		var color := Color("f5d797") if marker.recurso == "comida" else Color("a3dfea")
+		color.a = 0.24 + float(marker.strength) * 0.7
+		draw_circle(marker.position, 18 / zoom, Color(color, color.a * 0.11))
+		draw_arc(marker.position, 14 / zoom, 0, TAU, 40, color, 1.8 / zoom, true)
+		draw_arc(marker.position, 18 / zoom, 0.2, TAU - 0.2, 32, Color(color, color.a * 0.5), 1 / zoom, true)
+		var text: String = marker.caption
+		var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		var label_pos := Vector2(clampf(screen.x - width / 2, spatial_bounds.position.x + 4, maxf(spatial_bounds.position.x + 4, spatial_bounds.end.x - width - 4)), screen.y - 28)
+		var label_rect := Rect2(label_pos - Vector2(4, 14), Vector2(width + 8, 20))
+		if not spatial_bounds.encloses(label_rect): continue
+		var overlaps := false
+		for shown in occupied:
+			if shown.intersects(label_rect): overlaps = true
+		if overlaps: continue
+		occupied.append(label_rect)
+		draw_set_transform(transform.affine_inverse() * label_pos, 0, Vector2.ONE / zoom)
+		draw_style_box(_capsule_style(Color("294737")), Rect2(Vector2(-4, -14), Vector2(width + 8, 20)))
+		draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("f4ebd4"))
+		draw_set_transform(Vector2.ZERO)
+	for marker in spatial_data.get("perceived", []):
+		if not spatial_bounds.grow(-10).has_point(transform * marker.position): continue
+		var points := PackedVector2Array()
+		for offset in [Vector2(0, -7), Vector2(7, 0), Vector2(0, 7), Vector2(-7, 0), Vector2(0, -7)]:
+			points.append(marker.position + offset / zoom)
+		draw_polyline(points, Color("f4fff0"), 1.4 / zoom, true)
 
 func _draw_object(row: Dictionary) -> void:
 	# Same public appearance yields identical pixels, regardless of hidden effect.
