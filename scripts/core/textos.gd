@@ -20,6 +20,16 @@ const M5_UI := {
 	"m5_consent_denied": "Consentimento reprodutivo não concedido pelos parâmetros simulados."
 }
 
+const P1_UI := {
+	"action_seek_place": "Parece voltar a um lugar lembrado",
+	"action_inspect_place": "Parece procurar no lugar lembrado",
+	"spatial.expected": "Lembra de recurso neste lugar; a expectativa ainda é favorável.",
+	"spatial.explore": "Parece explorar para encontrar recursos em outros lugares.",
+	"spatial.inspect": "Parece verificar se o recurso continua no lugar lembrado.",
+	"spatial.failure": "Não encontrou o recurso; a expectativa sobre este lugar diminuiu.",
+	"spatial.visible": "Percebe um recurso ao alcance da visão."
+}
+
 const M4B_UI := {
 	"tool_terminal": "Terminal",
 	"m4b_placed": "Terminal #%d colocado. Dispositivo físico fictício com 3 manuais anexos.",
@@ -500,6 +510,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if P1_UI.has(codigo): return P1_UI[codigo] if valores.is_empty() else P1_UI[codigo] % valores
 	if M5_UI.has(codigo): return M5_UI[codigo] if valores.is_empty() else M5_UI[codigo] % valores
 	if M4B_UI.has(codigo): return M4B_UI[codigo] if valores.is_empty() else M4B_UI[codigo] % valores
 	if M3C_UI.has(codigo): return M3C_UI[codigo] if valores.is_empty() else M3C_UI[codigo] % valores
@@ -565,6 +576,7 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
+	if P1_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if M4B_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if M3C_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if M3_UI.has("action_" + codigo) or M3_CATALOGO.has("action_" + codigo): return texto("action_" + codigo)
@@ -574,6 +586,7 @@ static func acao(codigo: String) -> String:
 	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) or E2_CATALOGO.has("action_" + codigo) else texto("action_unknown")
 
 static func razao(original: String) -> String:
+	if P1_UI.has(original): return texto(original)
 	if original.begins_with("mind."):
 		return mente_motivo(original) if original.begins_with("mind.iniciativa.") or original in ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency"] else mente_desejo(original.trim_prefix("mind."))
 	if E4_RAZOES.has(original):
@@ -993,6 +1006,7 @@ static func mente_desejo(goal: String) -> String:
 	return texto("m1_goal_" + goal) if M1_UI.has("m1_goal_" + goal) or M3_UI.has("m1_goal_" + goal) else texto("m1_wait")
 
 static func mente_motivo(reason: String) -> String:
+	if P1_UI.has(reason): return texto(reason)
 	var code := "m1_reason_" + reason.trim_prefix("mind.")
 	if M4B_UI.has(code): return texto(code)
 	if M3C_UI.has(code): return texto(code)

@@ -247,7 +247,7 @@ func _migrations_and_golden(f: Array) -> void:
 		var stable := loaded.to_dict()
 		var twice := World.from_dict(stable)
 		check(twice != null and snapshot(twice) == snapshot(loaded), "migracao v%d nao estabilizou em v15" % version, f)
-		check(stable.save_version == 15 and loaded.creatures.size() == legacy.creatures.size(), "migracao v%d mudou populacao" % version, f)
+		check(stable.save_version == World.SAVE_VERSION and loaded.creatures.size() == legacy.creatures.size(), "migracao v%d mudou populacao" % version, f)
 		legacy.feeders = []
 		check(World.from_dict(legacy) == null, "schema futuro aceito em v%d" % version, f)
 
