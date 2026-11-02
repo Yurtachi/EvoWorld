@@ -1,0 +1,535 @@
+{
+	"base": "5d78967",
+	"expected_sha256": "de67ecbeab0e41eff40b188f6901dae0f942e73f0d98b1df95163349cd11ecfc",
+	"initial": {
+		"commands": {
+			"order": {},
+			"protection_requested": false
+		},
+		"config": {
+			"feeding_mode": "ecosystem",
+			"food_capacity": 48,
+			"food_regrow": true,
+			"food_regrow_batch": 1,
+			"food_regrow_interval": 40,
+			"max_age": 12000,
+			"max_population": 150,
+			"min_reproduction_age": 300,
+			"mind_all": false,
+			"mind_enabled_ids": [
+				35
+			],
+			"mutation_rate": 0.3,
+			"mutation_scale": 0.024999999999999998,
+			"personality_enabled": true,
+			"reproduction_cooldown": 300,
+			"reproduction_enabled": false,
+			"signal_cost": 0.3,
+			"signal_count": 4,
+			"signal_enabled": false,
+			"signal_noise": 0.049999999999999996,
+			"signal_range": 180.0,
+			"signal_ttl": 10,
+			"water_enabled": true
+		},
+		"creatures": [
+			{
+				"age": 0,
+				"alive": true,
+				"energy": 82.740488,
+				"genome": {
+					"generation": 0,
+					"hue": 0.971395,
+					"id": 34,
+					"metabolism": 1.549286,
+					"parents": [],
+					"size": 11.712805,
+					"speed": 36.561797999999996,
+					"temperament": {
+						"caution": 0.040519,
+						"curiosity": 0.22930599999999998,
+						"impulsivity": 0.430058,
+						"sociability": 0.595681
+					},
+					"version": 1,
+					"vision_fov": 2.303277,
+					"vision_range": 157.27569599999998
+				},
+				"heading": 3.087954,
+				"hydration": 100.0,
+				"id": 35,
+				"last_action": "rest",
+				"last_reason": "Newly spawned",
+				"max_energy": 103.42560999999999,
+				"memory": [],
+				"mind": {
+					"absent_ticks": 0,
+					"affect": {
+						"cause_log": [],
+						"values": {
+							"entusiasmo": 0,
+							"frustracao": 0,
+							"receio": 0,
+							"satisfacao": 0,
+							"saturacao_social": 0,
+							"solidao": 0,
+							"tranquilidade": 0
+						}
+					},
+					"affect_enabled": true,
+					"blocked_ticks": 0,
+					"contact_ticks": 0,
+					"experiences": [],
+					"goal_started": 0,
+					"memory_enabled": true,
+					"mind_log": [],
+					"motivo": "mind.disabled",
+					"objects": {},
+					"objetivo_atual": "",
+					"policy_mode": "full",
+					"pontuacoes": {},
+					"rng_state": {
+						"state": "403878306695800021"
+					},
+					"spatial": {
+						"arrival_tick": -1,
+						"busca_indice": -1,
+						"buscas": 0,
+						"cell_size": 78.63784799999999,
+						"detour_until": 0,
+						"enabled": true,
+						"explore_until": 0,
+						"lugares": [],
+						"motivo": "",
+						"objetivo_atual": "",
+						"systematic": false,
+						"version": 1
+					}
+				},
+				"name": "Compatibilidade",
+				"personality": {
+					"bonds": {},
+					"boredom": 0,
+					"conditioning": {},
+					"episodes": [],
+					"event_valence": 0,
+					"fatigue": 0,
+					"habituation": {},
+					"loneliness": 0,
+					"preferences": {}
+				},
+				"pos": [
+					431.8438720703125,
+					610.1577758789063
+				],
+				"reproduction_cooldown": 0,
+				"version": 1
+			}
+		],
+		"events": [
+			{
+				"creature_id": 35,
+				"name": "Compatibilidade",
+				"tick": 0,
+				"type": "spawn"
+			}
+		],
+		"foods": [
+			{
+				"energy": 24.0,
+				"food_type": "fruta",
+				"id": 10,
+				"pos": [
+					426.1706848144531,
+					619.13232421875
+				]
+			},
+			{
+				"energy": 40.0,
+				"food_type": "semente",
+				"id": 11,
+				"pos": [
+					148.75875854492188,
+					612.6607055664063
+				]
+			},
+			{
+				"energy": 12.0,
+				"food_type": "folha",
+				"id": 12,
+				"pos": [
+					499.19970703125,
+					307.59906005859375
+				]
+			},
+			{
+				"energy": 20.0,
+				"food_type": "cogumelo",
+				"id": 13,
+				"pos": [
+					1053.9732666015625,
+					608.33203125
+				]
+			},
+			{
+				"energy": 24.0,
+				"food_type": "fruta",
+				"id": 14,
+				"pos": [
+					599.6652221679688,
+					611.0702514648438
+				]
+			},
+			{
+				"energy": 40.0,
+				"food_type": "semente",
+				"id": 15,
+				"pos": [
+					15.062089920043945,
+					676.9273681640625
+				]
+			},
+			{
+				"energy": 12.0,
+				"food_type": "folha",
+				"id": 16,
+				"pos": [
+					346.44805908203125,
+					218.36285400390625
+				]
+			},
+			{
+				"energy": 20.0,
+				"food_type": "cogumelo",
+				"id": 17,
+				"pos": [
+					458.8115234375,
+					262.4525451660156
+				]
+			},
+			{
+				"energy": 24.0,
+				"food_type": "fruta",
+				"id": 18,
+				"pos": [
+					482.4547119140625,
+					53.19819641113281
+				]
+			},
+			{
+				"energy": 40.0,
+				"food_type": "semente",
+				"id": 19,
+				"pos": [
+					148.13162231445313,
+					279.62744140625
+				]
+			},
+			{
+				"energy": 12.0,
+				"food_type": "folha",
+				"id": 20,
+				"pos": [
+					926.8133544921875,
+					395.85198974609375
+				]
+			},
+			{
+				"energy": 20.0,
+				"food_type": "cogumelo",
+				"id": 21,
+				"pos": [
+					937.0943603515625,
+					560.0138549804688
+				]
+			},
+			{
+				"energy": 24.0,
+				"food_type": "fruta",
+				"id": 22,
+				"pos": [
+					984.2235717773438,
+					166.2892303466797
+				]
+			},
+			{
+				"energy": 40.0,
+				"food_type": "semente",
+				"id": 23,
+				"pos": [
+					565.3023681640625,
+					166.42518615722656
+				]
+			},
+			{
+				"energy": 12.0,
+				"food_type": "folha",
+				"id": 24,
+				"pos": [
+					629.690673828125,
+					63.174835205078125
+				]
+			},
+			{
+				"energy": 20.0,
+				"food_type": "cogumelo",
+				"id": 25,
+				"pos": [
+					952.8079223632813,
+					731.5411376953125
+				]
+			},
+			{
+				"energy": 24.0,
+				"food_type": "fruta",
+				"id": 26,
+				"pos": [
+					858.15673828125,
+					46.64567565917969
+				]
+			},
+			{
+				"energy": 40.0,
+				"food_type": "semente",
+				"id": 27,
+				"pos": [
+					462.0565185546875,
+					606.1561889648438
+				]
+			},
+			{
+				"energy": 12.0,
+				"food_type": "folha",
+				"id": 28,
+				"pos": [
+					52.355648040771484,
+					572.7709350585938
+				]
+			},
+			{
+				"energy": 20.0,
+				"food_type": "cogumelo",
+				"id": 29,
+				"pos": [
+					351.87139892578125,
+					177.4244384765625
+				]
+			},
+			{
+				"energy": 24.0,
+				"food_type": "fruta",
+				"id": 30,
+				"pos": [
+					516.1532592773438,
+					567.1041870117188
+				]
+			},
+			{
+				"energy": 40.0,
+				"food_type": "semente",
+				"id": 31,
+				"pos": [
+					89.79962921142578,
+					355.8817138671875
+				]
+			},
+			{
+				"energy": 12.0,
+				"food_type": "folha",
+				"id": 32,
+				"pos": [
+					946.3997802734375,
+					264.613037109375
+				]
+			},
+			{
+				"energy": 20.0,
+				"food_type": "cogumelo",
+				"id": 33,
+				"pos": [
+					767.4783325195313,
+					693.6318969726563
+				]
+			}
+		],
+		"genealogy": [
+			{
+				"birth_tick": 0,
+				"creature_id": 35,
+				"death_reason": "",
+				"death_tick": -1,
+				"generation": 0,
+				"genome": {
+					"generation": 0,
+					"hue": 0.971395,
+					"id": 34,
+					"metabolism": 1.549286,
+					"parents": [],
+					"size": 11.712805,
+					"speed": 36.561797999999996,
+					"temperament": {
+						"caution": 0.040519,
+						"curiosity": 0.22930599999999998,
+						"impulsivity": 0.430058,
+						"sociability": 0.595681
+					},
+					"version": 1,
+					"vision_fov": 2.303277,
+					"vision_range": 157.27569599999998
+				},
+				"legacy_root": false,
+				"mutations": [],
+				"name": "Compatibilidade",
+				"parents": []
+			}
+		],
+		"next_id": 36,
+		"object_catalog_version": 1,
+		"objects": [],
+		"obstacles": [
+			{
+				"pos": [
+					511.23480224609375,
+					361.1681823730469
+				],
+				"radius": 17.460297
+			},
+			{
+				"pos": [
+					1165.2554931640625,
+					70.34843444824219
+				],
+				"radius": 25.352911
+			},
+			{
+				"pos": [
+					731.2388916015625,
+					433.5605163574219
+				],
+				"radius": 19.295343
+			},
+			{
+				"pos": [
+					926.6670532226563,
+					656.2582397460938
+				],
+				"radius": 29.012801999999997
+			},
+			{
+				"pos": [
+					413.6425476074219,
+					664.943603515625
+				],
+				"radius": 19.316046
+			},
+			{
+				"pos": [
+					475.0983581542969,
+					522.7799072265625
+				],
+				"radius": 29.978614999999998
+			},
+			{
+				"pos": [
+					727.7767333984375,
+					551.845458984375
+				],
+				"radius": 21.015967999999997
+			},
+			{
+				"pos": [
+					1059.889404296875,
+					553.4393310546875
+				],
+				"radius": 29.702548999999998
+			}
+		],
+		"pet_id": 35,
+		"rng_state": {
+			"state": "-8783262837466488602"
+		},
+		"save_version": 16,
+		"signal_log": [],
+		"size": [
+			1200.0,
+			760.0
+		],
+		"tick": 0,
+		"waters": [
+			{
+				"id": 1,
+				"pos": [
+					888.710205078125,
+					317.51068115234375
+				],
+				"radius": 19.1161
+			},
+			{
+				"id": 2,
+				"pos": [
+					74.0289535522461,
+					484.5896301269531
+				],
+				"radius": 44.217613
+			},
+			{
+				"id": 3,
+				"pos": [
+					252.76754760742188,
+					654.3306274414063
+				],
+				"radius": 46.962745999999996
+			},
+			{
+				"id": 4,
+				"pos": [
+					1139.05859375,
+					109.67807006835938
+				],
+				"radius": 38.496002
+			},
+			{
+				"id": 5,
+				"pos": [
+					923.9111938476563,
+					202.20065307617188
+				],
+				"radius": 46.40136
+			},
+			{
+				"id": 6,
+				"pos": [
+					975.6778564453125,
+					706.9132690429688
+				],
+				"radius": 47.981544
+			},
+			{
+				"id": 7,
+				"pos": [
+					923.6868896484375,
+					225.37860107421875
+				],
+				"radius": 21.343176
+			},
+			{
+				"id": 8,
+				"pos": [
+					1047.16845703125,
+					189.83773803710938
+				],
+				"radius": 43.083244
+			},
+			{
+				"id": 9,
+				"pos": [
+					345.7278137207031,
+					140.00778198242188
+				],
+				"radius": 41.807899
+			}
+		],
+		"world_seed": "382020"
+	},
+	"ticks": 300
+}
