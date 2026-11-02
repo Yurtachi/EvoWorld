@@ -35,7 +35,7 @@ func set_world(value: World) -> void:
 	var decoration_rng := RandomNumberGenerator.new()
 	decoration_rng.seed = world.seed
 	terrain.clear()
-	for i in range(650):
+	for i in range(60):
 		terrain.append(Vector2(decoration_rng.randf_range(8, world.size.x - 8),
 			decoration_rng.randf_range(8, world.size.y - 8)))
 	queue_redraw()
@@ -44,23 +44,16 @@ func _draw() -> void:
 	if world == null:
 		return
 	draw_rect(Rect2(Vector2(-10, -10), world.size + Vector2(20, 20)), Color("233c32"))
-	draw_rect(Rect2(Vector2.ZERO, world.size), Color("54745b"))
-	# Leve textura CC0 de terreno; as entidades permanecem contrastantes.
-	# Só rasteriza os ladrilhos visíveis, inclusive no limite máximo de expansão.
+	draw_rect(Rect2(Vector2.ZERO, world.size), Color("537b64"))
 	var visible := get_global_transform_with_canvas().affine_inverse() * get_viewport_rect()
 	visible = visible.intersection(Rect2(Vector2.ZERO, world.size))
-	# Ladrilhos subpixel são dispensados ao enquadrar expansões muito grandes.
-	if get_global_transform_with_canvas().get_scale().x >= 0.08:
-		for y in range(maxi(0, int(visible.position.y / 48) * 48), int(visible.end.y) + 1, 48):
-			for x in range(maxi(0, int(visible.position.x / 48) * 48), int(visible.end.x) + 1, 48):
-				draw_texture_rect(grass_texture, Rect2(x, y, minf(48, world.size.x - x), minf(48, world.size.y - y)), false, Color(0.8, 0.9, 0.7, 0.12))
 	for point in terrain:
-		draw_line(point, point + Vector2(2, -3), Color("648166"), 1.1, true)
-	if get_global_transform_with_canvas().get_scale().x >= 0.08:
-		for x in range(maxi(0, int(visible.position.x / 100) * 100), int(visible.end.x) + 1, 100):
-			draw_line(Vector2(x, 0), Vector2(x, world.size.y), Color(0.84, 0.91, 0.76, 0.035))
-		for y in range(maxi(0, int(visible.position.y / 100) * 100), int(visible.end.y) + 1, 100):
-			draw_line(Vector2(0, y), Vector2(world.size.x, y), Color(0.84, 0.91, 0.76, 0.035))
+		if not visible.grow(12).has_point(point): continue
+		var scale_value := 0.35 + fmod(point.x, 11.0) / 35.0
+		for side in [-1, 1]:
+			var end := point + Vector2(side * 3.2, -6) * scale_value
+			draw_line(point, end, Color("6d956e"), 1.5, true)
+			draw_circle(end, 2.0 * scale_value, Color("7ca075"))
 	for water in world.waters:
 		_water(water.pos, water.radius)
 	for obstacle in world.obstacles:
@@ -77,6 +70,9 @@ func _draw() -> void:
 		_draw_terminal(terminal)
 	for marker in world.terminal_markers:
 		_draw_terminal_marker(marker)
+	if world.has_method("place_feeder"):
+		for feeder in world.get("feeders"):
+			_draw_feeder(feeder)
 	for creature in world.creatures.values():
 		if creature.id == selected_id and show_sensors:
 			_sensor(creature)
@@ -108,8 +104,9 @@ func _draw() -> void:
 		draw_line(command_target - Vector2(14, 0), command_target + Vector2(14, 0), Color("8fd5dd"), 1, true)
 		draw_line(command_target - Vector2(0, 14), command_target + Vector2(0, 14), Color("8fd5dd"), 1, true)
 	_draw_teaching()
-	_draw_social()
-	_draw_mind_marker()
+	if show_sensors:
+		_draw_social()
+		_draw_mind_marker()
 	if show_pointer and tool != "select" and Rect2(Vector2.ZERO, world.size).has_point(pointer):
 		var radius := 30.0 if tool == "water" else (24.0 if tool == "obstacle" else (13.0 if tool == "creature" else (12.0 if tool == "terminal" else 7.0)))
 		draw_circle(pointer, radius, Color(0.96, 0.91, 0.68, 0.18))
@@ -320,6 +317,7 @@ func _name_tag(creature) -> void:
 	draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 3, Color("17372b"))
 	draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, color)
 	draw_set_transform(Vector2.ZERO)
+	if zoom > 2.0: return
 	# A indicação persiste dois segundos de simulação após bebida confirmada.
 	for index in range(world.events.size() - 1, -1, -1):
 		var event: Dictionary = world.events[index]
@@ -337,8 +335,11 @@ func _name_tag(creature) -> void:
 			break
 
 func _rock(pos: Vector2, radius: float) -> void:
-	draw_circle(pos + Vector2(3, 5), radius, Color(0.12, 0.22, 0.17, 0.32))
-	draw_texture_rect(rock_texture, Rect2(pos - Vector2.ONE * radius * 1.2, Vector2.ONE * radius * 2.4), false)
+	draw_set_transform(pos + Vector2(0, radius * 0.25), 0, Vector2(1, 0.68))
+	draw_circle(Vector2.ZERO, radius, Color("3d5c4b"))
+	draw_circle(Vector2(0, -radius * 0.20), radius * 0.89, Color("82958b"))
+	draw_circle(Vector2(-radius * 0.15, -radius * 0.40), radius * 0.50, Color("a2aea0"))
+	draw_set_transform(Vector2.ZERO)
 
 func _texture(path: String) -> Texture2D:
 	# Também funciona em checkout novo, antes da importação do editor.
@@ -353,53 +354,93 @@ func _tile(atlas: Texture2D, cell: Vector2i) -> AtlasTexture:
 	return texture
 
 func _creature(creature) -> void:
-	var radius: float = creature.genome.size
-	var pos: Vector2 = creature.pos
+	# Stable species silhouette. Only size/hue originate in the genome; expression
+	# uses physiology, action and affect, never cosmetic random emotion.
+	var r: float = creature.genome.size
 	var state: Dictionary = creature.expression_state()
-	var valence := float(state.valence)
-	var arousal := float(state.arousal)
-	var enabled: bool = creature.personality != null
-	# Tick time freezes the sway when paused; no random or cosmetic emotion state.
-	var sway := sin(float(world.tick) * (0.18 + arousal * 0.4) + creature.id) * arousal * 0.12 if enabled else 0.0
-	var posture := Vector2(1.15 + valence * 0.12, 0.88 - valence * 0.08)
-	var dominant := Texto.mente_dominante(creature.mind_snapshot()) if creature.mind != null else {"key": "", "value": 0.0}
-	var intensity: float = dominant.value
-	if dominant.key in ["frustracao", "receio", "saturacao_social"]:
-		posture += Vector2(0.10, -0.12) * intensity
-	elif dominant.key in ["entusiasmo", "satisfacao"]:
-		posture += Vector2(-0.08, 0.12) * intensity
-	var selected: bool = creature.id == selected_id
-	if selected:
-		draw_arc(pos, radius + 6, 0, TAU, 48, Color("f3e2aa"), 2, true)
-	if creature.id == world.pet_id:
-		draw_circle(pos + Vector2(0, -radius - 12), 2.4, Color("f3e2aa"))
-	draw_set_transform(pos + Vector2(1.5, 3), creature.heading, Vector2(1.15, 0.88))
-	draw_circle(Vector2.ZERO, radius + 1, Color(0.12, 0.22, 0.18, 0.4))
-	draw_set_transform(pos, creature.heading + sway, posture)
-	var color := Color.from_hsv(creature.genome.hue, 0.44, clampf(0.88 + valence * 0.16, 0.65, 1.0))
-	color = color.lerp(mind_color(str(dominant.key)), intensity * 0.28)
-	# A faster genome has a longer visible tail; body radius is the size gene.
-	var tail: float = 4.0 + creature.genome.speed * 0.11
-	draw_colored_polygon(PackedVector2Array([Vector2(-radius + 2, -radius * 0.45),
-		Vector2(-radius - tail, 0), Vector2(-radius + 2, radius * 0.45)]), color.darkened(0.2))
-	draw_circle(Vector2.ZERO, radius, color.darkened(0.12))
-	draw_circle(Vector2(1, -1), radius * 0.82, color)
-	draw_circle(Vector2(-radius * 0.26, -radius * 0.35), radius * 0.25, color.lightened(0.18))
-	for side in [-1, 1]:
-		var eye := Vector2(radius * 0.55, radius * 0.38 * side)
-		draw_circle(eye, maxf(2.1, radius * 0.23), Color("f9f3db"))
-		draw_circle(eye + Vector2(0.8, 0), maxf(1.0, radius * 0.11), Color("263d35"))
+	var fatigue: float = creature.personality.fatigue if creature.personality != null else 0.0
+	var action: String = creature.last_action
+	var sleeping := action == "rest" and fatigue > 0.35
+	var eating := action == "eat"
+	var drinking := action == "drink"
+	var investigating := action.contains("object") or action.contains("investig")
+	var moving := action in ["explore", "seek_food", "seek_water", "seek_contact", "social_follow", "approach_object", "investigate_object"]
+	var phase := float(world.tick) * 0.65
+	var bounce := absf(sin(phase)) * r * 0.07 if moving else sin(float(world.tick) * 0.16) * r * 0.015
+	var dominant := Texto.mente_dominante(creature.mind_snapshot())
+	var worried: bool = dominant.key in ["receio", "frustracao", "saturacao_social"] and float(dominant.value) > 0.15
+	var happy: bool = dominant.key in ["entusiasmo", "satisfacao"] and float(dominant.value) > 0.12
+	var color := Color.from_hsv(creature.genome.hue, 0.39, 0.91)
+	var outline := color.darkened(0.48)
+	var pos: Vector2 = creature.pos
+	# Upright face remains readable in every travel direction.
+	draw_set_transform(pos + Vector2(0, r * 0.8), 0, Vector2(1.25, 0.28))
+	_pet_disc(Vector2.ZERO, r, Color(0.08, 0.20, 0.14, 0.23))
+	draw_set_transform(pos + Vector2(0, -bounce), 0, Vector2(1.08, 0.82) if sleeping else Vector2.ONE)
+	# Small curled tail, with a rounded tip: no tadpole taper.
+	var tail := PackedVector2Array()
+	for i in range(18):
+		var angle := lerpf(1.4, -1.6, i / 17.0)
+		tail.append(Vector2(r * 0.83, r * 0.16) + Vector2(cos(angle) * r * 0.36, sin(angle) * r * 0.29))
+	draw_polyline(tail, outline, r * 0.3, true)
+	draw_polyline(tail, color.darkened(0.1), r * 0.21, true)
+	_pet_disc(tail[-1], r * 0.11, color)
+	for side in [-1.0, 1.0]:
+		var step := sin(phase + (0 if side < 0 else PI)) * r * 0.10 if moving else 0.0
+		var foot := Vector2(side * r * 0.56, r * 0.80 + step)
+		_pet_disc(foot, r * 0.28, outline)
+		_pet_disc(foot + Vector2(0, -r * 0.04), r * 0.23, color.darkened(0.08))
+		var ear := Vector2(side * r * 0.68, -r * (0.60 if worried or fatigue > 0.65 else 0.91))
+		draw_set_transform(pos + Vector2(0, -bounce) + ear, side * (0.55 if worried else 0.28), Vector2(0.60, 1.0))
+		_pet_disc(Vector2.ZERO, r * 0.43, outline)
+		_pet_disc(Vector2.ZERO, r * 0.35, color)
+		_pet_disc(Vector2(0, r * 0.035), r * 0.22, color.lerp(Color("f8cab3"), 0.58))
+		draw_set_transform(pos + Vector2(0, -bounce), 0, Vector2(1.08, 0.82) if sleeping else Vector2.ONE)
+	_pet_disc(Vector2.ZERO, r * 1.02, outline)
+	_pet_disc(Vector2(0, -r * 0.03), r * 0.95, color)
+	_pet_disc(Vector2(-r * 0.30, -r * 0.48), r * 0.30, color.lightened(0.11))
+	# Cream muzzle and belly give an immediate, mammal-like face.
+	draw_set_transform(pos + Vector2(0, r * 0.43 - bounce), 0, Vector2(1.0, 0.66))
+	_pet_disc(Vector2.ZERO, r * 0.64, color.lerp(Color("fff1d6"), 0.7))
+	draw_set_transform(pos + Vector2(0, -bounce), 0, Vector2.ONE)
+	var blink := world.tick % 53 in [49, 50]
+	var gaze := Vector2.from_angle(creature.heading) * r * 0.045
+	for side in [-1.0, 1.0]:
+		var eye := Vector2(side * r * 0.38, -r * 0.19)
+		if sleeping or blink:
+			draw_arc(eye + Vector2(0, -r * 0.10), r * 0.19, 0.2, PI - 0.2, 16, outline, r * 0.055, true)
+		else:
+			_pet_disc(eye, r * 0.23, Color("fff9e9"))
+			_pet_disc(eye + gaze, r * (0.13 if investigating else 0.105), Color("283b35"))
+			_pet_disc(eye + gaze + Vector2(-r * 0.035, -r * 0.042), r * 0.037, Color("ffffff"))
+			if fatigue > 0.6 or worried:
+				draw_line(eye + Vector2(-r * 0.2, -r * 0.07), eye + Vector2(r * 0.2, -r * 0.12), color.darkened(0.15), r * 0.09, true)
+		var cheek := Vector2(side * r * 0.60, r * 0.15)
+		_pet_disc(cheek, r * 0.13, color.lerp(Color("f1b8a2"), 0.65))
+	# Nose, mouth and real ingestion gestures.
+	_pet_disc(Vector2(0, r * 0.10), r * 0.09, outline)
+	if eating:
+		_pet_disc(Vector2(0, r * 0.31), r * (0.08 + 0.04 * absf(sin(phase))), outline)
+		for side in [-1.0, 1.0]:
+			_pet_disc(Vector2(side * r * 0.22, r * 0.65), r * 0.16, color.darkened(0.05))
+	elif drinking:
+		_pet_disc(Vector2(0, r * 0.32), r * 0.09, Color("3b6370"))
+		draw_line(Vector2(0, r * 0.38), Vector2(0, r * 0.54), Color("f1aaa1"), r * 0.09, true)
+	else:
+		var mouth := PackedVector2Array()
+		for i in range(13):
+			var x := float(i) / 6.0 - 1.0
+			mouth.append(Vector2(x * r * 0.22, r * (0.28 + (0.07 if happy else 0.035) * (1 - x * x) * (-1 if worried or creature.hunger > 0.7 else 1))))
+		draw_polyline(mouth, outline, r * 0.045, true)
 	draw_set_transform(Vector2.ZERO)
-	if enabled and (selected or _show_name(creature)):
-		var zoom := get_viewport().get_camera_2d().zoom.x
-		var center := pos + Vector2(0, -radius - 21 / zoom)
-		var tint := Color("f2d3a0") if valence < -0.25 else Color("c8e8cd")
-		draw_circle(center, 5.5 / zoom, Color("193329"))
-		var points := PackedVector2Array()
-		for index in range(9):
-			var x := float(index) / 8.0 * 2.0 - 1.0
-			points.append(center + Vector2(x * 3.5, valence * (1.0 - x * x) * 4.0) / zoom)
-		draw_polyline(points, tint, 1.4 / zoom, true)
+	if sleeping:
+		for i in range(3):
+			var bubble := pos + Vector2(r * (1.05 + i * 0.30), -r * (0.55 + i * 0.32))
+			draw_arc(bubble, r * (0.08 + i * 0.025), 0, TAU, 16, Color("e3e6c8"), r * 0.04, true)
+	if drinking or creature.thirst > 0.65:
+		var drop := pos + Vector2(-r * 1.2, -r * 0.65)
+		_pet_disc(drop, r * 0.11, Color("a1e0ef"))
+		draw_colored_polygon(PackedVector2Array([drop + Vector2(-r * 0.10, 0), drop + Vector2(0, -r * 0.24), drop + Vector2(r * 0.10, 0)]), Color("a1e0ef"))
 
 func _sensor(creature) -> void:
 	var points := PackedVector2Array([creature.pos])
@@ -462,3 +503,19 @@ func _draw_mind_marker() -> void:
 		draw_polyline(PackedVector2Array([point + Vector2(-unit, -unit), point + Vector2(unit, 0), point + Vector2(-unit, unit)]), color, 2 / zoom, true)
 	else:
 		draw_circle(point, unit, color)
+
+func _draw_feeder(feeder: Dictionary) -> void:
+	var pos: Vector2 = feeder.pos
+	draw_style_box(_capsule_style(Color("2c4638")), Rect2(pos - Vector2(10, 16), Vector2(20, 28)))
+	draw_style_box(_capsule_style(Color("e0d4aa")), Rect2(pos - Vector2(8, 14), Vector2(16, 23)))
+	draw_rect(Rect2(pos - Vector2(5, 11), Vector2(10, 13)), Color("9dba9b"))
+	draw_circle(pos + Vector2(0, 10), 8, Color("415c49"))
+	draw_circle(pos + Vector2(0, 10), 5, Color("d4b987"))
+	var enabled: bool = feeder.get("enabled", feeder.get("ativo", true))
+	draw_circle(pos + Vector2(5, -12), 2, Color("bddf91") if enabled else Color("b67d68"))
+
+func _pet_disc(pos: Vector2, radius: float, color: Color) -> void:
+	var points := PackedVector2Array()
+	for i in range(96):
+		points.append(pos + Vector2.from_angle(TAU * i / 96.0) * radius)
+	draw_colored_polygon(points, color)

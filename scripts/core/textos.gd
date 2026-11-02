@@ -499,7 +499,27 @@ const ERROS_PREFIXO := {
 	"Cannot write checkpoint: ": "write_failed"
 }
 
+const P0_UI := {
+ "p0_feeder_placed": "Alimentador colocado. Escolha o modo Alimentador para ativar a distribuição.", "p0_feeder_blocked": "Esse ponto está ocupado. Escolha outro local para o alimentador.",
+ "p0_feeder_details": "%s · uma porção a cada %s s · até %d no local.",
+ "p0_tools": "Ferramentas", "p0_environment": "Ambiente", "p0_activities": "Atividades", "p0_science": "Laboratório científico", "p0_teaching": "Ensino",
+ "p0_care": "CONVIVÊNCIA", "p0_mood": "Como parece estar", "p0_hunger": "Fome", "p0_thirst": "Sede", "p0_energy": "Energia", "p0_rest": "Descanso",
+ "p0_feed": "Alimentar", "p0_water": "Oferecer água", "p0_play": "Brincar", "p0_observe": "Observar de perto", "p0_modify": "Modificar ambiente",
+ "p0_modes": "Alimentação", "p0_manual": "Manual", "p0_feeder": "Alimentador", "p0_ecosystem": "Ecossistema",
+ "p0_mode_manual": "Você coloca os alimentos. A comida do ambiente continua disponível.",
+ "p0_mode_feeder": "O alimentador libera comida do estoque no próprio local.", "p0_mode_ecosystem": "Alimentos reaparecem no habitat em densidade baixa.",
+ "p0_feeder_title": "Alimentador do habitat", "p0_feeder_place": "Colocar alimentador", "p0_feeder_refill": "Repor 20 porções", "p0_feeder_toggle": "Ligar / desligar", "p0_feeder_empty": "Nenhum alimentador colocado. Escolha um ponto no habitat.",
+ "p0_feeder_status": "Alimentador %d · %s", "p0_enabled": "ligado", "p0_disabled": "desligado", "p0_pending": "Esta ferramenta estará disponível quando o motor do alimentador estiver integrado.",
+ "p0_mode_pet": "Convivência com um pet", "p0_mode_eco": "Ecossistema · avançado", "p0_world_mode": "Experiência", "p0_need_value": "%s · %s%%",
+ "p0_intro": "Um pequeno mundo, uma companhia", "p0_tutorial": "1 · Observe as orelhas, o olhar e a postura.\n2 · Ofereça comida e água; o pet decide como reagir.\n3 · Brinque ou coloque um objeto para descobrir junto.",
+ "p0_hint": "Arraste para explorar · role para aproximar · Observar retorna ao pet", "p0_live": "Um habitat para cuidar e descobrir", "p0_sleep": "Parece dormir", "p0_doing": "Agora · %s",
+ "p0_natural_rest": "Parece descansar", "p0_natural_eat": "Está comendo", "p0_natural_drink": "Está bebendo", "p0_natural_explore": "Explora o habitat", "p0_natural_seek_food": "Procura algo para comer", "p0_natural_seek_water": "Procura água", "p0_natural_investigate": "Investiga o objeto",
+ "p0_water_offered": "Água colocada ao alcance. Observe a aproximação e a bebida.", "p0_play_offered": "Você ofereceu atenção. Observe a resposta do pet.", "p0_rest_note": "Descanso mostra a reserva de repouso (inverso da fadiga). Fome e energia vêm da mesma reserva física.",
+ "p0_tutorial_open": "Primeiros cuidados", "p0_optional": "Objetos e atividades opcionais", "p0_close": "Voltar ao pet", "p0_feeder_stock": "Estoque: %d porções", "place_feeder": "alimentador", "p0_feeder_tool": "alimentador"
+}
+
 static func texto(codigo: String, valores: Array = []) -> String:
+	if P0_UI.has(codigo): return P0_UI[codigo] if valores.is_empty() else P0_UI[codigo] % valores
 	if M5_UI.has(codigo): return M5_UI[codigo] if valores.is_empty() else M5_UI[codigo] % valores
 	if M4B_UI.has(codigo): return M4B_UI[codigo] if valores.is_empty() else M4B_UI[codigo] % valores
 	if M3C_UI.has(codigo): return M3C_UI[codigo] if valores.is_empty() else M3C_UI[codigo] % valores
@@ -1115,3 +1135,12 @@ const M3_UI := {
 	"m3_fps_sample": "%d criaturas · %s quadros/s · %d quadros · %d objetos · %d mente ativa · pet: %s",
 	"m3_demo_banner": "Inspeção M3 · ateliê e quadro com física e ações primitivas reais."
 }
+
+static func pet_acao(creature) -> String:
+	var action: String = creature.last_action
+	if action == "rest" and creature.personality != null and creature.personality.fatigue > 0.35:
+		return texto("p0_sleep")
+	if action.begins_with("object_") or action.contains("investig"):
+		return texto("p0_natural_investigate")
+	if P0_UI.has("p0_natural_" + action): return texto("p0_natural_" + action)
+	return acao(action)

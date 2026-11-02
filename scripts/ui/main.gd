@@ -1,4 +1,5 @@
 extends Node2D
+const PetWorldAdapter = preload("res://scripts/ui/pet_world_adapter.gd")
 const World = preload("res://scripts/world/sim_world.gd")
 const Store = preload("res://scripts/persistence/save_store.gd")
 const GardenTheme = preload("res://scripts/ui/garden_theme.gd")
@@ -75,7 +76,22 @@ var new_population: SpinBox
 var protection_input: CheckButton
 var autosave_input: CheckButton
 var settings_speed: OptionButton
-var initial_population := 12
+var initial_population := 1
+var ecosystem_mode := false
+var pet_adapter := PetWorldAdapter.new()
+var tools_dialog: AcceptDialog
+var tools_tabs: TabContainer
+var new_mode: OptionButton
+var feeding_buttons: Dictionary = {}
+var feeding_note: Label
+var needs: Dictionary = {}
+var feeder_dialog: AcceptDialog
+var feeder_status: Label
+var feeder_stock: Label
+var selected_feeder_id := -1
+var intro_card: PanelContainer
+var _drag_origin := Vector2.ZERO
+var _dragging := false
 var food_type := "fruta"
 var food_buttons: Dictionary = {}
 var hydration_text: Label
@@ -169,6 +185,7 @@ func _ready() -> void:
 	_capture_mode = not capture.path.is_empty()
 	if _capture_mode and capture.benchmark:
 		initial_population = capture.population
+		ecosystem_mode = capture.population > 1
 	if DisplayServer.get_name() != "headless" and not _capture_mode:
 		_read_settings()
 	_build_ui()
@@ -184,16 +201,16 @@ func _ready() -> void:
 	_build_terminal_ui()
 	_set_speed(speed)
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
-	get_viewport().size_changed.connect(_fit_world)
+	get_viewport().size_changed.connect(_resize_layout)
 	# Reproducible capture mode uses this same running scene and real SimWorld.
 	var capture_path: String = capture.path
 	if not capture_path.is_empty():
 		_capture_demo.call_deferred(capture_path)
 	else:
-		_open_new_world.call_deferred()
+		paused = false
 
 func create_world(garden_name: String, creature_name: String, world_seed: int) -> void:
-	world = World.new_world(world_seed, {"creature_count": initial_population, "initial_names": Texto.NOMES_INICIAIS})
+	world = pet_adapter.create(world_seed, creature_name, ecosystem_mode, initial_population)
 	# The name catalog applies only at this new-world boundary, never on load.
 	var index := 0
 	for creature in world.creatures.values():
@@ -209,6 +226,8 @@ func create_world(garden_name: String, creature_name: String, world_seed: int) -
 		if event.get("type") == "spawn" and world.creatures.has(int(event.get("creature_id", -1))):
 			event["name"] = world.creatures[int(event.creature_id)].name
 	selected_id = world.pet_id
+	roster.visible = ecosystem_mode
+	if tools_dialog != null: tools_dialog.hide()
 	paused = true
 	accumulator = 0
 	follow = false
@@ -220,6 +239,7 @@ func create_world(garden_name: String, creature_name: String, world_seed: int) -
 	_show_lab(false)
 	_focus_selected()
 	_refresh()
+	_refresh_pet_needs()
 	_notify(Texto.texto("welcome", [creature_name]))
 
 func _process(delta: float) -> void:
@@ -242,15 +262,18 @@ func _process(delta: float) -> void:
 	fps_chart.sample(delta)
 	_autosave(delta)
 	if follow and world.creatures.has(selected_id):
-		camera.position = world.creatures[selected_id].pos + _camera_bias()
+		var target_zoom := _pet_zoom()
+		camera.zoom = camera.zoom.lerp(Vector2.ONE * target_zoom, minf(1, delta * 3))
+		camera.position = camera.position.lerp(world.creatures[selected_id].pos + _camera_bias(), minf(1, delta * 6))
 	view.selected_id = selected_id
 	view.pointer = get_global_mouse_position()
 	view.show_pointer = _over_world(get_viewport().get_mouse_position()) and not new_dialog.visible and (demo_dialog == null or not demo_dialog.visible)
 	view.queue_redraw()
 	status_time = maxf(0, status_time - delta)
 	_refresh()
+	_refresh_pet_needs()
 
-func _build_ui() -> void:
+func _build_legacy_ui() -> void:
 	ui = Control.new()
 	ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -527,9 +550,15 @@ func _build_new_dialog() -> void:
 	world_input = _field(column, Texto.texto("garden_name"), Texto.texto("world_default"), 48)
 	pet_input = _field(column, Texto.texto("pet_name"), Texto.texto("pet_default"), 32)
 	seed_input = _field(column, Texto.texto("seed_caption"), Texto.texto("seed_default"), 10)
-	_label(column, Texto.texto("initial_population"), 13)
+	_label(column, Texto.texto("p0_world_mode"), 13)
+	new_mode = OptionButton.new()
+	new_mode.add_item(Texto.texto("p0_mode_pet"))
+	new_mode.add_item(Texto.texto("p0_mode_eco"))
+	column.add_child(new_mode)
 	new_population = _population_field(column)
-	new_population.value = initial_population
+	new_population.value = 12
+	new_population.hide()
+	new_mode.item_selected.connect(func(index): new_population.visible = index == 1)
 	dialog_error = _wrapped(column, Texto.texto("pet_rules"))
 	dialog_error.add_theme_color_override("font_color", Color("d4d6ab"))
 	new_dialog.confirmed.connect(_confirm_new_world)
@@ -551,11 +580,12 @@ func _confirm_new_world() -> void:
 		return
 	new_dialog.hide()
 	dialog_error.text = Texto.texto("pet_rules")
-	initial_population = int(new_population.value)
+	ecosystem_mode = new_mode.selected == 1
+	initial_population = int(new_population.value) if ecosystem_mode else 1
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
-	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
+	if tools_dialog.visible or feeder_dialog.visible or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -568,19 +598,28 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.pressed and event.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
 			var before := get_global_mouse_position()
 			var factor := 1.12 if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / 1.12
-			camera.zoom = Vector2.ONE * clampf(camera.zoom.x * factor, 0.001, 3.0)
+			camera.zoom = Vector2.ONE * clampf(camera.zoom.x * factor, 0.001, 7.0)
 			camera.force_update_scroll()
 			camera.position += before - get_global_mouse_position()
 			follow = false
-		elif event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-			_apply_tool(get_global_mouse_position())
+		elif event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_drag_origin = event.position
+				_dragging = false
+			elif not _dragging:
+				_apply_tool(get_global_mouse_position())
+	if event is InputEventMouseMotion and _over_world(event.position) and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and tool == "select":
+		if event.position.distance_to(_drag_origin) > 5:
+			_dragging = true
+			camera.position -= event.relative / camera.zoom
+			follow = false
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_MIDDLE):
 		camera.position -= event.relative / camera.zoom
 		follow = false
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
+	if new_dialog == null or tools_dialog.visible or feeder_dialog.visible or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -602,7 +641,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
+	if world == null or tools_dialog.visible or feeder_dialog.visible or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -616,6 +655,7 @@ func _apply_tool(pos: Vector2) -> void:
 		return
 	match tool:
 		"select":
+			var previous_selection := selected_id
 			selected_id = -1
 			var nearest := INF
 			for creature in world.creatures.values():
@@ -623,6 +663,9 @@ func _apply_tool(pos: Vector2) -> void:
 				if (distance < maxf(creature.genome.size + 5, 13 / camera.zoom.x) or view.label_hit(creature, pos)) and distance < nearest:
 					selected_id = creature.id
 					nearest = distance
+			if selected_id < 0:
+				selected_id = previous_selection if world.creatures.has(previous_selection) else world.pet_id
+				if not _open_world_object(pos): selected_id = -1
 			follow = false
 		"teaching":
 			teaching.mark(pos)
@@ -630,6 +673,15 @@ func _apply_tool(pos: Vector2) -> void:
 			_refresh()
 		"attention":
 			_give_attention(pos)
+		"feeder":
+			if world.has_method("place_feeder"):
+				var feeder_id: int = world.call("place_feeder", pos, {"tipo_alimento": food_type, "estoque": 40, "intervalo_ticks": 100, "capacidade_local": 3, "raio": 28.0})
+				_notify(Texto.texto("p0_feeder_placed" if feeder_id >= 0 else "p0_feeder_blocked"))
+				if feeder_id >= 0:
+					selected_feeder_id = feeder_id
+					_set_tool("select")
+			else:
+				_notify(Texto.texto("p0_pending"))
 		"food":
 			var id := world.place_food(pos, food_type)
 			_notify(Texto.texto("food_placed" if id >= 0 else "food_blocked"))
@@ -695,7 +747,7 @@ func _refresh() -> void:
 	view.teaching_target = teaching.target if teaching.selected_skill() == "ir_ate_local" else Vector2.INF
 	mode_note.text = Texto.texto("protection_active" if protected_mode else "protection_off")
 	title.text = Texto.texto("title", [Texto.nome_mundo(world_name)])
-	stats.text = Texto.texto("garden_stats", [world.creatures.size(), world.foods.size(), world.waters.size(), world.tick, Engine.get_frames_per_second()])
+	stats.text = Texto.texto("p0_live")
 	_refresh_roster()
 	var params: Dictionary = FoodCatalog.PARAMETERS[food_type]
 	food_profile.text = Texto.texto("food_profile", [Texto.texto("food_" + food_type), Texto.numero(params.palatability), Texto.numero(params.nutrition, 0), Texto.numero(params.hydration, 0), Texto.numero(params.toxicity, 0)])
@@ -737,12 +789,13 @@ func _refresh() -> void:
 			break
 	age_text.text = Texto.texto("age_value", [Texto.numero(creature.age * World.TICK_DT), creature.age])
 	age_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	action_text.text = Texto.acao(creature.last_action)
+	action_text.text = Texto.pet_acao(creature)
 	reason_text.text = Texto.razao(creature.last_reason)
 	genes_text.text = Texto.texto("genes", [Texto.numero(creature.genome.size), Texto.numero(creature.genome.speed),
 		Texto.numero(creature.genome.vision_range, 0), Texto.numero(creature.genome.metabolism, 2), Texto.numero(creature.genome.hue, 2)])
 
 func _set_tool(value: String) -> void:
+	if value != "select" and tools_dialog != null: tools_dialog.hide()
 	tool = value
 	view.tool = value
 	for key in tool_buttons:
@@ -773,9 +826,10 @@ func _find_pet() -> void:
 		_notify(Texto.texto("pet_dead"))
 
 func _camera_bias() -> Vector2:
-	return Vector2((SIDEBAR + 16) * 0.5, 25) / camera.zoom
+	return Vector2((SIDEBAR + 16) * 0.5, 8) / camera.zoom
 
 func _fit_world() -> void:
+	if intro_card != null: intro_card.offset_right = minf(348, (get_viewport_rect().size.x - SIDEBAR - 36) * 0.36 + 28)
 	if world == null:
 		return
 	var available := get_viewport_rect().size - Vector2(SIDEBAR + 100, 390)
@@ -786,7 +840,7 @@ func _fit_world() -> void:
 
 func _over_world(pos: Vector2) -> bool:
 	var size := get_viewport_rect().size
-	return pos.x < size.x - SIDEBAR - 36 and pos.y > 150 and pos.y < size.y - 215
+	return pos.x < size.x - SIDEBAR - 36 and pos.y > 150 and pos.y < size.y - 132
 
 func _save(slot: String = "world") -> void:
 	var result := store.save_world(world, slot, {"name": world_name})
@@ -878,21 +932,17 @@ func _autosave(delta: float) -> void:
 			_save("autosave")
 
 func _show_teaching() -> void:
-	caregiver_scroll.hide()
-	lab_scroll.hide()
-	teaching_scroll.show()
-	care_button.button_pressed = false
-	lab_button.button_pressed = false
-	teaching_button.button_pressed = true
+	if tools_dialog != null:
+		tools_tabs.current_tab = 2
+		tools_dialog.popup_centered()
 	teaching.refresh(true)
 
 func _show_lab(enabled: bool) -> void:
-	teaching_scroll.hide()
-	teaching_button.button_pressed = false
-	caregiver_scroll.visible = not enabled
-	lab_scroll.visible = enabled
-	lab_button.button_pressed = enabled
-	care_button.button_pressed = not enabled
+	caregiver_scroll.show()
+	if not enabled and tools_dialog != null: tools_dialog.hide()
+	if enabled and tools_dialog != null:
+		tools_tabs.current_tab = 3
+		tools_dialog.popup_centered()
 	if world != null:
 		lab.observe(world, selected_id, true)
 
@@ -1148,6 +1198,10 @@ func _capture_demo(path: String) -> void:
 			await _benchmark_fps(path)
 			get_tree().quit()
 			return
+	if state.begins_with("p0-"):
+		await _capture_p0(state, path)
+		get_tree().quit()
+		return
 	if state.begins_with("m4b-"):
 		await _capture_m4b(state, path)
 		get_tree().quit()
@@ -1772,7 +1826,7 @@ func _capture_e3(state: String, path: String) -> void:
 
 func _focus_selected() -> void:
 	if world != null and world.creatures.has(selected_id):
-		camera.zoom = Vector2.ONE * 2.2
+		camera.zoom = Vector2.ONE * _pet_zoom()
 		camera.position = world.creatures[selected_id].pos + _camera_bias()
 		follow = true
 
@@ -2712,3 +2766,318 @@ func _capture_m4b(state: String, path: String) -> void:
 	await get_tree().process_frame
 	print(JSON.stringify({"capture": state, "tick": world.tick, "action": creature.last_action, "terminals": world.terminals.size()}))
 	await capture_screenshot(path)
+
+func _build_ui() -> void:
+	_build_legacy_ui()
+	# Reuse every existing control and presenter, with one explicit advanced entry.
+	var inspector: VBoxContainer = pet_name.get_parent()
+	var modes: Control = care_button.get_parent()
+	modes.hide()
+	roster.hide()
+	tools_dialog = AcceptDialog.new()
+	tools_dialog.title = Texto.texto("p0_tools")
+	tools_dialog.exclusive = false
+	tools_dialog.ok_button_text = Texto.texto("p0_close")
+	tools_dialog.min_size = Vector2i(780, 570)
+	tools_dialog.theme = ui.theme
+	ui.add_child(tools_dialog)
+	tools_tabs = TabContainer.new()
+	tools_tabs.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	tools_tabs.offset_left = 12
+	tools_tabs.offset_top = 12
+	tools_tabs.offset_right = -12
+	tools_tabs.offset_bottom = -58
+	tools_dialog.add_child(tools_tabs)
+	var environment_scroll := ScrollContainer.new()
+	environment_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tools_tabs.add_child(environment_scroll)
+	var environment := VBoxContainer.new()
+	environment.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	environment_scroll.add_child(environment)
+	_wrapped(environment, Texto.texto("p0_modify"))
+	var playback: Control = fps_chart.get_parent()
+	var bottom_column: Control = playback.get_parent()
+	var rows := [bottom_column.get_child(0), bottom_column.get_child(1)]
+	for row in rows:
+		var grid := GridContainer.new()
+		grid.columns = 3
+		environment.add_child(grid)
+		for button in row.get_children():
+			button.reparent(grid)
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.queue_free()
+	var bottom_panel: Control = bottom_column.get_parent()
+	bottom_panel.offset_top = -122
+	var activities_scroll := ScrollContainer.new()
+	activities_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	tools_tabs.add_child(activities_scroll)
+	var advanced := VBoxContainer.new()
+	advanced.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	activities_scroll.add_child(advanced)
+	_wrapped(advanced, Texto.texto("p0_optional"))
+	for child in inspector.get_children():
+		child.reparent(advanced)
+	teaching_scroll.reparent(tools_tabs)
+	lab_scroll.reparent(tools_tabs)
+	for index in range(4):
+		tools_tabs.set_tab_title(index, Texto.texto(["p0_environment", "p0_activities", "p0_teaching", "p0_science"][index]))
+	tools_tabs.current_tab = 0
+	_label(inspector, Texto.texto("p0_care"), 12, Color("d4dda6"))
+	pet_name.reparent(inspector)
+	pet_name.add_theme_font_size_override("font_size", 32)
+	_label(inspector, Texto.texto("p0_mood"), 12, Color("acbfad"))
+	mind_emotion.reparent(inspector)
+	mind_emotion.add_theme_font_size_override("font_size", 19)
+	var needs_grid := GridContainer.new()
+	needs_grid.columns = 2
+	inspector.add_child(needs_grid)
+	for key in ["hunger", "thirst", "energy", "rest"]:
+		var need_column := VBoxContainer.new()
+		need_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		needs_grid.add_child(need_column)
+		var caption := _label(need_column, "", 13)
+		var bar := ProgressBar.new()
+		bar.custom_minimum_size.y = 6
+		bar.show_percentage = false
+		need_column.add_child(bar)
+		needs[key] = {"label": caption, "bar": bar}
+	action_text.reparent(inspector)
+	action_text.add_theme_font_size_override("font_size", 17)
+	var primary := GridContainer.new()
+	primary.columns = 2
+	inspector.add_child(primary)
+	offer_button.reparent(primary)
+	offer_button.text = Texto.texto("p0_feed")
+	_button(primary, Texto.texto("p0_water"), _offer_water)
+	_button(primary, Texto.texto("p0_play"), _play_with_pet)
+	_button(primary, Texto.texto("p0_observe"), _focus_selected)
+	for button in primary.get_children():
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 14)
+	var tool_row := HBoxContainer.new()
+	inspector.add_child(tool_row)
+	for entry in [["p0_modify", 0], ["p0_tools", 1]]:
+		var tool_button := _button(tool_row, Texto.texto(entry[0]), _open_tools.bind(entry[1]))
+		tool_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tool_button.add_theme_font_size_override("font_size", 13)
+	_label(inspector, Texto.texto("p0_modes"), 12, Color("acbfad"))
+	var feeding_row := HBoxContainer.new()
+	inspector.add_child(feeding_row)
+	for key in ["manual", "feeder", "ecosystem"]:
+		var button := _button(feeding_row, Texto.texto("p0_" + key), _set_feeding_mode.bind(key))
+		button.toggle_mode = true
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.add_theme_font_size_override("font_size", 12)
+		feeding_buttons[key] = button
+	feeding_note = _wrapped(advanced, Texto.texto("p0_mode_ecosystem"))
+	_wrapped(advanced, Texto.texto("p0_rest_note"))
+	feeding_buttons.ecosystem.button_pressed = true
+	var feeder_button := _button(environment, Texto.texto("p0_feeder_title"), _open_feeder)
+	feeder_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_button(inspector, Texto.texto("p0_tutorial_open"), func():
+		intro_card.visible = not intro_card.visible)
+	intro_card = _panel(ui, Vector4(28, 150, 348, 275), Vector4.ZERO)
+	intro_card.offset_right = minf(348, (get_viewport_rect().size.x - SIDEBAR - 36) * 0.36 + 28)
+	intro_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var intro := VBoxContainer.new()
+	intro_card.add_child(intro)
+	var intro_title := _wrapped(intro, Texto.texto("p0_intro"))
+	intro_title.add_theme_font_size_override("font_size", 16)
+	intro_title.add_theme_color_override("font_color", Color("f6e8bc"))
+	var guide := _wrapped(intro, Texto.texto("p0_tutorial"))
+	guide.add_theme_font_size_override("font_size", 13)
+	for child in ui.get_children():
+		if child is Label:
+			child.text = Texto.texto("p0_hint")
+	_build_feeder_dialog()
+
+func _open_tools(tab: int = 0) -> void:
+	tools_tabs.current_tab = tab
+	tools_dialog.popup_centered()
+
+func _set_feeding_mode(value: String) -> void:
+	var available := pet_adapter.set_mode(world, value)
+	for key in feeding_buttons:
+		feeding_buttons[key].button_pressed = key == value
+	feeding_note.text = Texto.texto("p0_mode_" + value)
+	_world_dirty = true
+	if value == "feeder":
+		_open_feeder()
+	if not available:
+		_notify(Texto.texto("p0_pending"))
+
+func _offer_water() -> void:
+	var creature = world.creatures.get(selected_id)
+	if creature == null: return
+	for offset in [Vector2(27, 0), Vector2(-27, 0), Vector2(0, 27), Vector2(0, -27)]:
+		if world.place_water(creature.pos + offset, 16) >= 0:
+			_world_dirty = true
+			_notify(Texto.texto("p0_water_offered"))
+			return
+	_set_tool("water")
+
+func _play_with_pet() -> void:
+	var creature = world.creatures.get(selected_id)
+	if creature == null: return
+	_give_attention(creature.pos)
+	_notify(Texto.texto("p0_play_offered"))
+
+func _pet_zoom() -> float:
+	if world == null or not world.creatures.has(selected_id): return 3.5
+	var radius: float = world.creatures[selected_id].genome.size
+	return clampf(68.0 / maxf(radius, 1), 3.4, 6.0)
+
+func _refresh_pet_needs() -> void:
+	if needs.is_empty(): return
+	var actual_mode := pet_adapter.current_mode(world)
+	for key in feeding_buttons:
+		feeding_buttons[key].button_pressed = key == actual_mode
+	var creature = world.creatures.get(selected_id)
+	if creature == null: return
+	var fatigue: float = creature.personality.fatigue if creature.personality != null else 0.0
+	var values := {"hunger": creature.hunger * 100, "thirst": creature.thirst * 100, "energy": creature.energy / creature.max_energy * 100, "rest": (1.0 - fatigue) * 100}
+	for key in needs:
+		needs[key].label.text = Texto.texto("p0_need_value", [Texto.texto("p0_" + key), Texto.numero(values[key], 0)])
+		needs[key].bar.value = values[key]
+		var urgent: bool = values[key] > 60 if key in ["hunger", "thirst"] else values[key] < 35
+		needs[key].bar.add_theme_stylebox_override("fill", GardenTheme.panel(Color("e6ac85") if urgent else Color("bad799"), 4, 0))
+	if feeder_dialog != null and feeder_dialog.visible:
+		_refresh_feeder()
+
+func _build_feeder_dialog() -> void:
+	feeder_dialog = _window("p0_feeder_title", Vector2i(520, 420))
+	var column := _window_column(feeder_dialog)
+	_wrapped(column, Texto.texto("p0_mode_feeder"))
+	feeder_status = _wrapped(column, "")
+	feeder_stock = _wrapped(column, "")
+	_button(column, Texto.texto("p0_feeder_place"), func():
+		feeder_dialog.hide()
+		tools_dialog.hide()
+		_set_tool("feeder"))
+	_button(column, Texto.texto("p0_feeder_refill"), _refill_feeder)
+	_button(column, Texto.texto("p0_feeder_toggle"), _toggle_feeder)
+
+func _open_feeder() -> void:
+	_refresh_feeder()
+	feeder_dialog.popup_centered()
+	feeder_dialog.position = Vector2i(maxi(20, get_window().size.x - feeder_dialog.size.x - 20), 145)
+
+func _refresh_feeder() -> void:
+	var feeders: Array = pet_adapter.feeders(world)
+	if feeders.is_empty():
+		feeder_status.text = Texto.texto("p0_feeder_empty" if world.has_method("place_feeder") else "p0_pending")
+		feeder_stock.text = ""
+	else:
+		var feeder: Dictionary = _current_feeder()
+		feeder_status.text = Texto.texto("p0_feeder_status", [feeder.id, Texto.texto("p0_enabled" if feeder.get("enabled", feeder.get("ativo", true)) else "p0_disabled")])
+		feeder_status.text += "\n" + Texto.texto("p0_feeder_details", [Texto.texto("food_" + str(feeder.tipo_alimento)), Texto.numero(float(feeder.intervalo_ticks) * World.TICK_DT, 1), int(feeder.capacidade_local)])
+		feeder_stock.text = Texto.texto("p0_feeder_stock", [int(feeder.get("estoque", feeder.get("stock", 0)))])
+
+func _refill_feeder() -> void:
+	var feeders: Array = pet_adapter.feeders(world)
+	if not feeders.is_empty():
+		world.call("feeder_refill", int(_current_feeder().id), 20)
+		_world_dirty = true
+	_refresh_feeder()
+
+func _toggle_feeder() -> void:
+	var feeders: Array = pet_adapter.feeders(world)
+	if not feeders.is_empty():
+		var feeder: Dictionary = _current_feeder()
+		world.call("feeder_set_enabled", int(feeder.id), not feeder.get("enabled", feeder.get("ativo", true)))
+		_world_dirty = true
+	_refresh_feeder()
+
+func _capture_p0(state: String, path: String) -> void:
+	# Debug-only controlled scenarios; every displayed action is produced by step().
+	paused = true
+	protected_mode = false
+	intro_card.visible = state == "p0-initial"
+	if state not in ["p0-initial", "p0-tools"]:
+		var fixture_genome = world.creatures[world.pet_id].genome
+		world = World.new_world(7421, {"creature_count": 1, "reproduction_enabled": false, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "size": Vector2(600, 440)})
+		selected_id = world.pet_id
+		var creature = world.creatures[selected_id]
+		creature.name = Texto.texto("pet_default")
+		creature.genome = fixture_genome
+		creature.pos = Vector2(300, 220)
+		creature.heading = 0
+		creature.energy = creature.max_energy * 0.8
+		creature.hydration = 90
+		if state == "p0-eating":
+			creature.energy = creature.max_energy * 0.3
+			world.oferecer_alimento(selected_id, "fruta")
+		elif state == "p0-drinking":
+			creature.hydration = 22
+			world.place_water(creature.pos + Vector2(24, 8), 20)
+		elif state == "p0-sleeping":
+			creature.personality.fatigue = 0.95
+		elif state == "p0-investigating":
+			world.place_object(creature.pos + Vector2(creature.genome.size + 1, 5), "capsula_neutra")
+			creature.mind.set_goal("investigar_objeto", world.tick, "goal.curiosity")
+		elif state == "p0-expressions":
+			creature.hydration = 30
+			creature.energy = creature.max_energy * 0.28
+			creature.personality.fatigue = 0.75
+		var expected: String = {"p0-eating": "eat", "p0-drinking": "drink", "p0-sleeping": "rest", "p0-investigating": "investigate_object"}.get(state, "")
+		for i in range(300):
+			world.step()
+			if state == "p0-investigating" and not world.objects.is_empty():
+				world.interact_object(creature, int(world.objects[0].id))
+			if expected.is_empty() or creature.last_action == expected: break
+		print("P0 fixture ", state, " action=", creature.last_action, " fatigue=", creature.personality.fatigue)
+		_reset_session()
+		view.set_world(world)
+	_focus_selected()
+	_refresh()
+	_refresh_pet_needs()
+	if state == "p0-tools": _open_tools(0)
+	if state == "p0-feeder":
+		if world.has_method("place_feeder"):
+			world.call("place_feeder", world.creatures[selected_id].pos + Vector2(25, 8), {"tipo_alimento": "fruta", "estoque": 40, "intervalo_ticks": 10, "capacidade_local": 3, "raio": 28.0})
+		_set_feeding_mode("feeder")
+		for i in range(10): world.step()
+		_focus_selected()
+		_refresh()
+		_refresh_pet_needs()
+		print("P0 feeder stock=", world.feeders.back().estoque, " foods=", world.foods.size(), " mode=", world.feeding_mode)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await capture_screenshot(path)
+
+func _resize_layout() -> void:
+	if intro_card != null:
+		intro_card.offset_right = minf(348, (get_viewport_rect().size.x - SIDEBAR - 36) * 0.36 + 28)
+	if follow:
+		_focus_selected()
+	else:
+		_fit_world()
+
+func _current_feeder() -> Dictionary:
+	var feeders: Array = pet_adapter.feeders(world)
+	for feeder in feeders:
+		if int(feeder.id) == selected_feeder_id: return feeder
+	return feeders.back() if not feeders.is_empty() else {}
+
+func _open_world_object(pos: Vector2) -> bool:
+	# Optional objects open their own existing activity, never grant a skill.
+	for feeder in pet_adapter.feeders(world):
+		if pos.distance_to(feeder.pos) <= 15:
+			selected_feeder_id = int(feeder.id)
+			_open_feeder()
+			return true
+	for board in world.boards:
+		if pos.distance_to(board.pos) <= 20:
+			_selected_board_id = int(board.id)
+			_open_tools(1)
+			tools_tabs.get_child(1).ensure_control_visible.call_deferred(board_canvas)
+			return true
+	for book in world.library.books:
+		if pos.distance_to(book.pos) <= 12:
+			_open_knowledge()
+			return true
+	for terminal in world.terminals:
+		if pos.distance_to(terminal.pos) <= 15:
+			_open_terminal_panel()
+			return true
+	return false
