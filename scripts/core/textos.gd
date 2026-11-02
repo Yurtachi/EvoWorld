@@ -639,7 +639,7 @@ const E4_CATALOGO := {
 	"reason_social_avoid": "Cautela e aversão registrada motivaram afastamento.",
 	"reason_social_share": "Afinidade e fome do vizinho motivaram ceder acesso; não confirma ingestão.",
 	"reason_social_compete": "Fome e impulsividade motivaram buscar o mesmo recurso.",
-	"episode_resource_contention": "Encontro pr?ximo com disputa por alimento vis?vel.",
+	"episode_resource_contention": "Encontro próximo com disputa por alimento visível.",
 	"social_familiarity": "Familiaridade por encontros",
 	"social_affinity": "Afinidade registrada",
 	"social_aversion": "Aversão registrada"

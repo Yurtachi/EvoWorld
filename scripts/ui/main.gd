@@ -1340,8 +1340,11 @@ func _benchmark_fps(path: String) -> void:
 	var p95: float = intervals[int((intervals.size() - 1) * 0.95)] * 1000
 	var result := {"initial_population": initial_population, "final_population": world.creatures.size(), "frames": intervals.size(), "seconds": elapsed, "mean_fps": mean, "p95_frame_ms": p95, "godot": Engine.get_version_info().string, "adapter": RenderingServer.get_video_adapter_name(), "display": DisplayServer.get_name(), "window": [get_window().size.x, get_window().size.y], "speed": speed, "tick": world.tick}
 	var output := FileAccess.open(path.get_basename() + ".json", FileAccess.WRITE)
-	output.store_string(JSON.stringify(result, "\t"))
-	output.close()
+	if output != null:
+		output.store_string(JSON.stringify(result, "\t"))
+		output.close()
+	else:
+		printerr("Benchmark: caminho de saída não gravável; use caminho absoluto.")
 	paused = true
 	_notify(Texto.texto("fps_sample", [world.creatures.size(), Texto.numero(mean), Texto.numero(1.0 / intervals.back())]), 15)
 	print(JSON.stringify(result))

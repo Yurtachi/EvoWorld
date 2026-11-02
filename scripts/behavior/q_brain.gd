@@ -37,6 +37,9 @@ var last_reason: String = ""
 const GOAL_ACTIONS := [Actions.FORWARD, Actions.TURN_LEFT, Actions.TURN_RIGHT, Actions.REST, Actions.DRINK]
 var goal_q: Array = []
 var goal_updates := 0
+## True when the brain was created only to hold taught-skill tables; it must not
+## take over autonomous decisions (legacy heuristic keeps running).
+var teaching_only := false
 
 func _init() -> void:
 	q.resize(TABLE_SIZE)
@@ -160,13 +163,16 @@ func copy():
 	return from_dict(to_dict())
 
 func to_dict() -> Dictionary:
-	return {
+	var out := {
 		"kind": KIND, "version": VERSION, "alpha": alpha, "gamma": gamma,
 		"epsilon_start": epsilon_start, "epsilon_min": epsilon_min, "epsilon_decay": epsilon_decay,
 		"death_penalty": death_penalty, "learning": learning, "q": q.duplicate(), "steps": steps,
 		"prev_state": prev_state, "prev_action": prev_action, "prev_energy": prev_energy, "prev_hydration": prev_hydration, "prev_water_enabled": prev_water_enabled,
 		"total_reward": total_reward, "goal_q": goal_q.duplicate(), "goal_updates": goal_updates
 	}
+	if teaching_only:
+		out["teaching_only"] = true
+	return out
 
 static func from_dict(data: Dictionary):
 	var historical: bool = Data.integer(data.get("version")) and int(data["version"]) < VERSION
@@ -235,6 +241,7 @@ static func from_dict(data: Dictionary):
 	for index in range(result.goal_q.size()):
 		result.goal_q[index] = snappedf(float(data["goal_q"][index]), 0.000001)
 	result.goal_updates = int(data["goal_updates"])
+	result.teaching_only = data.get("teaching_only") is bool and bool(data["teaching_only"])
 	return result
 
 static func _migrate_v1(data: Dictionary) -> Dictionary:

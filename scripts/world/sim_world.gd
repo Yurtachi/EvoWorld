@@ -424,7 +424,7 @@ func _update_creature(creature: Creature) -> void:
 	elif not motive.is_empty():
 		_suspend_brain(creature)
 		moving = _personality_action(creature, sensors, motive)
-	elif creature.brain != null:
+	elif creature.brain != null and creature.brain.get("teaching_only") != true:
 		moving = _act_with_brain(creature, sensors)
 	elif water_enabled and creature.thirst > Water.THIRST_THRESHOLD:
 		moving = _seek_water(creature, sensors)
@@ -1061,6 +1061,7 @@ func ensino_iniciar(creature_id: int, skill: String, target: Vector2 = Vector2.I
 	comandos.cancelar_ordem(creature_id)
 	if policy == "q" and creature.brain == null:
 		creature.brain = QBrain.new()
+		creature.brain.teaching_only = true
 	_suspend_brain(creature)
 	creature.ensino.start(skill, target, tick, creature.energy, assisted, horizon, policy)
 	return ensino_observar(creature_id)

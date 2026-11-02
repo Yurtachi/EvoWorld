@@ -66,7 +66,7 @@ func finish(tick: int, status: String, energy: float, distance: float) -> void:
 func statistics(skill: String) -> Dictionary:
 	var rows: Array = []
 	for attempt in attempts:
-		if attempt.skill == skill and int(attempt.assistance) == 0:
+		if attempt.skill == skill and int(attempt.assistance) == 0 and str(attempt.get("policy", "q")) == "q":
 			rows.append(attempt)
 	rows = rows.slice(maxi(0, rows.size() - RECENT))
 	var successes := 0

@@ -14,6 +14,7 @@ func run() -> Array:
 	_training_and_reset(failures)
 	_persistence(failures)
 	_bounds_and_legacy(failures)
+	failures.append_array(test_teaching_brain_is_not_autonomous())
 	return failures
 
 func check(condition: bool, message: String, failures: Array) -> void:
@@ -214,3 +215,21 @@ func _bounds_and_legacy(f: Array) -> void:
 	old_brain.q[0] = 0.123
 	var migrated_brain = Q.from_dict(old_brain)
 	check(migrated_brain != null and migrated_brain.q[0] == snappedf(0.123, 0.000001) and migrated_brain.goal_updates == 0 and migrated_brain.goal_q.all(func(v): return v == 0.0), "Migração QBrain v3 perdeu aprendizado", f)
+
+## Regressão da revisão independente: ensinar não troca o comportamento autônomo.
+func test_teaching_brain_is_not_autonomous() -> Array:
+	var f: Array = []
+	var World = preload("res://scripts/world/sim_world.gd")
+	var w = World.new_world(7421, {"creature_count": 2})
+	var id: int = w.creatures.keys()[1]
+	var c = w.creatures[id]
+	if c.brain != null:
+		return f
+	w.ensino_iniciar(id, "buscar_agua", Vector2.INF, false, 50, "q")
+	w.ensino_cancelar(id)
+	if c.brain == null or c.brain.get("teaching_only") != true:
+		f.append("cérebro criado pelo ensino deve ser marcado teaching_only")
+	var round = World.from_dict(w.to_dict())
+	if round == null or round.creatures[id].brain.get("teaching_only") != true:
+		f.append("teaching_only deve sobreviver ao save/load")
+	return f

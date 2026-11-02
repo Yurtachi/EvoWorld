@@ -111,7 +111,7 @@ func _dialogue(failures: Array) -> void:
 	check(world.comandos.aplicar("perguntar_aprendizado", world).aplicado, "consulta delimitada aceita", failures)
 	check(world.to_dict() == before, "diálogo não muda estado", failures)
 	for attempt in range(5):
-		world.ensino_iniciar(pet.id, "ir_ate_local", pet.pos, false, 20, "heuristica")
+		world.ensino_iniciar(pet.id, "ir_ate_local", pet.pos, false, 20, "q")
 		world.step()
 	check(D.responder("perguntar_aprendizado", pet, world).texto.contains("5 sucessos"), "habilidade somente após cinco sucessos autônomos reais", failures)
 

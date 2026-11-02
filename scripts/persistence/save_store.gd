@@ -94,9 +94,10 @@ func _read(path: String) -> Dictionary:
 		# Check canonical base64 and compressed integrity before decompression.
 		if payload.length() % 4 != 0:
 			return _error("Invalid compressed checkpoint encoding.")
-		for character in payload:
-			if not character in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=":
-				return _error("Invalid compressed checkpoint encoding.")
+		var b64 := RegEx.new()
+		b64.compile("^[A-Za-z0-9+/]*={0,2}$")
+		if b64.search(payload) == null:
+			return _error("Invalid compressed checkpoint encoding.")
 		var compressed := Marshalls.base64_to_raw(payload)
 		if compressed.is_empty() or Marshalls.raw_to_base64(compressed) != payload or payload.sha256_text() != envelope.compressed_sha256:
 			return _error("Compressed checkpoint checksum does not match.")

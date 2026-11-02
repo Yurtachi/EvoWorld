@@ -1,0 +1,17 @@
+{
+	"adapter": "NVIDIA GeForce RTX 2050",
+	"display": "Windows",
+	"final_population": 12,
+	"frames": 894,
+	"godot": "4.7.2-stable (official)",
+	"initial_population": 12,
+	"mean_fps": 111.720798976168,
+	"p95_frame_ms": 11.492,
+	"seconds": 8.002091,
+	"speed": 1.0,
+	"tick": 101,
+	"window": [
+		1280,
+		720
+	]
+}
