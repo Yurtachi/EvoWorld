@@ -45,3 +45,7 @@ verify E4 ad63789bf26c64e5b829aba76f5c461f75e5a996 \
 verify M1 c8e9e91159a088558774e353e870a8b47802beea \
     tests/experiments/m1_preregistro.md tests/experiments/m1_eval.gd \
     reports/M1_mind_eval.json preregister_sha256
+verify M2 f1a6349 \
+    tests/experiments/m2_curiosity_preregistro.md tests/experiments/m2_curiosity_eval.gd \
+    reports/M2_curiosidade_eval.json preregister_sha256
+python tests/experiments/m2_curiosity_verify.py "$revision"

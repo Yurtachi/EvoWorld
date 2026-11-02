@@ -5,11 +5,12 @@ const Affect = preload("res://scripts/mind/affect.gd")
 const Motivation = preload("res://scripts/mind/motivation.gd")
 const Rng = preload("res://scripts/core/sim_rng.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
+const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
 const LOG_LIMIT := 48
 const MEMORY_LIMIT := 32
 const MEMORY_TTL := 2400
 const MEMORY_KINDS := ["contact", "food", "water", "blocked", "toxic"]
-const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency"]
+const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento"]
 var affect = Affect.new()
 var affect_enabled := true
 var memory_enabled := true
@@ -20,7 +21,7 @@ var goal_started := 0
 var pontuacoes: Dictionary = {}
 var mind_log: Array = []
 var experiences: Array = []
-var objects: Dictionary = {} # reserved M2 stub, must remain empty
+var objects: Dictionary = {} # lazily allocated; preserves M1 snapshots without objects
 var blocked_ticks := 0
 var contact_ticks := 0
 var absent_ticks := 0
@@ -109,6 +110,8 @@ func consequence(creature, tick: int, kind: String, value: float, source: int = 
 
 func observe(world, creature, sensors: Dictionary, moving: bool) -> void:
 	var t := traits(creature)
+	if not sensors.get("objects", []).is_empty() or not objects.is_empty():
+		ObjectMemory.observe(self, sensors, world.tick)
 	# Decay is not spontaneous emotion generation: zero remains zero.
 	if affect_enabled:
 		affect.decay(world.tick, t)
@@ -152,7 +155,7 @@ func expression(base: Dictionary) -> Dictionary:
 		"arousal": snappedf(clampf(float(base.arousal) + float(a.entusiasmo) * 0.3 + float(a.receio) * 0.3 + float(a.frustracao) * 0.25 - float(a.tranquilidade) * 0.2, 0.0, 1.0), 0.000001)}
 
 func snapshot(base: Dictionary) -> Dictionary:
-	return {"afetos": affect.values.duplicate(true) if affect_enabled else empty_affect(), "objetivo_atual": objetivo_atual, "motivo": motivo, "ultimos_logs": mind_log.duplicate(true), "expressao": expression(base), "cause_log": affect.cause_log.duplicate(true), "pontuacoes": pontuacoes.duplicate(true), "affect_enabled": affect_enabled, "memory_enabled": memory_enabled}
+	return {"afetos": affect.values.duplicate(true) if affect_enabled else empty_affect(), "objetivo_atual": objetivo_atual, "motivo": motivo, "ultimos_logs": mind_log.duplicate(true), "expressao": expression(base), "cause_log": affect.cause_log.duplicate(true), "pontuacoes": pontuacoes.duplicate(true), "affect_enabled": affect_enabled, "memory_enabled": memory_enabled, "objects": Data.restore_precision(objects)}
 
 func to_dict() -> Dictionary:
 	return Data.restore_precision({"affect": affect.to_dict(), "affect_enabled": affect_enabled, "memory_enabled": memory_enabled, "policy_mode": policy_mode,
@@ -177,7 +180,7 @@ static func from_dict(data: Variant, max_tick: int = 2147483647):
 	for key in ["blocked_ticks", "contact_ticks", "absent_ticks"]:
 		if not Data.integer(data.get(key)) or int(data[key]) > 10000:
 			return null
-	if not data.get("objects") is Dictionary or not data["objects"].is_empty() or not data.get("rng_state") is Dictionary or data["rng_state"].size() != 1 or not Data.integer_text(data["rng_state"].get("state")):
+	if not ObjectMemory.valid(data.get("objects"), max_tick) or not data.get("rng_state") is Dictionary or data["rng_state"].size() != 1 or not Data.integer_text(data["rng_state"].get("state")):
 		return null
 	if not data.get("mind_log") is Array or data["mind_log"].size() > LOG_LIMIT or not data.get("experiences") is Array or data["experiences"].size() > MEMORY_LIMIT:
 		return null

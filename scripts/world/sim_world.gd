@@ -22,7 +22,8 @@ const Ensino = preload("res://scripts/interaction/ensino.gd")
 const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
-const SAVE_VERSION := 8 # M1 adds opt-in per-creature mental state.
+const SAVE_VERSION := 9 # M2 physical objects and bounded acquired knowledge.
+const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
@@ -39,6 +40,7 @@ var seed: int = 1
 var size := Vector2(1200.0, 760.0)
 var creatures: Dictionary = {}
 var foods: Array = []
+var objects: Array = []
 var obstacles: Array = []
 var waters: Array = []
 var water_enabled := false
@@ -255,6 +257,37 @@ func genetic_diversity() -> Dictionary:
 		result[gene] = maxf(0.0, squared / maxi(1, count))
 	return result
 
+func place_object(pos: Vector2, tipo: String = "capsula_neutra") -> int:
+	if not ObjectCatalog.TYPES.has(tipo) or not pos.is_finite() or objects.size() >= ObjectCatalog.LIMIT:
+		return -1
+	var location := _inside(pos, 5.0)
+	if not _clear(location, 5.0): return -1
+	var object_id: int = ids.take()
+	objects.append({"id": object_id, "pos": location, "tipo": tipo})
+	return object_id
+
+func interact_object(creature: Creature, object_id: int) -> bool:
+	if not creature.alive or creature.mind == null: return false
+	for row in objects:
+		if int(row.id) != object_id: continue
+		if creature.pos.distance_to(row.pos) > Obs.reach(creature) or _occluded(creature.pos, row.pos): return false
+		var s: Dictionary = Mind.ObjectMemory.state(creature.mind)
+		var e: Dictionary = s.entries.get(str(object_id), {})
+		if tick < int(s.cooldowns.get(str(object_id), 0)) or tick < int(e.get("retry_tick", 0)): return false
+		var params: Dictionary = ObjectCatalog.TYPES[row.tipo]
+		var energy_before := creature.energy
+		var water_before := creature.hydration
+		creature.energy = snappedf(clampf(creature.energy + float(params.energy) - float(params.toxicity) * 4.0, 0.0, creature.max_energy), 0.000001)
+		creature.hydration = snappedf(clampf(creature.hydration + float(params.hydration), 0.0, 100.0), 0.000001)
+		var evidence := {"energy": snappedf(creature.energy - energy_before, 0.000001), "hydration": snappedf(creature.hydration - water_before, 0.000001), "toxicity": params.toxicity, "surprise": params.surprise}
+		Mind.ObjectMemory.interacted(creature.mind, ObjectCatalog.appearance(row), tick, evidence)
+		if creature.mind.affect_enabled:
+			var state := "receio" if float(params.toxicity) > 0.0 else "entusiasmo"
+			creature.mind.affect.change(tick, state, float(params.surprise) * 0.4, "object_contact", creature.mind.traits(creature))
+		creature.last_action = "investigate_object"
+		return true
+	return false
+
 func place_food(pos: Vector2, tipo: String = "legacy") -> int:
 	if not FoodCatalog.valid_type(tipo) or not pos.is_finite() or foods.size() >= food_capacity:
 		return -1
@@ -370,6 +403,11 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 	if not _in_step:
 		_rebuild_spatial()
 	var result := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger}
+	if not objects.is_empty():
+		result["objects"] = []
+		for row in objects:
+			if _visible(creature, row.pos) and not _occluded(creature.pos, row.pos):
+				result.objects.append(ObjectCatalog.appearance(row))
 	result["signal"] = creature.last_signal.duplicate(true) if signal_enabled and not creature.last_signal.is_empty() and tick - int(creature.last_signal["tick"]) <= signal_ttl else {}
 	result["action_count"] = Actions.SIGNAL_FIRST + signal_count if signal_enabled else Actions.SIGNAL_FIRST
 	if water_enabled:
@@ -733,6 +771,9 @@ func to_dict() -> Dictionary:
 	for obstacle in obstacles:
 		saved_obstacles.append({"pos": Data.pack_vector(obstacle["pos"]), "radius": obstacle["radius"]})
 	var saved_waters: Array = []
+	var saved_objects: Array = []
+	for row in objects:
+		saved_objects.append({"id": row.id, "pos": Data.pack_vector(row.pos), "tipo": row.tipo})
 	for water in waters:
 		saved_waters.append({"id": water["id"], "pos": Data.pack_vector(water["pos"]), "radius": water["radius"]})
 	var saved_config := {"food_regrow": food_regrow, "food_capacity": food_capacity,
@@ -747,7 +788,7 @@ func to_dict() -> Dictionary:
 		"save_version": SAVE_VERSION, "world_seed": str(seed), "tick": tick,
 		"size": Data.pack_vector(size), "pet_id": pet_id, "next_id": ids.next_id,
 		"rng_state": rng.to_dict(), "creatures": saved_creatures, "foods": saved_foods,
-		"obstacles": saved_obstacles, "waters": saved_waters, "events": Data.restore_precision(events),
+		"obstacles": saved_obstacles, "waters": saved_waters, "objects": saved_objects, "object_catalog_version": ObjectCatalog.VERSION, "events": Data.restore_precision(events),
 		"config": saved_config, "genealogy": genealogy.to_array(),
 		"signal_log": Data.restore_precision(signal_log), "commands": comandos.to_dict(self)
 	}
@@ -758,7 +799,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -784,6 +825,11 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		data = _migrate_v7(data)
 		if data.is_empty():
 			return null
+	if int(data["save_version"]) == 8:
+		data = _migrate_v8(data)
+		if data.is_empty(): return null
+	if not Data.integer(data.get("object_catalog_version"), 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION or not data.get("objects") is Array or data.objects.size() > ObjectCatalog.LIMIT:
+		return null
 	if not Data.integer_text(data.get("world_seed")):
 		return null
 	if not Data.integer(data.get("tick")) or not Data.integer(data.get("next_id"), 1) or not Data.integer(data.get("pet_id"), -1):
@@ -949,6 +995,17 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			return null
 		used_ids[int(food["id"])] = true
 		result.foods.append({"id": int(food["id"]), "pos": pos, "energy": snappedf(float(food["energy"]), 0.000001), "food_type": food["food_type"]})
+	for row in data.objects:
+		if not row is Dictionary or row.size() != 3 or not Data.integer(row.get("id"), 1) or used_ids.has(int(row.get("id", -1))) or not Data.vector(row.get("pos")) or not ObjectCatalog.TYPES.has(row.get("tipo", "")): return null
+		var pos := Data.unpack_vector(row.pos)
+		if pos != result._inside(pos, 5.0) or not result._clear(pos, 5.0): return null
+		used_ids[int(row.id)] = true
+		result.objects.append({"id": int(row.id), "pos": pos, "tipo": row.tipo})
+	for creature in result.creatures.values():
+		if creature.mind != null and not creature.mind.objects.is_empty():
+			if int(creature.mind.objects.target) >= int(data.next_id): return null
+			for key in creature.mind.objects.entries:
+				if int(key) >= int(data.next_id): return null
 	for used_id in used_ids:
 		if used_id >= int(data["next_id"]):
 			return null
@@ -1046,7 +1103,7 @@ static func _migrate_v6(data: Dictionary) -> Dictionary:
 
 ## Idempotent migration never activates M1 or invents an acquired experience.
 static func _migrate_v7(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION:
+	if data.get("save_version") in [8, SAVE_VERSION]:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
 		return {}
@@ -1056,6 +1113,21 @@ static func _migrate_v7(data: Dictionary) -> Dictionary:
 	for entry in migrated["creatures"]:
 		if not entry is Dictionary or entry.has("mind"):
 			return {}
+	migrated["save_version"] = 8
+	return migrated
+
+static func _migrate_v8(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 8 or not data.get("creatures") is Array: return {}
+	# Legacy fixtures may retain empty modern metadata; never discard acquired data.
+	if data.has("objects") and (not data.objects is Array or not data.objects.is_empty()): return {}
+	if data.has("object_catalog_version") and (not Data.integer(data.object_catalog_version, 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION): return {}
+	for c in data.creatures:
+		if not c is Dictionary: return {}
+		if c.has("mind") and (not c.mind is Dictionary or not c.mind.get("objects") is Dictionary or not c.mind.objects.is_empty()): return {}
+	var migrated := data.duplicate(true)
+	migrated["objects"] = []
+	migrated["object_catalog_version"] = ObjectCatalog.VERSION
 	migrated["save_version"] = SAVE_VERSION
 	return migrated
 
@@ -1312,6 +1384,18 @@ func _social_action(creature: Creature, sensors: Dictionary, decision: Dictionar
 func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest: Dictionary, distance: float) -> bool:
 	creature.last_reason = "mind." + goal
 	match goal:
+		"investigar_objeto":
+			var target: int = Mind.ObjectMemory.state(creature.mind).target
+			for row in sensors.get("objects", []):
+				if int(row.id) != target: continue
+				if creature.pos.distance_to(row.pos) <= Obs.reach(creature):
+					interact_object(creature, target)
+					return false
+				creature.heading = (row.pos - creature.pos).angle()
+				creature.last_action = "seek_object"
+				return _move(creature, sensors.obstacles)
+			creature.last_action = "rest"
+			return false
 		"comer":
 			return _personality_seek_food(creature, sensors, closest, distance)
 		"beber":

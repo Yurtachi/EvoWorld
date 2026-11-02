@@ -13,6 +13,8 @@ static func digest(world) -> String:
 	var data: Dictionary = world.to_dict()
 	# Compare the exact historical v7 state; remove only new schema metadata.
 	data.save_version = 7
+	data.erase("objects")
+	data.erase("object_catalog_version")
 	data.config.erase("mind_all")
 	data.config.erase("mind_enabled_ids")
 	return JSON.stringify(data, "", true, true).sha256_text()

@@ -4,6 +4,7 @@ extends RefCounted
 const GOALS := ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto"]
 const MIN_COMMITMENT := 12
 const MAX_COMMITMENT := 80
+const Objects = preload("res://scripts/mind/object_memory.gd")
 
 static func modulation(mind) -> Dictionary:
 	var a: Dictionary = mind.affect.values if mind.affect_enabled and mind.policy_mode == "full" else mind.empty_affect()
@@ -35,6 +36,8 @@ static func utilities(creature, mind, tick: int, sensors: Dictionary) -> Diction
 		"buscar_privacidade": float(t.caution) * 0.35,
 		"brincar": 0.15 + float(t.impulsivity) * 0.2,
 		"investigar_objeto": -4.0}
+	if not sensors.get("objects", []).is_empty():
+		result.investigar_objeto = Objects.candidate(mind, creature, sensors, tick).score
 	for goal in GOALS:
 		result[goal] = snappedf(float(result[goal]) + mind.memory_bias(goal, tick, sensors) + mind.rng.between(-0.045, 0.045), 0.000001)
 	return result
@@ -60,13 +63,16 @@ static func choose(creature, mind, tick: int, sensors: Dictionary) -> String:
 		return critical
 	var control := modulation(mind)
 	var release: bool = control.release_blocked
+	var object_candidate := Objects.candidate(mind, creature, sensors, tick)
+	if mind.objetivo_atual == "investigar_objeto" and int(object_candidate.id) == 0:
+		release = true
 	if mind.objetivo_atual != "" and elapsed < int(control.minimum) and not release:
 		return mind.objetivo_atual
 	var timeout: bool = mind.objetivo_atual != "" and elapsed >= int(control.maximum)
 	var winner := ""
 	var highest := -INF
 	for goal in GOALS:
-		if goal == "investigar_objeto" or (goal == "beber" and not creature.personality_water_enabled) or (goal == "buscar_privacidade" and sensors.get("creatures", []).is_empty()):
+		if (goal == "investigar_objeto" and int(object_candidate.id) == 0) or (goal == "beber" and not creature.personality_water_enabled) or (goal == "buscar_privacidade" and sensors.get("creatures", []).is_empty()):
 			continue
 		if (timeout or release) and goal == mind.objetivo_atual:
 			continue
@@ -79,5 +85,15 @@ static func choose(creature, mind, tick: int, sensors: Dictionary) -> String:
 			winner = goal
 	if not timeout and not release and mind.policy_mode != "random" and mind.objetivo_atual != "" and highest < float(scores_now[mind.objetivo_atual]) + float(control.hysteresis):
 		return mind.objetivo_atual
-	mind.set_goal(winner, tick, "mind.timeout" if timeout else "mind.score")
+	var reason := "mind.timeout" if timeout else "mind.score"
+	if winner == "investigar_objeto":
+		Objects.state(mind).target = int(object_candidate.id)
+		reason = "mind.iniciativa.novidade" if float(object_candidate.novelty) > 0.7 else "mind.iniciativa.lacuna"
+	elif mind.objetivo_atual == "investigar_objeto" and timeout:
+		var state := Objects.state(mind)
+		var key := str(state.target)
+		if state.cooldowns.size() >= Objects.LIMIT: state.cooldowns.erase(state.cooldowns.keys()[0])
+		state.cooldowns[key] = tick + 180
+		if state.entries.has(key): state.entries[key].retry_tick = tick + 180
+	mind.set_goal(winner, tick, reason)
 	return mind.objetivo_atual

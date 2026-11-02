@@ -1,0 +1,9851 @@
+{
+	"frozen_sha256": {
+		"scripts/behavior/personality.gd": "2d1bac12674be6bb521fc72b3fc1a8cf78c3e77de199be11927754dd83f00194",
+		"scripts/environment/object_catalog.gd": "0220927731b28d33f90820a01cce8f59a729cba1ac0d28e9571e7facf6373208",
+		"scripts/mind/affect.gd": "46ff3260aa6af76766b080f4f8b41b154eee42d5c863e5cfbfde13233360e096",
+		"scripts/mind/creature_mind.gd": "2aea4672e1ab9d80c405772b3db07f4381fd74eaabeac8a8670eea0b52b2c591",
+		"scripts/mind/motivation.gd": "8812dc213c32a01b7ef5d197321e7ec3dab4c68ddb18a31127af9e39d2c9eb71",
+		"scripts/mind/object_memory.gd": "b6656424d969cc69abe2e56dc49304827de61f27864fe5d0cda00272deb01a38",
+		"scripts/world/sim_world.gd": "9c35f4303f9ac5b4e0156430f218846bf54851de0ddcc7c078d7f7dfe348da46",
+		"tests/experiments/m2_curiosity_eval.gd": "e9f160dcc9cf4e14f677b2bf8f5c36b0a6e2b63ec900fea779cbd571569296fa",
+		"tests/unit/test_sim_m2.gd": "b05b6560171f318808752c6107a2c65c0c9ae3dfab24d55b8f622cc4c6b2eae9"
+	},
+	"godot": {
+		"build": "official",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (official)",
+		"timestamp": 0
+	},
+	"preregister_sha256": "f560da4498f9d35510f5d562e03b0c212546e42f9553559d42880089849ec19d",
+	"recovery_ticks_history": 600,
+	"rows": [
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "full",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"investigate_object": 1,
+				"rest": 31,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "fear",
+			"goals": {
+				"descansar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 34,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "fear",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "novel",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"investigate_object": 1,
+				"seek_object": 11
+			},
+			"arm": "random",
+			"condition": "novel",
+			"goals": {
+				"beber": 12,
+				"explorar": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"investigate_object": 1,
+				"seek_object": 11
+			},
+			"arm": "random",
+			"condition": "habituated",
+			"goals": {
+				"beber": 12,
+				"explorar": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"investigate_object": 1,
+				"seek_object": 11
+			},
+			"arm": "random",
+			"condition": "neutral_history",
+			"goals": {
+				"beber": 12,
+				"explorar": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"investigate_object": 1,
+				"seek_object": 11
+			},
+			"arm": "random",
+			"condition": "adverse_history",
+			"goals": {
+				"beber": 12,
+				"explorar": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"investigate_object": 1,
+				"seek_object": 11
+			},
+			"arm": "random",
+			"condition": "enthusiasm",
+			"goals": {
+				"beber": 12,
+				"explorar": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"investigate_object": 1,
+				"seek_object": 11
+			},
+			"arm": "random",
+			"condition": "fear",
+			"goals": {
+				"beber": 12,
+				"explorar": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 8,
+				"investigate_object": 1,
+				"rest": 23,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "fear",
+			"goals": {
+				"beber": 3,
+				"brincar": 3,
+				"comer": 2,
+				"descansar": 23,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "novel",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "enthusiasm",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-7491739607603457055"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106201
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "full",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"investigate_object": 1,
+				"rest": 31,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "fear",
+			"goals": {
+				"descansar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 32,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "fear",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "novel",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"seek_object": 12
+			},
+			"arm": "random",
+			"condition": "novel",
+			"goals": {
+				"beber": 12,
+				"comer": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"seek_object": 12
+			},
+			"arm": "random",
+			"condition": "habituated",
+			"goals": {
+				"beber": 12,
+				"comer": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"seek_object": 12
+			},
+			"arm": "random",
+			"condition": "neutral_history",
+			"goals": {
+				"beber": 12,
+				"comer": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"seek_object": 12
+			},
+			"arm": "random",
+			"condition": "adverse_history",
+			"goals": {
+				"beber": 12,
+				"comer": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"seek_object": 12
+			},
+			"arm": "random",
+			"condition": "enthusiasm",
+			"goals": {
+				"beber": 12,
+				"comer": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 24,
+				"seek_object": 12
+			},
+			"arm": "random",
+			"condition": "fear",
+			"goals": {
+				"beber": 12,
+				"comer": 12,
+				"investigar_objeto": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "novel",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 6,
+				"investigate_object": 1,
+				"rest": 25,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "fear",
+			"goals": {
+				"beber": 4,
+				"brincar": 2,
+				"descansar": 25,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "novel",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "enthusiasm",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-8137404205434284454"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106202
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "full",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 4,
+				"investigate_object": 1,
+				"rest": 27,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "fear",
+			"goals": {
+				"brincar": 4,
+				"descansar": 27,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 32,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "fear",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "novel",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "novel",
+			"goals": {
+				"buscar_companhia": 24,
+				"comer": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "habituated",
+			"goals": {
+				"buscar_companhia": 24,
+				"comer": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "neutral_history",
+			"goals": {
+				"buscar_companhia": 24,
+				"comer": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "adverse_history",
+			"goals": {
+				"buscar_companhia": 24,
+				"comer": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "enthusiasm",
+			"goals": {
+				"buscar_companhia": 24,
+				"comer": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "fear",
+			"goals": {
+				"buscar_companhia": 24,
+				"comer": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "novel",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 6,
+				"investigate_object": 1,
+				"rest": 25,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "fear",
+			"goals": {
+				"beber": 3,
+				"brincar": 2,
+				"comer": 1,
+				"descansar": 25,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "novel",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "enthusiasm",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1773267981587491449"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106203
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "full",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"investigate_object": 1,
+				"rest": 31,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "fear",
+			"goals": {
+				"descansar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 34,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "fear",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "novel",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 23,
+				"rest": 13
+			},
+			"arm": "random",
+			"condition": "novel",
+			"goals": {
+				"brincar": 10,
+				"buscar_companhia": 13,
+				"descansar": 13
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 23,
+				"rest": 13
+			},
+			"arm": "random",
+			"condition": "habituated",
+			"goals": {
+				"brincar": 10,
+				"buscar_companhia": 13,
+				"descansar": 13
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 23,
+				"rest": 13
+			},
+			"arm": "random",
+			"condition": "neutral_history",
+			"goals": {
+				"brincar": 10,
+				"buscar_companhia": 13,
+				"descansar": 13
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 23,
+				"rest": 13
+			},
+			"arm": "random",
+			"condition": "adverse_history",
+			"goals": {
+				"brincar": 10,
+				"buscar_companhia": 13,
+				"descansar": 13
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 23,
+				"rest": 13
+			},
+			"arm": "random",
+			"condition": "enthusiasm",
+			"goals": {
+				"brincar": 10,
+				"buscar_companhia": 13,
+				"descansar": 13
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 23,
+				"rest": 13
+			},
+			"arm": "random",
+			"condition": "fear",
+			"goals": {
+				"brincar": 10,
+				"buscar_companhia": 13,
+				"descansar": 13
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "novel",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 8,
+				"investigate_object": 1,
+				"rest": 23,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "fear",
+			"goals": {
+				"beber": 4,
+				"brincar": 2,
+				"comer": 2,
+				"descansar": 23,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "novel",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "enthusiasm",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-6846075009772629656"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106204
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "full",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"investigate_object": 1,
+				"rest": 31,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "fear",
+			"goals": {
+				"descansar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 31,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "fear",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "novel",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "novel",
+			"goals": {
+				"brincar": 13,
+				"comer": 11,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "habituated",
+			"goals": {
+				"brincar": 13,
+				"comer": 11,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "neutral_history",
+			"goals": {
+				"brincar": 13,
+				"comer": 11,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "adverse_history",
+			"goals": {
+				"brincar": 13,
+				"comer": 11,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "enthusiasm",
+			"goals": {
+				"brincar": 13,
+				"comer": 11,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "fear",
+			"goals": {
+				"brincar": 13,
+				"comer": 11,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "novel",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 6,
+				"investigate_object": 1,
+				"rest": 25,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "fear",
+			"goals": {
+				"beber": 1,
+				"brincar": 3,
+				"comer": 1,
+				"descansar": 25,
+				"explorar": 1,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "novel",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "enthusiasm",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-481938785925836651"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106205
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "full",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "full",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "full",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"investigate_object": 1,
+				"rest": 31,
+				"seek_object": 4
+			},
+			"arm": "no_memory",
+			"condition": "fear",
+			"goals": {
+				"descansar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 32,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "novel",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_affect",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "no_affect",
+			"condition": "fear",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": true,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "novel",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "habituated",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "neutral_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "adverse_history",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "no_curiosity",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "novel",
+			"goals": {
+				"buscar_companhia": 12,
+				"comer": 12,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "habituated",
+			"goals": {
+				"buscar_companhia": 12,
+				"comer": 12,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "neutral_history",
+			"goals": {
+				"buscar_companhia": 12,
+				"comer": 12,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "adverse_history",
+			"goals": {
+				"buscar_companhia": 12,
+				"comer": 12,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "enthusiasm",
+			"goals": {
+				"buscar_companhia": 12,
+				"comer": 12,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 36
+			},
+			"arm": "random",
+			"condition": "fear",
+			"goals": {
+				"buscar_companhia": 12,
+				"comer": 12,
+				"explorar": 12
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "novel",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 30,
+				"investigate_object": 1,
+				"rest": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 1,
+				"explorar": 30,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 31,
+				"investigate_object": 1,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "enthusiasm",
+			"goals": {
+				"explorar": 31,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"explore": 9,
+				"investigate_object": 1,
+				"rest": 22,
+				"seek_object": 4
+			},
+			"arm": "always",
+			"condition": "fear",
+			"goals": {
+				"beber": 3,
+				"brincar": 6,
+				"descansar": 22,
+				"investigar_objeto": 5
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": true,
+			"interactions": 1,
+			"latency_censored": 5,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "novel",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "habituated",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "neutral_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "adverse_history",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0.0,
+					"frustracao": 0.0,
+					"receio": 0.0,
+					"satisfacao": 0.0,
+					"saturacao_social": 0.0,
+					"solidao": 0.0,
+					"tranquilidade": 0.0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "enthusiasm",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 1,
+					"frustracao": 0,
+					"receio": 0,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		},
+		{
+			"actions": {
+				"rest": 36
+			},
+			"arm": "never",
+			"condition": "fear",
+			"goals": {
+				"descansar": 36
+			},
+			"initial_body": {
+				"affect": {
+					"entusiasmo": 0,
+					"frustracao": 0,
+					"receio": 1,
+					"satisfacao": 0,
+					"saturacao_social": 0,
+					"solidao": 0,
+					"tranquilidade": 0
+				},
+				"energy": 86.4,
+				"hydration": 90.0,
+				"pos": [
+					300.0,
+					300.0
+				],
+				"rng": {
+					"state": "-1127603383756664050"
+				}
+			},
+			"initiative": false,
+			"interacted": false,
+			"interactions": 0,
+			"latency_censored": 36,
+			"roundtrip": true,
+			"seed": 106206
+		}
+	],
+	"seeds": [
+		106201,
+		106202,
+		106203,
+		106204,
+		106205,
+		106206
+	],
+	"split": "dev",
+	"status": "complete",
+	"summary": {
+		"affect_contrast": 0.9999999999999999,
+		"affect_without_affect": 0.0,
+		"checks": {
+			"H1_initiative": true,
+			"H2_habituation": true,
+			"H3_memory_history": true,
+			"H4_memory_ablation": true,
+			"H5_curiosity_ablation": true,
+			"H6_affect_ablation": true,
+			"controls": true,
+			"roundtrips": true
+		},
+		"groups": {
+			"always": {
+				"adverse_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"enthusiasm": {
+					"initiative": 0.0,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"fear": {
+					"initiative": 0.0,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"habituated": {
+					"initiative": 0.0,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"neutral_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"novel": {
+					"initiative": 0.0,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				}
+			},
+			"full": {
+				"adverse_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"enthusiasm": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"fear": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"habituated": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"neutral_history": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"novel": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				}
+			},
+			"never": {
+				"adverse_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"enthusiasm": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"fear": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"habituated": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"neutral_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"novel": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				}
+			},
+			"no_affect": {
+				"adverse_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"enthusiasm": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"fear": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"habituated": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"neutral_history": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"novel": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				}
+			},
+			"no_curiosity": {
+				"adverse_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"enthusiasm": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"fear": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"habituated": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"neutral_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				},
+				"novel": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.0
+				}
+			},
+			"no_memory": {
+				"adverse_history": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"enthusiasm": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"fear": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 32.5,
+					"proportion": 0.9999999999999999
+				},
+				"habituated": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"neutral_history": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				},
+				"novel": {
+					"initiative": 0.9999999999999999,
+					"mean_latency_censored": 5.0,
+					"proportion": 0.9999999999999999
+				}
+			},
+			"random": {
+				"adverse_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.16666666666666666
+				},
+				"enthusiasm": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.16666666666666666
+				},
+				"fear": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.16666666666666666
+				},
+				"habituated": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.16666666666666666
+				},
+				"neutral_history": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.16666666666666666
+				},
+				"novel": {
+					"initiative": 0.0,
+					"mean_latency_censored": 36.0,
+					"proportion": 0.16666666666666666
+				}
+			}
+		},
+		"history_contrast": 0.9999999999999999,
+		"history_without_memory": 0.0,
+		"scientific_status": "PASS"
+	},
+	"window": 36
+}
