@@ -42,3 +42,6 @@ verify E3 a66ea9c0084f2c3ced6e7c55c127a90266d006fd \
 verify E4 ad63789bf26c64e5b829aba76f5c461f75e5a996 \
     tests/experiments/social_preregistro.md tests/experiments/social_eval.gd \
     reports/E4_social_eval.json preregister_sha256
+verify M1 c8e9e91159a088558774e353e870a8b47802beea \
+    tests/experiments/m1_preregistro.md tests/experiments/m1_eval.gd \
+    reports/M1_mind_eval.json preregister_sha256

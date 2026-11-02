@@ -7,8 +7,10 @@ const Brains = preload("res://scripts/behavior/brains.gd")
 const Signals = preload("res://scripts/communication/signal_channel.gd")
 const MEMORY_LIMIT := 16
 const Personality = preload("res://scripts/behavior/personality.gd")
+const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Ensino = preload("res://scripts/interaction/ensino.gd")
 
+var mind = null
 var personality = null
 var ensino = null
 var personality_water_enabled := false
@@ -17,7 +19,14 @@ var temperament: Dictionary:
 		return genome.temperament.duplicate()
 
 func expression_state() -> Dictionary:
-	return personality.expression(self) if personality != null else {"valence": 0.0, "arousal": 0.0}
+	var base: Dictionary = personality.expression(self) if personality != null else {"valence": 0.0, "arousal": 0.0}
+	return mind.expression(base) if mind != null else base
+
+func mind_snapshot() -> Dictionary:
+	var base: Dictionary = personality.expression(self) if personality != null else {"valence": 0.0, "arousal": 0.0}
+	if mind != null:
+		return mind.snapshot(base)
+	return {"afetos": Mind.new().empty_affect(), "objetivo_atual": "", "motivo": "mind.disabled", "ultimos_logs": [], "expressao": base, "cause_log": [], "pontuacoes": {}, "affect_enabled": false, "memory_enabled": false}
 
 
 var id: int = 0
@@ -56,6 +65,8 @@ func to_dict() -> Dictionary:
 		"age": age, "reproduction_cooldown": reproduction_cooldown, "alive": alive, "genome": genome.to_dict(),
 		"last_action": last_action, "last_reason": last_reason, "memory": Data.restore_precision(memory)
 	}
+	if mind != null:
+		result["mind"] = mind.to_dict()
 	if personality != null:
 		result["personality"] = personality.to_dict()
 	if ensino != null:
@@ -100,6 +111,11 @@ static func from_dict(data: Dictionary) -> SimCreature:
 		saved_brain = Brains.from_dict(data["brain"])
 		if saved_brain == null:
 			return null
+	var saved_mind = null
+	if data.has("mind"):
+		saved_mind = Mind.from_dict(data["mind"])
+		if saved_mind == null:
+			return null
 	var saved_personality = null
 	var saved_teaching = null
 	if data.has("ensino"):
@@ -111,6 +127,7 @@ static func from_dict(data: Dictionary) -> SimCreature:
 		if saved_personality == null or genes.temperament.is_empty():
 			return null
 	var result = load("res://scripts/creature/sim_creature.gd").new()
+	result.mind = saved_mind
 	result.personality = saved_personality
 	result.ensino = saved_teaching
 	result.brain = saved_brain

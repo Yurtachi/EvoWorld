@@ -78,7 +78,7 @@ func run() -> Array:
 	legacy.save_version = 6
 	var original := JSON.stringify(legacy)
 	var loaded_v6 = World.from_dict(legacy)
-	check(loaded_v6 != null and loaded_v6.to_dict().save_version == 7, "save v6 carrega em v7", failures)
+	check(loaded_v6 != null and loaded_v6.to_dict().save_version == World.SAVE_VERSION, "save v6 carrega na versao atual", failures)
 	check(JSON.stringify(legacy) == original, "migração não altera entrada", failures)
 	var migrated := World._migrate_v6(legacy)
 	check(World._migrate_v6(migrated) == migrated, "migração v6 idempotente", failures)
