@@ -1,0 +1,4478 @@
+[
+	{
+		"after100": {
+			"commands": {
+				"order": {},
+				"protection_requested": false
+			},
+			"config": {
+				"food_capacity": 100,
+				"food_regrow": true,
+				"food_regrow_batch": 2,
+				"food_regrow_interval": 10,
+				"max_age": 12000,
+				"max_population": 150,
+				"min_reproduction_age": 300,
+				"mutation_rate": 0.3,
+				"mutation_scale": 0.024999999999999998,
+				"personality_enabled": false,
+				"reproduction_cooldown": 300,
+				"reproduction_enabled": false,
+				"signal_cost": 0.3,
+				"signal_count": 4,
+				"signal_enabled": false,
+				"signal_noise": 0.049999999999999996,
+				"signal_range": 180.0,
+				"signal_ttl": 10,
+				"water_enabled": false
+			},
+			"creatures": [
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 72.03848099999999,
+					"genome": {
+						"generation": 0,
+						"hue": 0.827874,
+						"id": 13,
+						"metabolism": 0.640282,
+						"parents": [],
+						"size": 8.659964,
+						"speed": 32.906269,
+						"version": 1,
+						"vision_fov": 5.693858,
+						"vision_range": 86.601181
+					},
+					"heading": 1.0536649999999999,
+					"hydration": 100.0,
+					"id": 14,
+					"last_action": "explore",
+					"last_reason": "No food within vision; exploring",
+					"max_energy": 97.31992799999999,
+					"memory": [],
+					"name": "Criatura 14",
+					"pos": [
+						1179.284912109375,
+						547.4253540039063
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 99.236234,
+					"genome": {
+						"generation": 0,
+						"hue": 0.698618,
+						"id": 15,
+						"metabolism": 0.715673,
+						"parents": [],
+						"size": 10.699337,
+						"speed": 56.950409,
+						"version": 1,
+						"vision_fov": 1.327102,
+						"vision_range": 156.939667
+					},
+					"heading": 2.286467,
+					"hydration": 100.0,
+					"id": 16,
+					"last_action": "rest",
+					"last_reason": "Satiated; conserving energy",
+					"max_energy": 101.398674,
+					"memory": [
+						{
+							"creature_id": 16,
+							"energy": 24.985763,
+							"food_id": 28,
+							"tick": 61,
+							"type": "eat"
+						}
+					],
+					"name": "Criatura 16",
+					"pos": [
+						985.1734008789063,
+						411.1875
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 87.734398,
+					"genome": {
+						"generation": 0,
+						"hue": 0.972057,
+						"id": 17,
+						"metabolism": 0.971078,
+						"parents": [],
+						"size": 6.367020999999999,
+						"speed": 55.26403,
+						"version": 1,
+						"vision_fov": 4.184665,
+						"vision_range": 205.74212599999998
+					},
+					"heading": 0.820456,
+					"hydration": 100.0,
+					"id": 18,
+					"last_action": "rest",
+					"last_reason": "Satiated; conserving energy",
+					"max_energy": 92.734042,
+					"memory": [
+						{
+							"creature_id": 18,
+							"energy": 20.344032,
+							"food_id": 1,
+							"tick": 23,
+							"type": "eat"
+						}
+					],
+					"name": "Criatura 18",
+					"pos": [
+						803.144287109375,
+						660.2957763671875
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 74.819262,
+					"genome": {
+						"generation": 0,
+						"hue": 0.557082,
+						"id": 19,
+						"metabolism": 0.857463,
+						"parents": [],
+						"size": 12.209145999999999,
+						"speed": 35.953697,
+						"version": 1,
+						"vision_fov": 1.148914,
+						"vision_range": 55.410522
+					},
+					"heading": -1.745126,
+					"hydration": 100.0,
+					"id": 20,
+					"last_action": "explore",
+					"last_reason": "No food within vision; exploring",
+					"max_energy": 104.418292,
+					"memory": [],
+					"name": "Criatura 20",
+					"pos": [
+						716.2383422851563,
+						326.29827880859375
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				}
+			],
+			"events": [
+				{
+					"creature_id": 14,
+					"name": "Criatura 14",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 16,
+					"name": "Criatura 16",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 18,
+					"name": "Criatura 18",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 20,
+					"name": "Criatura 20",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 18,
+					"energy": 20.344032,
+					"food_id": 1,
+					"tick": 23,
+					"type": "eat"
+				},
+				{
+					"creature_id": 16,
+					"energy": 24.985763,
+					"food_id": 28,
+					"tick": 61,
+					"type": "eat"
+				}
+			],
+			"foods": [
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 2,
+					"pos": [
+						145.15438842773438,
+						755.1969604492188
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 3,
+					"pos": [
+						764.4127807617188,
+						302.79730224609375
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 4,
+					"pos": [
+						896.16064453125,
+						70.47116088867188
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 5,
+					"pos": [
+						940.8302612304688,
+						392.59832763671875
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 6,
+					"pos": [
+						270.16680908203125,
+						531.4946899414063
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 7,
+					"pos": [
+						670.3123168945313,
+						292.0504455566406
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 8,
+					"pos": [
+						487.8567199707031,
+						130.81637573242188
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 9,
+					"pos": [
+						338.01251220703125,
+						470.2935791015625
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 10,
+					"pos": [
+						734.7273559570313,
+						272.9678649902344
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 11,
+					"pos": [
+						266.1120910644531,
+						574.6790161132813
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 12,
+					"pos": [
+						540.4630737304688,
+						71.24371337890625
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 21,
+					"pos": [
+						32.65650177001953,
+						636.8553466796875
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 22,
+					"pos": [
+						647.1010131835938,
+						546.0175170898438
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 23,
+					"pos": [
+						865.299560546875,
+						285.4526062011719
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 24,
+					"pos": [
+						405.3792724609375,
+						457.1651611328125
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 25,
+					"pos": [
+						1178.791259765625,
+						123.65042114257813
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 26,
+					"pos": [
+						645.5499267578125,
+						332.8951110839844
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 27,
+					"pos": [
+						291.1773986816406,
+						377.1930847167969
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 29,
+					"pos": [
+						101.9341049194336,
+						216.5413360595703
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 30,
+					"pos": [
+						632.01416015625,
+						587.5975952148438
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 31,
+					"pos": [
+						318.64312744140625,
+						437.47467041015625
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 32,
+					"pos": [
+						1120.0306396484375,
+						394.2198486328125
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 33,
+					"pos": [
+						593.6890258789063,
+						242.98545837402344
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 34,
+					"pos": [
+						591.4703979492188,
+						559.43701171875
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 35,
+					"pos": [
+						601.6435546875,
+						260.288330078125
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 36,
+					"pos": [
+						609.1157836914063,
+						402.7069091796875
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 37,
+					"pos": [
+						601.0885009765625,
+						331.9298095703125
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 38,
+					"pos": [
+						524.589111328125,
+						221.3029327392578
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 39,
+					"pos": [
+						55.61048126220703,
+						743.4112548828125
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 40,
+					"pos": [
+						859.3901977539063,
+						177.79864501953125
+					]
+				}
+			],
+			"genealogy": [
+				{
+					"birth_tick": 0,
+					"creature_id": 14,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.827874,
+						"id": 13,
+						"metabolism": 0.640282,
+						"parents": [],
+						"size": 8.659964,
+						"speed": 32.906269,
+						"version": 1,
+						"vision_fov": 5.693858,
+						"vision_range": 86.601181
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 14",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 16,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.698618,
+						"id": 15,
+						"metabolism": 0.715673,
+						"parents": [],
+						"size": 10.699337,
+						"speed": 56.950409,
+						"version": 1,
+						"vision_fov": 1.327102,
+						"vision_range": 156.939667
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 16",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 18,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.972057,
+						"id": 17,
+						"metabolism": 0.971078,
+						"parents": [],
+						"size": 6.367020999999999,
+						"speed": 55.26403,
+						"version": 1,
+						"vision_fov": 4.184665,
+						"vision_range": 205.74212599999998
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 18",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 20,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.557082,
+						"id": 19,
+						"metabolism": 0.857463,
+						"parents": [],
+						"size": 12.209145999999999,
+						"speed": 35.953697,
+						"version": 1,
+						"vision_fov": 1.148914,
+						"vision_range": 55.410522
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 20",
+					"parents": []
+				}
+			],
+			"next_id": 41,
+			"obstacles": [
+				{
+					"pos": [
+						725.9391479492188,
+						462.3015441894531
+					],
+					"radius": 27.734672999999997
+				},
+				{
+					"pos": [
+						735.9517822265625,
+						488.6301574707031
+					],
+					"radius": 20.851056999999997
+				},
+				{
+					"pos": [
+						998.1820678710938,
+						727.418701171875
+					],
+					"radius": 24.425590999999997
+				}
+			],
+			"pet_id": 14,
+			"rng_state": {
+				"state": "-4209556690633926163"
+			},
+			"save_version": 7,
+			"signal_log": [],
+			"size": [
+				1200.0,
+				760.0
+			],
+			"tick": 100,
+			"waters": [],
+			"world_seed": "7823"
+		},
+		"initial": {
+			"commands": {
+				"order": {},
+				"protection_requested": false
+			},
+			"config": {
+				"food_capacity": 100,
+				"food_regrow": true,
+				"food_regrow_batch": 2,
+				"food_regrow_interval": 10,
+				"max_age": 12000,
+				"max_population": 150,
+				"min_reproduction_age": 300,
+				"mutation_rate": 0.3,
+				"mutation_scale": 0.024999999999999998,
+				"personality_enabled": false,
+				"reproduction_cooldown": 300,
+				"reproduction_enabled": false,
+				"signal_cost": 0.3,
+				"signal_count": 4,
+				"signal_enabled": false,
+				"signal_noise": 0.049999999999999996,
+				"signal_range": 180.0,
+				"signal_ttl": 10,
+				"water_enabled": false
+			},
+			"creatures": [
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 77.855942,
+					"genome": {
+						"generation": 0,
+						"hue": 0.827874,
+						"id": 13,
+						"metabolism": 0.640282,
+						"parents": [],
+						"size": 8.659964,
+						"speed": 32.906269,
+						"version": 1,
+						"vision_fov": 5.693858,
+						"vision_range": 86.601181
+					},
+					"heading": -1.22247,
+					"hydration": 100.0,
+					"id": 14,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 97.31992799999999,
+					"memory": [],
+					"name": "Criatura 14",
+					"pos": [
+						937.8817749023438,
+						603.57763671875
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 81.118939,
+					"genome": {
+						"generation": 0,
+						"hue": 0.698618,
+						"id": 15,
+						"metabolism": 0.715673,
+						"parents": [],
+						"size": 10.699337,
+						"speed": 56.950409,
+						"version": 1,
+						"vision_fov": 1.327102,
+						"vision_range": 156.939667
+					},
+					"heading": 0.6821119999999999,
+					"hydration": 100.0,
+					"id": 16,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 101.398674,
+					"memory": [],
+					"name": "Criatura 16",
+					"pos": [
+						1168.8277587890625,
+						266.9285888671875
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 74.187234,
+					"genome": {
+						"generation": 0,
+						"hue": 0.972057,
+						"id": 17,
+						"metabolism": 0.971078,
+						"parents": [],
+						"size": 6.367020999999999,
+						"speed": 55.26403,
+						"version": 1,
+						"vision_fov": 4.184665,
+						"vision_range": 205.74212599999998
+					},
+					"heading": 0.527905,
+					"hydration": 100.0,
+					"id": 18,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 92.734042,
+					"memory": [],
+					"name": "Criatura 18",
+					"pos": [
+						720.2401123046875,
+						571.3646850585938
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 83.534634,
+					"genome": {
+						"generation": 0,
+						"hue": 0.557082,
+						"id": 19,
+						"metabolism": 0.857463,
+						"parents": [],
+						"size": 12.209145999999999,
+						"speed": 35.953697,
+						"version": 1,
+						"vision_fov": 1.148914,
+						"vision_range": 55.410522
+					},
+					"heading": 2.684989,
+					"hydration": 100.0,
+					"id": 20,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 104.418292,
+					"memory": [],
+					"name": "Criatura 20",
+					"pos": [
+						916.848876953125,
+						342.2165222167969
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				}
+			],
+			"events": [
+				{
+					"creature_id": 14,
+					"name": "Criatura 14",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 16,
+					"name": "Criatura 16",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 18,
+					"name": "Criatura 18",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 20,
+					"name": "Criatura 20",
+					"tick": 0,
+					"type": "spawn"
+				}
+			],
+			"foods": [
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 1,
+					"pos": [
+						810.1466064453125,
+						667.80712890625
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 2,
+					"pos": [
+						145.15438842773438,
+						755.1969604492188
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 3,
+					"pos": [
+						764.4127807617188,
+						302.79730224609375
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 4,
+					"pos": [
+						896.16064453125,
+						70.47116088867188
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 5,
+					"pos": [
+						940.8302612304688,
+						392.59832763671875
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 6,
+					"pos": [
+						270.16680908203125,
+						531.4946899414063
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 7,
+					"pos": [
+						670.3123168945313,
+						292.0504455566406
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 8,
+					"pos": [
+						487.8567199707031,
+						130.81637573242188
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 9,
+					"pos": [
+						338.01251220703125,
+						470.2935791015625
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 10,
+					"pos": [
+						734.7273559570313,
+						272.9678649902344
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 11,
+					"pos": [
+						266.1120910644531,
+						574.6790161132813
+					]
+				},
+				{
+					"energy": 32.0,
+					"food_type": "legacy",
+					"id": 12,
+					"pos": [
+						540.4630737304688,
+						71.24371337890625
+					]
+				}
+			],
+			"genealogy": [
+				{
+					"birth_tick": 0,
+					"creature_id": 14,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.827874,
+						"id": 13,
+						"metabolism": 0.640282,
+						"parents": [],
+						"size": 8.659964,
+						"speed": 32.906269,
+						"version": 1,
+						"vision_fov": 5.693858,
+						"vision_range": 86.601181
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 14",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 16,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.698618,
+						"id": 15,
+						"metabolism": 0.715673,
+						"parents": [],
+						"size": 10.699337,
+						"speed": 56.950409,
+						"version": 1,
+						"vision_fov": 1.327102,
+						"vision_range": 156.939667
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 16",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 18,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.972057,
+						"id": 17,
+						"metabolism": 0.971078,
+						"parents": [],
+						"size": 6.367020999999999,
+						"speed": 55.26403,
+						"version": 1,
+						"vision_fov": 4.184665,
+						"vision_range": 205.74212599999998
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 18",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 20,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.557082,
+						"id": 19,
+						"metabolism": 0.857463,
+						"parents": [],
+						"size": 12.209145999999999,
+						"speed": 35.953697,
+						"version": 1,
+						"vision_fov": 1.148914,
+						"vision_range": 55.410522
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 20",
+					"parents": []
+				}
+			],
+			"next_id": 21,
+			"obstacles": [
+				{
+					"pos": [
+						725.9391479492188,
+						462.3015441894531
+					],
+					"radius": 27.734672999999997
+				},
+				{
+					"pos": [
+						735.9517822265625,
+						488.6301574707031
+					],
+					"radius": 20.851056999999997
+				},
+				{
+					"pos": [
+						998.1820678710938,
+						727.418701171875
+					],
+					"radius": 24.425590999999997
+				}
+			],
+			"pet_id": 14,
+			"rng_state": {
+				"state": "5930147193273284567"
+			},
+			"save_version": 7,
+			"signal_log": [],
+			"size": [
+				1200.0,
+				760.0
+			],
+			"tick": 0,
+			"waters": [],
+			"world_seed": "7823"
+		}
+	},
+	{
+		"after100": {
+			"commands": {
+				"order": {},
+				"protection_requested": false
+			},
+			"config": {
+				"food_capacity": 100,
+				"food_regrow": true,
+				"food_regrow_batch": 2,
+				"food_regrow_interval": 10,
+				"max_age": 12000,
+				"max_population": 150,
+				"min_reproduction_age": 300,
+				"mutation_rate": 0.3,
+				"mutation_scale": 0.024999999999999998,
+				"personality_enabled": true,
+				"reproduction_cooldown": 300,
+				"reproduction_enabled": false,
+				"signal_cost": 0.3,
+				"signal_count": 4,
+				"signal_enabled": false,
+				"signal_noise": 0.049999999999999996,
+				"signal_range": 180.0,
+				"signal_ttl": 10,
+				"water_enabled": true
+			},
+			"creatures": [
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 87.74913699999999,
+					"genome": {
+						"generation": 0,
+						"hue": 0.57405,
+						"id": 15,
+						"metabolism": 1.5773519999999999,
+						"parents": [],
+						"size": 9.054378999999999,
+						"speed": 64.389473,
+						"temperament": {
+							"caution": 0.165902,
+							"curiosity": 0.053458,
+							"impulsivity": 0.6085619999999999,
+							"sociability": 0.698618
+						},
+						"version": 1,
+						"vision_fov": 3.507765,
+						"vision_range": 112.21301299999999
+					},
+					"heading": -1.581767,
+					"hydration": 95.70960799999999,
+					"id": 16,
+					"last_action": "rest",
+					"last_reason": "Satiated; conserving energy",
+					"max_energy": 98.108758,
+					"memory": [
+						{
+							"creature_id": 16,
+							"energy": 12,
+							"food_id": 14,
+							"tick": 30,
+							"type": "eat"
+						},
+						{
+							"creature_id": 16,
+							"energy": 7.334995999999999,
+							"food_id": 34,
+							"tick": 67,
+							"type": "eat"
+						}
+					],
+					"name": "Criatura 16",
+					"personality": {
+						"bonds": {},
+						"boredom": 0.02822,
+						"conditioning": {
+							"cogumelo:2:2": -0.186029
+						},
+						"episodes": [
+							{
+								"action": "eat",
+								"consequence": {
+									"energy": 12,
+									"event": "toxic_food",
+									"fatigue": 0,
+									"hydration": 3.659452
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "cogumelo",
+									"hydration": 2
+								},
+								"reward_source": "ingestion",
+								"tick": 30
+							},
+							{
+								"action": "eat",
+								"consequence": {
+									"energy": 7.334995999999999,
+									"event": "toxic_food",
+									"fatigue": 0,
+									"hydration": 4.668956
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "cogumelo",
+									"hydration": 2
+								},
+								"reward_source": "ingestion",
+								"tick": 67
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 71
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 72
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 73
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": -0.022,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 74
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 75
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 76
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 77
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 78
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 79
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 80
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 81
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 82
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 83
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 84
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 85
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 86
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 87
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 88
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 89
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 90
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 91
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 92
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 93
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 94
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 95
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 96
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 97
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 98
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 99
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.068066,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.126188
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 100
+							}
+						],
+						"event_valence": -0.268748,
+						"fatigue": 0,
+						"habituation": {
+							"food:cogumelo": {
+								"last_tick": 67,
+								"level": 0.734271
+							},
+							"zone:2:10": {
+								"last_tick": 19,
+								"level": 0
+							},
+							"zone:2:9": {
+								"last_tick": 17,
+								"level": 0.219804
+							},
+							"zone:3:10": {
+								"last_tick": 42,
+								"level": 0.449274
+							},
+							"zone:4:10": {
+								"last_tick": 49,
+								"level": 0.3311
+							},
+							"zone:4:11": {
+								"last_tick": 66,
+								"level": 0.651165
+							}
+						},
+						"loneliness": 0.0949,
+						"preferences": {
+							"cogumelo": -0.186029
+						}
+					},
+					"pos": [
+						295.2325439453125,
+						704.63330078125
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 96.963565,
+					"genome": {
+						"generation": 0,
+						"hue": 0.584019,
+						"id": 17,
+						"metabolism": 1.763674,
+						"parents": [],
+						"size": 13.928516,
+						"speed": 56.742973,
+						"temperament": {
+							"caution": 0.4481,
+							"curiosity": 0.7712749999999999,
+							"impulsivity": 0.381994,
+							"sociability": 0.620915
+						},
+						"version": 1,
+						"vision_fov": 2.9445509999999997,
+						"vision_range": 161.846359
+					},
+					"heading": 0.431442,
+					"hydration": 94.074052,
+					"id": 18,
+					"last_action": "rest",
+					"last_reason": "Satiated; conserving energy",
+					"max_energy": 107.85703199999999,
+					"memory": [
+						{
+							"creature_id": 18,
+							"energy": 24,
+							"food_id": 3,
+							"tick": 59,
+							"type": "eat"
+						}
+					],
+					"name": "Criatura 18",
+					"personality": {
+						"bonds": {},
+						"boredom": 0.080094,
+						"conditioning": {
+							"fruta:2:2": 0.163322
+						},
+						"episodes": [
+							{
+								"action": "eat",
+								"consequence": {
+									"energy": 24,
+									"event": "food",
+									"fatigue": 0,
+									"hydration": 8.183451999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "fruta",
+									"hydration": 2
+								},
+								"reward_source": "ingestion",
+								"tick": 59
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 70
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 71
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": -0.020999999999999998,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 72
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 73
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 74
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 75
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 76
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 77
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 78
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 79
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 80
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 81
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 82
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 83
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 84
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 85
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 86
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 87
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 88
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 89
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 90
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 91
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 92
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 93
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 94
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 95
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 96
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 97
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 98
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 99
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.087453,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.141094
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 100
+							}
+						],
+						"event_valence": 0.23346799999999998,
+						"fatigue": 0,
+						"habituation": {
+							"food:fruta": {
+								"last_tick": 59,
+								"level": 0.7257429999999999
+							},
+							"zone:12:0": {
+								"last_tick": 48,
+								"level": 0.715545
+							},
+							"zone:13:0": {
+								"last_tick": 58,
+								"level": 0.702892
+							},
+							"zone:14:0": {
+								"last_tick": 13,
+								"level": 0
+							}
+						},
+						"loneliness": 0.0871,
+						"preferences": {
+							"fruta": 0.163322
+						}
+					},
+					"pos": [
+						879.4302368164063,
+						62.769046783447266
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 71.102755,
+					"genome": {
+						"generation": 0,
+						"hue": 0.720182,
+						"id": 19,
+						"metabolism": 1.2012829999999999,
+						"parents": [],
+						"size": 11.570822,
+						"speed": 61.584472999999996,
+						"temperament": {
+							"caution": 0.5838909999999999,
+							"curiosity": 0.7627339999999999,
+							"impulsivity": 0.9852449999999999,
+							"sociability": 0.21284799999999998
+						},
+						"version": 1,
+						"vision_fov": 5.448867,
+						"vision_range": 49.843399
+					},
+					"heading": 1.147961,
+					"hydration": 90.38969999999999,
+					"id": 20,
+					"last_action": "rest",
+					"last_reason": "personality.fatigue",
+					"max_energy": 103.141644,
+					"memory": [],
+					"name": "Criatura 20",
+					"personality": {
+						"bonds": {},
+						"boredom": 0.0018939999999999999,
+						"conditioning": {},
+						"episodes": [
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 69
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 70
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 71
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.055827999999999996,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 72
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 73
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 74
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 75
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 76
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.055827999999999996,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 77
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 78
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 79
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 80
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 81
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.055827999999999996,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 82
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 83
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 84
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 85
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.055827999999999996,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 86
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 87
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 88
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 89
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 90
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.055827999999999996,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 91
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 92
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 93
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 94
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.055827999999999996,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 95
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 96
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 97
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 98
+							},
+							{
+								"action": "explore",
+								"consequence": {
+									"energy": -0.12867499999999998,
+									"event": "exploration",
+									"fatigue": 0.006999999999999999,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "movement",
+								"tick": 99
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.055827999999999996,
+									"event": "rest",
+									"fatigue": -0.024999999999999998,
+									"hydration": -0.096103
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "rest",
+								"tick": 100
+							}
+						],
+						"event_valence": 0,
+						"fatigue": 0.33499999999999996,
+						"habituation": {
+							"zone:0:3": {
+								"last_tick": 17,
+								"level": 0.219804
+							},
+							"zone:0:4": {
+								"last_tick": 28,
+								"level": 0.44335399999999997
+							},
+							"zone:0:5": {
+								"last_tick": 38,
+								"level": 0.42947199999999996
+							},
+							"zone:0:6": {
+								"last_tick": 47,
+								"level": 0.410643
+							},
+							"zone:1:6": {
+								"last_tick": 48,
+								"level": 0
+							},
+							"zone:1:7": {
+								"last_tick": 59,
+								"level": 0.505354
+							},
+							"zone:1:8": {
+								"last_tick": 74,
+								"level": 0.5625709999999999
+							},
+							"zone:1:9": {
+								"last_tick": 79,
+								"level": 0.23482399999999998
+							},
+							"zone:2:10": {
+								"last_tick": 99,
+								"level": 0.42966699999999997
+							},
+							"zone:2:9": {
+								"last_tick": 90,
+								"level": 0.49409499999999995
+							}
+						},
+						"loneliness": 0.0463,
+						"preferences": {}
+					},
+					"pos": [
+						173.61444091796875,
+						677.2180786132813
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 100,
+					"alive": true,
+					"energy": 99.21470099999999,
+					"genome": {
+						"generation": 0,
+						"hue": 0.160014,
+						"id": 21,
+						"metabolism": 1.7801749999999998,
+						"parents": [],
+						"size": 12.023411,
+						"speed": 53.803833,
+						"temperament": {
+							"caution": 0.437527,
+							"curiosity": 0.538149,
+							"impulsivity": 0.49627699999999997,
+							"sociability": 0.241355
+						},
+						"version": 1,
+						"vision_fov": 5.222136,
+						"vision_range": 91.56605499999999
+					},
+					"heading": 0.306844,
+					"hydration": 91.882402,
+					"id": 22,
+					"last_action": "rest",
+					"last_reason": "Satiated; conserving energy",
+					"max_energy": 104.04682199999999,
+					"memory": [
+						{
+							"creature_id": 22,
+							"energy": 12,
+							"food_id": 27,
+							"tick": 37,
+							"type": "eat"
+						},
+						{
+							"creature_id": 22,
+							"energy": 15.202848,
+							"food_id": 29,
+							"tick": 44,
+							"type": "eat"
+						}
+					],
+					"name": "Criatura 22",
+					"personality": {
+						"bonds": {},
+						"boredom": 0.088749,
+						"conditioning": {
+							"cogumelo:2:2": -0.11626099999999999,
+							"fruta:2:2": 0.09597399999999999
+						},
+						"episodes": [
+							{
+								"action": "eat",
+								"consequence": {
+									"energy": 12,
+									"event": "toxic_food",
+									"fatigue": 0,
+									"hydration": 5.126904
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "cogumelo",
+									"hydration": 2
+								},
+								"reward_source": "ingestion",
+								"tick": 37
+							},
+							{
+								"action": "eat",
+								"consequence": {
+									"energy": 15.202848,
+									"event": "food",
+									"fatigue": 0,
+									"hydration": 0.996898
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "fruta",
+									"hydration": 2
+								},
+								"reward_source": "ingestion",
+								"tick": 44
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 71
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 72
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 73
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 74
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 75
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 76
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 77
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 78
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 79
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 80
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 81
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 82
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 83
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 84
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 85
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 86
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 87
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 88
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 89
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 90
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 91
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 92
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 93
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 94
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 95
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 96
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 97
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 98
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 99
+							},
+							{
+								"action": "rest",
+								"consequence": {
+									"energy": -0.083794,
+									"event": "rest",
+									"fatigue": 0,
+									"hydration": -0.14241399999999999
+								},
+								"context": {
+									"energy": 2,
+									"food_type": "legacy",
+									"hydration": 2
+								},
+								"reward_source": "body",
+								"tick": 100
+							}
+						],
+						"event_valence": 0.087709,
+						"fatigue": 0,
+						"habituation": {
+							"food:cogumelo": {
+								"last_tick": 42,
+								"level": 0.395565
+							},
+							"food:fruta": {
+								"last_tick": 100,
+								"level": 0.831615
+							},
+							"zone:5:5": {
+								"last_tick": 40,
+								"level": 0.46579699999999996
+							},
+							"zone:6:4": {
+								"last_tick": 27,
+								"level": 0.527588
+							},
+							"zone:6:5": {
+								"last_tick": 43,
+								"level": 0.145829
+							},
+							"zone:7:4": {
+								"last_tick": 13,
+								"level": 0
+							}
+						},
+						"loneliness": 0.0491,
+						"preferences": {
+							"cogumelo": -0.11626099999999999,
+							"fruta": 0.09597399999999999
+						}
+					},
+					"pos": [
+						398.638671875,
+						382.0204162597656
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				}
+			],
+			"events": [
+				{
+					"creature_id": 16,
+					"name": "Criatura 16",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 18,
+					"name": "Criatura 18",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 20,
+					"name": "Criatura 20",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 22,
+					"name": "Criatura 22",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 16,
+					"energy": 12,
+					"food_id": 14,
+					"tick": 30,
+					"type": "eat"
+				},
+				{
+					"creature_id": 22,
+					"energy": 12,
+					"food_id": 27,
+					"tick": 37,
+					"type": "eat"
+				},
+				{
+					"creature_id": 22,
+					"energy": 15.202848,
+					"food_id": 29,
+					"tick": 44,
+					"type": "eat"
+				},
+				{
+					"creature_id": 18,
+					"energy": 24,
+					"food_id": 3,
+					"tick": 59,
+					"type": "eat"
+				},
+				{
+					"creature_id": 16,
+					"energy": 7.334995999999999,
+					"food_id": 34,
+					"tick": 67,
+					"type": "eat"
+				}
+			],
+			"foods": [
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 4,
+					"pos": [
+						940.8302612304688,
+						392.59832763671875
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 5,
+					"pos": [
+						270.16680908203125,
+						531.4946899414063
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 6,
+					"pos": [
+						670.3123168945313,
+						292.0504455566406
+					]
+				},
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 7,
+					"pos": [
+						487.8567199707031,
+						130.81637573242188
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 8,
+					"pos": [
+						338.01251220703125,
+						470.2935791015625
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 9,
+					"pos": [
+						734.7273559570313,
+						272.9678649902344
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 10,
+					"pos": [
+						266.1120910644531,
+						574.6790161132813
+					]
+				},
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 11,
+					"pos": [
+						540.4630737304688,
+						71.24371337890625
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 12,
+					"pos": [
+						945.403076171875,
+						611.5625610351563
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 13,
+					"pos": [
+						320.5997009277344,
+						242.13462829589844
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 23,
+					"pos": [
+						663.4407348632813,
+						288.8605041503906
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 24,
+					"pos": [
+						494.39263916015625,
+						65.4759750366211
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 25,
+					"pos": [
+						656.83642578125,
+						496.91497802734375
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 26,
+					"pos": [
+						318.64312744140625,
+						437.47467041015625
+					]
+				},
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 28,
+					"pos": [
+						884.1482543945313,
+						654.9384765625
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 30,
+					"pos": [
+						635.9575805664063,
+						718.2699584960938
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 31,
+					"pos": [
+						523.8782348632813,
+						332.3786926269531
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 32,
+					"pos": [
+						348.6945495605469,
+						36.2230339050293
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 33,
+					"pos": [
+						770.4114990234375,
+						670.0128173828125
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 35,
+					"pos": [
+						555.2930297851563,
+						358.3911437988281
+					]
+				},
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 36,
+					"pos": [
+						468.46307373046875,
+						128.5439453125
+					]
+				},
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 37,
+					"pos": [
+						462.30462646484375,
+						401.2509460449219
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 38,
+					"pos": [
+						661.764404296875,
+						738.5390014648438
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 39,
+					"pos": [
+						664.4909057617188,
+						462.446044921875
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 40,
+					"pos": [
+						185.33401489257813,
+						164.2373809814453
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 41,
+					"pos": [
+						967.2009887695313,
+						585.0618286132813
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 42,
+					"pos": [
+						677.506103515625,
+						408.1971435546875
+					]
+				}
+			],
+			"genealogy": [
+				{
+					"birth_tick": 0,
+					"creature_id": 16,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.57405,
+						"id": 15,
+						"metabolism": 1.5773519999999999,
+						"parents": [],
+						"size": 9.054378999999999,
+						"speed": 64.389473,
+						"temperament": {
+							"caution": 0.165902,
+							"curiosity": 0.053458,
+							"impulsivity": 0.6085619999999999,
+							"sociability": 0.698618
+						},
+						"version": 1,
+						"vision_fov": 3.507765,
+						"vision_range": 112.21301299999999
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 16",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 18,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.584019,
+						"id": 17,
+						"metabolism": 1.763674,
+						"parents": [],
+						"size": 13.928516,
+						"speed": 56.742973,
+						"temperament": {
+							"caution": 0.4481,
+							"curiosity": 0.7712749999999999,
+							"impulsivity": 0.381994,
+							"sociability": 0.620915
+						},
+						"version": 1,
+						"vision_fov": 2.9445509999999997,
+						"vision_range": 161.846359
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 18",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 20,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.720182,
+						"id": 19,
+						"metabolism": 1.2012829999999999,
+						"parents": [],
+						"size": 11.570822,
+						"speed": 61.584472999999996,
+						"temperament": {
+							"caution": 0.5838909999999999,
+							"curiosity": 0.7627339999999999,
+							"impulsivity": 0.9852449999999999,
+							"sociability": 0.21284799999999998
+						},
+						"version": 1,
+						"vision_fov": 5.448867,
+						"vision_range": 49.843399
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 20",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 22,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.160014,
+						"id": 21,
+						"metabolism": 1.7801749999999998,
+						"parents": [],
+						"size": 12.023411,
+						"speed": 53.803833,
+						"temperament": {
+							"caution": 0.437527,
+							"curiosity": 0.538149,
+							"impulsivity": 0.49627699999999997,
+							"sociability": 0.241355
+						},
+						"version": 1,
+						"vision_fov": 5.222136,
+						"vision_range": 91.56605499999999
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 22",
+					"parents": []
+				}
+			],
+			"next_id": 43,
+			"obstacles": [
+				{
+					"pos": [
+						998.1820678710938,
+						727.418701171875
+					],
+					"radius": 24.425590999999997
+				},
+				{
+					"pos": [
+						800.6425170898438,
+						647.1949462890625
+					],
+					"radius": 17.666801
+				},
+				{
+					"pos": [
+						1167.27392578125,
+						476.389404296875
+					],
+					"radius": 21.566527999999998
+				}
+			],
+			"pet_id": 16,
+			"rng_state": {
+				"state": "7270301603171998873"
+			},
+			"save_version": 7,
+			"signal_log": [],
+			"size": [
+				1200.0,
+				760.0
+			],
+			"tick": 100,
+			"waters": [
+				{
+					"id": 1,
+					"pos": [
+						732.5491333007813,
+						612.4627685546875
+					],
+					"radius": 36.314186
+				},
+				{
+					"id": 2,
+					"pos": [
+						774.8705444335938,
+						274.5721435546875
+					],
+					"radius": 36.577678999999996
+				}
+			],
+			"world_seed": "7823"
+		},
+		"initial": {
+			"commands": {
+				"order": {},
+				"protection_requested": false
+			},
+			"config": {
+				"food_capacity": 100,
+				"food_regrow": true,
+				"food_regrow_batch": 2,
+				"food_regrow_interval": 10,
+				"max_age": 12000,
+				"max_population": 150,
+				"min_reproduction_age": 300,
+				"mutation_rate": 0.3,
+				"mutation_scale": 0.024999999999999998,
+				"personality_enabled": true,
+				"reproduction_cooldown": 300,
+				"reproduction_enabled": false,
+				"signal_cost": 0.3,
+				"signal_count": 4,
+				"signal_enabled": false,
+				"signal_noise": 0.049999999999999996,
+				"signal_range": 180.0,
+				"signal_ttl": 10,
+				"water_enabled": true
+			},
+			"creatures": [
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 78.487006,
+					"genome": {
+						"generation": 0,
+						"hue": 0.57405,
+						"id": 15,
+						"metabolism": 1.5773519999999999,
+						"parents": [],
+						"size": 9.054378999999999,
+						"speed": 64.389473,
+						"temperament": {
+							"caution": 0.165902,
+							"curiosity": 0.053458,
+							"impulsivity": 0.6085619999999999,
+							"sociability": 0.698618
+						},
+						"version": 1,
+						"vision_fov": 3.507765,
+						"vision_range": 112.21301299999999
+					},
+					"heading": 0.646825,
+					"hydration": 100.0,
+					"id": 16,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 98.108758,
+					"memory": [],
+					"name": "Criatura 16",
+					"personality": {
+						"bonds": {},
+						"boredom": 0,
+						"conditioning": {},
+						"episodes": [],
+						"event_valence": 0,
+						"fatigue": 0,
+						"habituation": {},
+						"loneliness": 0,
+						"preferences": {}
+					},
+					"pos": [
+						142.0382080078125,
+						618.6925048828125
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 86.285626,
+					"genome": {
+						"generation": 0,
+						"hue": 0.584019,
+						"id": 17,
+						"metabolism": 1.763674,
+						"parents": [],
+						"size": 13.928516,
+						"speed": 56.742973,
+						"temperament": {
+							"caution": 0.4481,
+							"curiosity": 0.7712749999999999,
+							"impulsivity": 0.381994,
+							"sociability": 0.620915
+						},
+						"version": 1,
+						"vision_fov": 2.9445509999999997,
+						"vision_range": 161.846359
+					},
+					"heading": -2.8061499999999997,
+					"hydration": 100.0,
+					"id": 18,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 107.85703199999999,
+					"memory": [],
+					"name": "Criatura 18",
+					"personality": {
+						"bonds": {},
+						"boredom": 0,
+						"conditioning": {},
+						"episodes": [],
+						"event_valence": 0,
+						"fatigue": 0,
+						"habituation": {},
+						"loneliness": 0,
+						"preferences": {}
+					},
+					"pos": [
+						907.024658203125,
+						42.71910095214844
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 82.51331499999999,
+					"genome": {
+						"generation": 0,
+						"hue": 0.720182,
+						"id": 19,
+						"metabolism": 1.2012829999999999,
+						"parents": [],
+						"size": 11.570822,
+						"speed": 61.584472999999996,
+						"temperament": {
+							"caution": 0.5838909999999999,
+							"curiosity": 0.7627339999999999,
+							"impulsivity": 0.9852449999999999,
+							"sociability": 0.21284799999999998
+						},
+						"version": 1,
+						"vision_fov": 5.448867,
+						"vision_range": 49.843399
+					},
+					"heading": 1.396086,
+					"hydration": 100.0,
+					"id": 20,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 103.141644,
+					"memory": [],
+					"name": "Criatura 20",
+					"personality": {
+						"bonds": {},
+						"boredom": 0,
+						"conditioning": {},
+						"episodes": [],
+						"event_valence": 0,
+						"fatigue": 0,
+						"habituation": {},
+						"loneliness": 0,
+						"preferences": {}
+					},
+					"pos": [
+						38.68995666503906,
+						216.17945861816406
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				},
+				{
+					"age": 0,
+					"alive": true,
+					"energy": 83.23745799999999,
+					"genome": {
+						"generation": 0,
+						"hue": 0.160014,
+						"id": 21,
+						"metabolism": 1.7801749999999998,
+						"parents": [],
+						"size": 12.023411,
+						"speed": 53.803833,
+						"temperament": {
+							"caution": 0.437527,
+							"curiosity": 0.538149,
+							"impulsivity": 0.49627699999999997,
+							"sociability": 0.241355
+						},
+						"version": 1,
+						"vision_fov": 5.222136,
+						"vision_range": 91.56605499999999
+					},
+					"heading": 1.986294,
+					"hydration": 100.0,
+					"id": 22,
+					"last_action": "rest",
+					"last_reason": "Newly spawned",
+					"max_energy": 104.04682199999999,
+					"memory": [],
+					"name": "Criatura 22",
+					"personality": {
+						"bonds": {},
+						"boredom": 0,
+						"conditioning": {},
+						"episodes": [],
+						"event_valence": 0,
+						"fatigue": 0,
+						"habituation": {},
+						"loneliness": 0,
+						"preferences": {}
+					},
+					"pos": [
+						453.539306640625,
+						261.3367614746094
+					],
+					"reproduction_cooldown": 0,
+					"version": 1
+				}
+			],
+			"events": [
+				{
+					"creature_id": 16,
+					"name": "Criatura 16",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 18,
+					"name": "Criatura 18",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 20,
+					"name": "Criatura 20",
+					"tick": 0,
+					"type": "spawn"
+				},
+				{
+					"creature_id": 22,
+					"name": "Criatura 22",
+					"tick": 0,
+					"type": "spawn"
+				}
+			],
+			"foods": [
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 3,
+					"pos": [
+						896.16064453125,
+						70.47116088867188
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 4,
+					"pos": [
+						940.8302612304688,
+						392.59832763671875
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 5,
+					"pos": [
+						270.16680908203125,
+						531.4946899414063
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 6,
+					"pos": [
+						670.3123168945313,
+						292.0504455566406
+					]
+				},
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 7,
+					"pos": [
+						487.8567199707031,
+						130.81637573242188
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 8,
+					"pos": [
+						338.01251220703125,
+						470.2935791015625
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 9,
+					"pos": [
+						734.7273559570313,
+						272.9678649902344
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 10,
+					"pos": [
+						266.1120910644531,
+						574.6790161132813
+					]
+				},
+				{
+					"energy": 24.0,
+					"food_type": "fruta",
+					"id": 11,
+					"pos": [
+						540.4630737304688,
+						71.24371337890625
+					]
+				},
+				{
+					"energy": 40.0,
+					"food_type": "semente",
+					"id": 12,
+					"pos": [
+						945.403076171875,
+						611.5625610351563
+					]
+				},
+				{
+					"energy": 12.0,
+					"food_type": "folha",
+					"id": 13,
+					"pos": [
+						320.5997009277344,
+						242.13462829589844
+					]
+				},
+				{
+					"energy": 20.0,
+					"food_type": "cogumelo",
+					"id": 14,
+					"pos": [
+						257.7272644042969,
+						672.1348876953125
+					]
+				}
+			],
+			"genealogy": [
+				{
+					"birth_tick": 0,
+					"creature_id": 16,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.57405,
+						"id": 15,
+						"metabolism": 1.5773519999999999,
+						"parents": [],
+						"size": 9.054378999999999,
+						"speed": 64.389473,
+						"temperament": {
+							"caution": 0.165902,
+							"curiosity": 0.053458,
+							"impulsivity": 0.6085619999999999,
+							"sociability": 0.698618
+						},
+						"version": 1,
+						"vision_fov": 3.507765,
+						"vision_range": 112.21301299999999
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 16",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 18,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.584019,
+						"id": 17,
+						"metabolism": 1.763674,
+						"parents": [],
+						"size": 13.928516,
+						"speed": 56.742973,
+						"temperament": {
+							"caution": 0.4481,
+							"curiosity": 0.7712749999999999,
+							"impulsivity": 0.381994,
+							"sociability": 0.620915
+						},
+						"version": 1,
+						"vision_fov": 2.9445509999999997,
+						"vision_range": 161.846359
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 18",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 20,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.720182,
+						"id": 19,
+						"metabolism": 1.2012829999999999,
+						"parents": [],
+						"size": 11.570822,
+						"speed": 61.584472999999996,
+						"temperament": {
+							"caution": 0.5838909999999999,
+							"curiosity": 0.7627339999999999,
+							"impulsivity": 0.9852449999999999,
+							"sociability": 0.21284799999999998
+						},
+						"version": 1,
+						"vision_fov": 5.448867,
+						"vision_range": 49.843399
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 20",
+					"parents": []
+				},
+				{
+					"birth_tick": 0,
+					"creature_id": 22,
+					"death_reason": "",
+					"death_tick": -1,
+					"generation": 0,
+					"genome": {
+						"generation": 0,
+						"hue": 0.160014,
+						"id": 21,
+						"metabolism": 1.7801749999999998,
+						"parents": [],
+						"size": 12.023411,
+						"speed": 53.803833,
+						"temperament": {
+							"caution": 0.437527,
+							"curiosity": 0.538149,
+							"impulsivity": 0.49627699999999997,
+							"sociability": 0.241355
+						},
+						"version": 1,
+						"vision_fov": 5.222136,
+						"vision_range": 91.56605499999999
+					},
+					"legacy_root": false,
+					"mutations": [],
+					"name": "Criatura 22",
+					"parents": []
+				}
+			],
+			"next_id": 23,
+			"obstacles": [
+				{
+					"pos": [
+						998.1820678710938,
+						727.418701171875
+					],
+					"radius": 24.425590999999997
+				},
+				{
+					"pos": [
+						800.6425170898438,
+						647.1949462890625
+					],
+					"radius": 17.666801
+				},
+				{
+					"pos": [
+						1167.27392578125,
+						476.389404296875
+					],
+					"radius": 21.566527999999998
+				}
+			],
+			"pet_id": 16,
+			"rng_state": {
+				"state": "-90983419492231837"
+			},
+			"save_version": 7,
+			"signal_log": [],
+			"size": [
+				1200.0,
+				760.0
+			],
+			"tick": 0,
+			"waters": [
+				{
+					"id": 1,
+					"pos": [
+						732.5491333007813,
+						612.4627685546875
+					],
+					"radius": 36.314186
+				},
+				{
+					"id": 2,
+					"pos": [
+						774.8705444335938,
+						274.5721435546875
+					],
+					"radius": 36.577678999999996
+				}
+			],
+			"world_seed": "7823"
+		}
+	}
+]
