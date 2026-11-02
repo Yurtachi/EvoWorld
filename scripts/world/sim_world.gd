@@ -1076,6 +1076,11 @@ func terminal_start(creature: Creature, device_id: int, program: String) -> bool
 	if lines.is_empty():
 		var known = TerminalState.from_dict(s.state)
 		Terminal.new().execute(program, null, known, tick, 8)
+		# The standalone module permits 256-character program keys; the global
+		# checkpoint format permits 128. Keep opaque error history, but do not
+		# retain an unexecutable long key that could invalidate the whole save.
+		for remembered in known.tabela.keys():
+			if remembered.length() > 128: known.tabela.erase(remembered)
 		s.state = known.to_dict()
 		return false
 	s.active = {"program": program, "instructions": lines, "index": 0, "terminal_id": device_id, "started": tick, "origin": Data.pack_vector(creature.pos)}
@@ -1141,7 +1146,11 @@ func _restore_terminals(data: Dictionary, used_ids: Dictionary) -> bool:
 		marker_ids[k] = true
 		var pos := Data.unpack_vector(m.pos)
 		var delta: Vector2 = pos - _terminal_device(int(m.terminal_id)).pos
-		if absf(delta.x) > 64 or absf(delta.y) > 64 or delta.x != floor(delta.x) or delta.y != floor(delta.y) or pos != _inside(pos, 1.0) or not _clear(pos, 1.0): return false
+		# Reconstruct the actual float32 operation used by terminal_mark. Exact
+		# integer subtraction fails at exponent boundaries for valid fractional bases.
+		var offset := Vector2i(roundi(delta.x), roundi(delta.y))
+		var expected: Vector2 = _terminal_device(int(m.terminal_id)).pos + Vector2(offset)
+		if absi(offset.x) > 64 or absi(offset.y) > 64 or pos != expected or pos != _inside(pos, 1.0) or not _clear(pos, 1.0): return false
 		terminal_markers.append(Data.restore_precision(m))
 	for c in creatures.values():
 		if c.mind == null or c.mind.terminal.is_empty(): continue
@@ -1449,6 +1458,8 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			var canonical: Dictionary = Data.restore_precision(art)
 			if artifact_registry.has(aid) and artifact_registry[aid] != canonical: return null
 			artifact_registry[aid] = canonical
+	# New physical devices share the same global identity namespace as drawings.
+	for artifact_id in artifact_registry: used_ids[artifact_id] = true
 	for used_id in used_ids:
 		if used_id >= int(data["next_id"]):
 			return null

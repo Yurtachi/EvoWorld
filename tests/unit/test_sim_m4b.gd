@@ -58,6 +58,11 @@ func _physics_and_budget(f: Array) -> void:
 		var count: int = w.terminal_markers.size()
 		check(not w.terminal_start(c, device, attack) and count == w.terminal_markers.size(), "hostil teve efeito: " + attack, f)
 		check(c.pos.x > before[0].x and not snapshot.is_empty(), "hostil alterou corpo", f)
+	var unknown = studio(154009)
+	var uc = unknown.creatures[unknown.pet_id]
+	var ud: int = unknown.place_terminal(uc.pos)
+	check(not unknown.terminal_start(uc, ud, "MOVER LESTE 3" + " ".repeat(180)), "programa longo desconhecido aceito", f)
+	check(World.from_dict(unknown.to_dict()) != null and not uc.mind.terminal.state.tentativas.is_empty(), "erro longo invalidou checkpoint/perdeu historico", f)
 	# Swept contact blocks even unseen obstacles.
 	w.place_obstacle(c.pos + Vector2(10, 0), 1.0)
 	var p: Vector2 = c.pos
@@ -143,6 +148,18 @@ func _save_and_hostile(f: Array) -> void:
 	check(World._migrate_v12(World._migrate_v12(legacy)) == World._migrate_v12(legacy), "migracao v12 nao idempotente", f)
 	legacy.creatures[0].mind.terminal = Learning.empty()
 	check(World.from_dict(legacy) == null, "v12 aceitou dados futuros", f)
+	# Float32 bases on either side of an exponent boundary must round trip.
+	for coordinate in [255.99998, 511.99997, 1023.99994]:
+		var fractional = studio(154008)
+		var actor = fractional.creatures[fractional.pet_id]
+		actor.pos = Vector2(coordinate, 300.0)
+		var tid: int = fractional.place_terminal(actor.pos)
+		for offset in [Vector2i(64, 0), Vector2i(-64, 0), Vector2i(0, 64)]:
+			check(fractional.terminal_mark(actor, tid, offset), "marcador fracionario nao colocado", f)
+			check(World.from_dict(fractional.to_dict()) != null, "marcador valido perdido por arredondamento", f)
+			var invalid: Dictionary = fractional.to_dict()
+			invalid.terminal_markers[0].pos[1] += 0.25
+			check(World.from_dict(invalid) == null, "marcador fora da grade aceito", f)
 
 func _drawing(f: Array) -> void:
 	var w = studio(154006)
@@ -159,6 +176,9 @@ func _drawing(f: Array) -> void:
 		w.terminal_step(c, device)
 	check(c.energy < energy and c.atelier != null and not c.atelier.artifacts.is_empty(), "DESENHAR nao usou primitivas reais", f)
 	check(World.from_dict(w.to_dict()) != null, "save com desenho terminal invalido", f)
+	var collision: Dictionary = w.to_dict()
+	collision.terminals[0].id = collision.gallery[0].id
+	check(World.from_dict(collision) == null, "ID terminal/artefato duplicado aceito", f)
 
 func _migrations(f: Array) -> void:
 	for version in range(1, 13):
