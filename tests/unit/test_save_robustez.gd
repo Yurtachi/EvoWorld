@@ -1,6 +1,14 @@
 extends RefCounted
 const World = preload("res://scripts/world/sim_world.gd")
 const Store = preload("res://scripts/persistence/save_store.gd")
+const Main = preload("res://scripts/ui/main.gd")
+const Commands = preload("res://scripts/communication/comandos.gd")
+
+class ObservedStore extends Store:
+	var decompressed := false
+	func _decompress(compressed: PackedByteArray, declared_bytes: int) -> PackedByteArray:
+		decompressed = true
+		return super._decompress(compressed, declared_bytes)
 
 class FaultStore extends Store:
 	var mode := "truncated"
@@ -11,10 +19,13 @@ class FaultStore extends Store:
 func run() -> Array:
 	var failures: Array = []
 	_hostile_versions(failures)
+	_nested_mutation_fuzz(failures)
 	_migration_roundtrips(failures)
 	_bound_trait_roundtrip(failures)
 	_atomic_failures(failures)
 	_compressed_envelopes(failures)
+	_capture_flags(failures)
+	_hostile_order_ttl(failures)
 	_new_world_generations(failures)
 	return failures
 
@@ -126,6 +137,36 @@ func _migration_roundtrips(f: Array) -> void:
 			loaded.world.step()
 		_check(_snapshot(migrated) == _snapshot(loaded.world), "continuacao apos migracao v%d divergiu" % version, f)
 
+func _nested_mutation_fuzz(f: Array) -> void:
+	# Fixed seed gives repeatable nested mutations beyond the top-level corpus.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 92026
+	var cases := 0
+	for version in range(1, 8):
+		var good := _fixture(version)
+		for i in 160:
+			var bad := good.duplicate(true)
+			var target: Dictionary = bad.creatures[0] if i % 2 == 0 else bad.creatures[0].genome
+			var fields := ["id", "name", "energy", "age", "max_energy", "alive", "memory", "pos", "heading", "genome"] if i % 2 == 0 else ["id", "size", "speed", "vision_range", "vision_fov", "metabolism", "hue", "generation", "parents"]
+			var field: String = fields[rng.randi_range(0, fields.size() - 1)]
+			var wrong_values: Array = [null, true, "hostil", [], {}, NAN, INF, -INF]
+			var wrong: Variant = wrong_values[rng.randi_range(0, wrong_values.size() - 1)]
+			if typeof(wrong) == typeof(target[field]):
+				wrong = null
+			target[field] = wrong
+			_reject(bad, version, "fuzz aninhado " + field, f)
+			cases += 1
+		for text in ["9223372036854775808", "-9223372036854775809", "9".repeat(4096), "+1", "01", "-0"]:
+			for field in ["world_seed", "rng_state"]:
+				var bad := good.duplicate(true)
+				if field == "world_seed":
+					bad.world_seed = text
+				else:
+					bad.rng_state.state = text
+				_reject(bad, version, "inteiro textual hostil " + field, f)
+				cases += 1
+	print("M0 fuzz aninhado: %d casos deterministas, versoes 1-7" % cases)
+
 func _put(path: String, contents: String) -> void:
 	var file := FileAccess.open(path, FileAccess.WRITE)
 	file.store_string(contents)
@@ -217,18 +258,79 @@ func _compressed_envelopes(f: Array) -> void:
 		bad.payload = contents
 		_put(path, JSON.stringify(bad))
 		_check(not store.load_world("compressed").ok, "payload comprimido adulterado aceito", f)
-	# Legal JSON padding exercises the real >24 MiB threshold without discarding
-	# genealogy or inventing non-schema world fields. The decoded cap is enforced.
-	var padded := " ".repeat(Store.COMPRESS_AT_BYTES) + payload
+	# Deterministic legal JSON whitespace, with realistic compression ratio.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 712
+	var padding := PackedByteArray()
+	padding.resize(Store.COMPRESS_AT_BYTES)
+	var whitespace := [32, 9, 10, 13]
+	for i in padding.size():
+		padding[i] = whitespace[rng.randi_range(0, 3)]
+	var padded := padding.get_string_from_utf8() + payload
 	encoded = store._encode(padded)
 	_check(encoded.ok and int(JSON.parse_string(encoded.text).version) == 2 and encoded.text.length() < Store.MAX_BYTES, "limiar automatico de compressao falhou", f)
 	if encoded.ok:
 		_put(path, encoded.text)
 		loaded = store.load_world("compressed")
 		_check(loaded.ok and _snapshot(loaded.world) == _snapshot(world), "checkpoint grande comprimido nao carrega", f)
-	_check(not store._encode(" ".repeat(Store.MAX_PAYLOAD_BYTES + 1)).ok, "limite de 128 MiB nao aplicado na escrita", f)
+	# A complete, valid gzip bomb: real schema, matching plaintext/base64 SHA256,
+	# correct gzip CRC/ISIZE, below the decoded cap but far above the ratio cap.
+	var bomb := " ".repeat(2 * 1024 * 1024) + payload
+	var compressed := bomb.to_utf8_buffer().compress(FileAccess.COMPRESSION_GZIP)
+	var b64 := Marshalls.raw_to_base64(compressed)
+	var bomb_header := {"format": "evoworld-checkpoint", "version": 2, "encoding": "gzip-base64",
+		"uncompressed_bytes": bomb.to_utf8_buffer().size(), "sha256": bomb.sha256_text(),
+		"compressed_sha256": b64.sha256_text(), "payload": b64}
+	var bomb_text := JSON.stringify(bomb_header)
+	_check(bomb_header.uncompressed_bytes > Store.MAX_EXPANSION_RATIO * bomb_text.to_utf8_buffer().size(), "fixture gzip bomb nao excede razao", f)
+	_put(path, bomb_text)
+	var observed := ObservedStore.new(folder)
+	var rejected := observed._read(path)
+	_check(not rejected.ok and "64:1" in rejected.get("message", "") and not observed.decompressed, "gzip bomb chegou ao descompressor apesar dos checksums validos", f)
+	# The writer must never emit that unreadable envelope; uncompressed fallback
+	# retains compatibility for highly repetitive but valid payloads.
+	encoded = store._encode(bomb, true)
+	_check(encoded.ok and int(JSON.parse_string(encoded.text).version) == 1, "writer criou envelope acima da razao permitida", f)
+	if encoded.ok:
+		_put(path, encoded.text)
+		_check(store.load_world("compressed").ok, "fallback v1 repetitivo nao carrega", f)
+	_check(not store._encode(" ".repeat(Store.MAX_PAYLOAD_BYTES + 1)).ok, "limite de 8 MiB nao aplicado na escrita", f)
+	# The same decoded limit applies to v1, regardless of the 32 MiB disk cap.
+	var oversized_payload := " ".repeat(Store.MAX_PAYLOAD_BYTES) + payload
+	_put(path, JSON.stringify({"format": "evoworld-checkpoint", "version": 1, "payload": oversized_payload, "sha256": oversized_payload.sha256_text()}))
+	_check(not store._read(path).ok, "envelope v1 contornou teto de payload", f)
 	DirAccess.remove_absolute(path)
 	DirAccess.remove_absolute(folder)
+
+func _capture_flags(f: Array) -> void:
+	for path in ["user://m0.png", "C:/temp/m0.png", "C:\\temp\\m0.png", "/tmp/m0.png"]:
+		var args := PackedStringArray(["--capture=" + path, "--fps-benchmark=30"])
+		var options := Main._capture_options(args, true)
+		_check(not options.path.is_empty() and options.population == 30 and options.benchmark, "debug rejeitou captura absoluta/user: " + path, f)
+		options = Main._capture_options(args, false)
+		_check(options.path.is_empty() and not options.benchmark and options.population == 12, "release ativou flag de desenvolvimento", f)
+	for path in ["reports/m0.png", "res://m0.png", "user://../m0.png", "user://a/../../m0.png", "user:///tmp/m0.png", "user://C:/m0.png", "", "user://", "/tmp/m0.json", "/tmp/m0.png\n"]:
+		var options := Main._capture_options(PackedStringArray(["--capture=" + path, "--fps-benchmark=30"]), true)
+		_check(options.path.is_empty(), "captura aceitou caminho hostil: " + path, f)
+	for count in ["", "0", "101", "-1", "abc", "30=extra", "999999999999999999999999"]:
+		_check(Main._capture_options(PackedStringArray(["--fps-benchmark=" + count]), true).path.is_empty(), "benchmark aceitou populacao invalida: " + count, f)
+	_check(Main._capture_options(PackedStringArray(["--fps-benchmark=12"]), true).path == "user://E4-fps-12.png", "benchmark sem caminho nao usa user://", f)
+
+func _hostile_order_ttl(f: Array) -> void:
+	var cases := 0
+	for version in range(3, 8):
+		var good := _fixture(version)
+		for intent in Commands.TICKS_ORDEM:
+			for ttl in [null, true, false, "7", [], {}, 0, -1, 1.5, NAN, INF, -INF, Commands.TICKS_ORDEM[intent] + 1, 2147483648]:
+				var bad := good.duplicate(true)
+				bad.commands = {"order": {"intent": intent, "target": good.creatures[0].pos, "remaining_ticks": ttl}, "protection_requested": false}
+				_reject(bad, version, "TTL hostil", f)
+				cases += 1
+			for ttl in [1, Commands.TICKS_ORDEM[intent]]:
+				var valid := good.duplicate(true)
+				valid.commands = {"order": {"intent": intent, "target": good.creatures[0].pos, "remaining_ticks": ttl}, "protection_requested": false}
+				_check(World.from_dict(valid) != null, "v%d TTL valido rejeitado" % version, f)
+	print("M0 TTL hostis: %d casos, versoes 3-7 (v1/v2 nao tinham ordens)" % cases)
 
 func _new_world_generations(f: Array) -> void:
 	for seed_value in [7421, 9181]:

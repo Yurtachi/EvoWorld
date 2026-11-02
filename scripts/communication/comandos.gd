@@ -109,7 +109,7 @@ func to_dict(mundo) -> Dictionary:
 	if not _mesmo_mundo(mundo) or not mundo.creatures.has(mundo.pet_id):
 		return {"order": {}, "protection_requested": false}
 	var ordem: Dictionary = _ordens.get(mundo.pet_id, {})
-	return {"order": {} if ordem.is_empty() else {"intent": ordem["intent"], "target": Data.pack_vector(ordem["alvo"])},
+	return {"order": {} if ordem.is_empty() else {"intent": ordem["intent"], "target": Data.pack_vector(ordem["alvo"]), "remaining_ticks": int(ordem["restante"])},
 		"protection_requested": bool(_protecao.get(mundo.pet_id, false))}
 
 func restore(data: Variant, mundo) -> bool:
@@ -117,7 +117,10 @@ func restore(data: Variant, mundo) -> bool:
 		return false
 	var order: Dictionary = data["order"]
 	if not order.is_empty():
-		if order.size() != 2 or order.get("intent") not in ["seguir", "parar", "chamar", "brincar"] or not Data.vector(order.get("target")):
+		if order.size() != (3 if order.has("remaining_ticks") else 2) or order.get("intent") not in ["seguir", "parar", "chamar", "brincar"] or not Data.vector(order.get("target")):
+			return false
+		# Optional extension to v7: old v1-v7 orders retain their original TTL.
+		if order.has("remaining_ticks") and (not Data.integer(order["remaining_ticks"], 1) or int(order["remaining_ticks"]) > int(TICKS_ORDEM[order["intent"]])):
 			return false
 		if not _alvo_valido(Data.unpack_vector(order["target"]), mundo):
 			return false
@@ -126,7 +129,7 @@ func restore(data: Variant, mundo) -> bool:
 	limpar()
 	_vincular(mundo)
 	if not order.is_empty():
-		_ordens[mundo.pet_id] = {"intent": order["intent"], "alvo": Data.unpack_vector(order["target"]), "restante": int(TICKS_ORDEM[order["intent"]])}
+		_ordens[mundo.pet_id] = {"intent": order["intent"], "alvo": Data.unpack_vector(order["target"]), "restante": int(order.get("remaining_ticks", TICKS_ORDEM[order["intent"]]))}
 	if data["protection_requested"]:
 		_protecao[mundo.pet_id] = true
 	return true

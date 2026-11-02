@@ -6,8 +6,11 @@ const Data = preload("res://scripts/core/sim_data.gd")
 const MAX_BYTES := 32 * 1024 * 1024
 # Envelope v2 compresses losslessly before the disk limit becomes a problem.
 # The world schema remains v7; v1 envelopes remain readable and writable.
-const COMPRESS_AT_BYTES := 24 * 1024 * 1024
-const MAX_PAYLOAD_BYTES := 128 * 1024 * 1024
+const COMPRESS_AT_BYTES := 1024 * 1024
+# E5 measured ~0.8 MB per save: 8 MiB allows ~10x growth, without allocating
+# 128 MiB for an untrusted gzip. Ratio uses the on-disk envelope byte length.
+const MAX_PAYLOAD_BYTES := 8 * 1024 * 1024
+const MAX_EXPANSION_RATIO := 64
 var directory: String
 
 func _init(save_directory: String = "user://saves") -> void:
@@ -74,7 +77,8 @@ func _read(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
 		return _error("File cannot be opened.")
-	if file.get_length() > MAX_BYTES:
+	var file_bytes := file.get_length()
+	if file_bytes > MAX_BYTES:
 		file.close()
 		return _error("File exceeds the 32 MiB limit.")
 	var text := file.get_as_text()
@@ -88,9 +92,15 @@ func _read(path: String) -> Dictionary:
 	if not envelope.get("payload") is String or not envelope.get("sha256") is String:
 		return _error("Missing checkpoint payload or checksum.")
 	var payload: String = envelope.payload
+	if int(envelope.version) == 1 and payload.to_utf8_buffer().size() > MAX_PAYLOAD_BYTES:
+		return _error("Checkpoint payload exceeds the 8 MiB decoded limit.")
 	if int(envelope.version) == 2:
 		if envelope.get("encoding") != "gzip-base64" or not Data.integer(envelope.get("uncompressed_bytes"), 1) or int(envelope.uncompressed_bytes) > MAX_PAYLOAD_BYTES or not envelope.get("compressed_sha256") is String:
 			return _error("Invalid compressed checkpoint header.")
+		# Must run before base64 decoding or calling the gzip allocator, even
+		# when both checksums and the gzip trailer are completely valid.
+		if int(envelope.uncompressed_bytes) > MAX_EXPANSION_RATIO * file_bytes:
+			return _error("Compressed checkpoint exceeds the 64:1 expansion limit.")
 		# Check canonical base64 and compressed integrity before decompression.
 		if payload.length() % 4 != 0:
 			return _error("Invalid compressed checkpoint encoding.")
@@ -103,7 +113,7 @@ func _read(path: String) -> Dictionary:
 			return _error("Compressed checkpoint checksum does not match.")
 		if compressed.size() < 18 or compressed[0] != 0x1f or compressed[1] != 0x8b or compressed[2] != 8 or compressed.decode_u32(compressed.size() - 4) != int(envelope.uncompressed_bytes):
 			return _error("Invalid compressed checkpoint size or header.")
-		var expanded := compressed.decompress_dynamic(int(envelope.uncompressed_bytes), FileAccess.COMPRESSION_GZIP)
+		var expanded := _decompress(compressed, int(envelope.uncompressed_bytes))
 		if expanded.size() != int(envelope.uncompressed_bytes):
 			return _error("Compressed checkpoint exceeds its declared size or is corrupt.")
 		payload = expanded.get_string_from_utf8()
@@ -121,10 +131,13 @@ func _read(path: String) -> Dictionary:
 		return _error("World data failed schema validation.")
 	return {"ok": true, "world": world, "metadata": data.metadata, "path": path}
 
+func _decompress(compressed: PackedByteArray, declared_bytes: int) -> PackedByteArray:
+	return compressed.decompress_dynamic(declared_bytes, FileAccess.COMPRESSION_GZIP)
+
 func _encode(payload: String, force_compression: bool = false) -> Dictionary:
 	var bytes := payload.to_utf8_buffer()
 	if bytes.size() > MAX_PAYLOAD_BYTES:
-		return _error("Checkpoint payload exceeds the 128 MiB decoded limit.")
+		return _error("Checkpoint payload exceeds the 8 MiB decoded limit.")
 	var envelope := {"format": "evoworld-checkpoint", "version": 1,
 		"sha256": payload.sha256_text(), "payload": payload}
 	if force_compression or bytes.size() >= COMPRESS_AT_BYTES:
@@ -134,6 +147,12 @@ func _encode(payload: String, force_compression: bool = false) -> Dictionary:
 		envelope.merge({"version": 2, "encoding": "gzip-base64", "uncompressed_bytes": bytes.size(),
 			"compressed_sha256": Marshalls.raw_to_base64(compressed).sha256_text(), "payload": Marshalls.raw_to_base64(compressed)}, true)
 	var text := JSON.stringify(envelope)
+	if int(envelope.version) == 2 and bytes.size() > MAX_EXPANSION_RATIO * text.to_utf8_buffer().size():
+		# Highly repetitive valid saves can use the uncompressed v1 envelope;
+		# never produce a checkpoint that our own reader would reject.
+		envelope = {"format": "evoworld-checkpoint", "version": 1,
+			"sha256": payload.sha256_text(), "payload": payload}
+		text = JSON.stringify(envelope)
 	if text.to_utf8_buffer().size() > MAX_BYTES:
 		return _error("Checkpoint exceeds the 32 MiB limit.")
 	return {"ok": true, "text": text}
