@@ -47,3 +47,6 @@ Sem shell, rede, `eval`, arquivos reais ou LLM no ciclo biológico. Mini termina
 
 ## Ownership e Git
 Workers em worktrees próprias; um revisor que não escreveu o patch; revisão dinâmica executa os testes. Commits locais seletivos, sem trailers de IA, sem reset/clean/force.
+
+## Esclarecimento de invariante (revisão dinâmica RD-02)
+Os módulos cognitivos (`scripts/mind`, afeto, decisão, memória) **nunca** alteram energia, hidratação ou posição. Objetos físicos do mundo (ex.: cápsulas) podem, **por contato real**, aplicar uma consequência fisiológica, como alimentos e água fazem; isso é física do mundo, não efeito da mente. A mente só aprende com essa consequência depois que ela ocorre.

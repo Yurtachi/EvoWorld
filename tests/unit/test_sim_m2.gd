@@ -59,6 +59,14 @@ func run() -> Array:
 		var bad := saved.duplicate(true)
 		bad.creatures[0].mind.objects.entries[str(id)].confidence = invalid
 		check(World.from_dict(bad) == null, "confianca hostil aceita", f)
+	for hostile in [[], {}, null]:
+		var badtypes := saved.duplicate(true)
+		var types = badtypes.creatures[0].mind.objects.types
+		if types is Dictionary and not types.is_empty():
+			var category = types.keys()[0]
+			types[category].value = hostile
+			types[category].confidence = hostile
+			check(World.from_dict(badtypes) == null, "tipo de memoria hostil aceito", f)
 	var bad := saved.duplicate(true)
 	bad.objects[0].tipo = "desconhecido"
 	check(World.from_dict(bad) == null, "tipo de objeto hostil aceito", f)

@@ -127,6 +127,7 @@ static func valid(s: Variant, max_tick: int) -> bool:
 	for category in s.types:
 		var k = s.types[category]
 		if category not in CATEGORIES or not k is Dictionary or k.size() != 7 or not Data.integer(k.get("tick")) or int(k.tick) > max_tick or not Data.integer(k.get("evidence_tick")) or int(k.evidence_tick) > int(k.tick) or not Data.integer(k.get("samples")) or int(k.samples) > 10000 or k.get("source") not in ["observado", "interagido"]: return false
+		if not Data.number(k.get("value")) or not Data.number(k.get("confidence")): return false
 		if k.source == "observado" and (float(k.get("value", 0.0)) != 0.0 or float(k.get("confidence", 0.0)) != 0.0 or int(k.samples) != 0): return false
 		for field in ["value", "confidence", "familiarity"]:
 			if not Data.number(k.get(field)) or absf(float(k[field])) > (12.0 if field == "familiarity" else 1.0): return false
