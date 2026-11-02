@@ -1,0 +1,127 @@
+{
+	"experiment": "M3_atelie_cpu",
+	"godot": {
+		"build": "official",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (official)",
+		"timestamp": 0
+	},
+	"populations": [
+		12,
+		30,
+		60,
+		100
+	],
+	"rows": [
+		{
+			"delta_mean_ms": 0.0363,
+			"mind_off": {
+				"active_minds": 0,
+				"boards": 1,
+				"creature_count": 12,
+				"gallery_artifacts": 0,
+				"mean_ms_per_tick": 1.5271000000000001,
+				"mode": "mind_off_with_board",
+				"p50_ms_per_tick": 1.417,
+				"p95_ms_per_tick": 2.186,
+				"ticks": 300
+			},
+			"pet_only": {
+				"active_minds": 1,
+				"boards": 1,
+				"creature_count": 12,
+				"gallery_artifacts": 0,
+				"mean_ms_per_tick": 1.5634000000000001,
+				"mode": "pet_only_with_board",
+				"p50_ms_per_tick": 1.4460000000000002,
+				"p95_ms_per_tick": 2.322,
+				"ticks": 300
+			},
+			"population": 12
+		},
+		{
+			"delta_mean_ms": -0.4742,
+			"mind_off": {
+				"active_minds": 0,
+				"boards": 1,
+				"creature_count": 30,
+				"gallery_artifacts": 0,
+				"mean_ms_per_tick": 3.8234000000000004,
+				"mode": "mind_off_with_board",
+				"p50_ms_per_tick": 3.373,
+				"p95_ms_per_tick": 6.489,
+				"ticks": 300
+			},
+			"pet_only": {
+				"active_minds": 1,
+				"boards": 1,
+				"creature_count": 30,
+				"gallery_artifacts": 1,
+				"mean_ms_per_tick": 3.3492,
+				"mode": "pet_only_with_board",
+				"p50_ms_per_tick": 3.2840000000000003,
+				"p95_ms_per_tick": 4.135,
+				"ticks": 300
+			},
+			"population": 30
+		},
+		{
+			"delta_mean_ms": 0.136,
+			"mind_off": {
+				"active_minds": 0,
+				"boards": 1,
+				"creature_count": 60,
+				"gallery_artifacts": 0,
+				"mean_ms_per_tick": 7.253900000000001,
+				"mode": "mind_off_with_board",
+				"p50_ms_per_tick": 7.103000000000001,
+				"p95_ms_per_tick": 8.776,
+				"ticks": 300
+			},
+			"pet_only": {
+				"active_minds": 1,
+				"boards": 1,
+				"creature_count": 60,
+				"gallery_artifacts": 5,
+				"mean_ms_per_tick": 7.3899,
+				"mode": "pet_only_with_board",
+				"p50_ms_per_tick": 7.301,
+				"p95_ms_per_tick": 8.74,
+				"ticks": 300
+			},
+			"population": 60
+		},
+		{
+			"delta_mean_ms": 0.32730000000000004,
+			"mind_off": {
+				"active_minds": 0,
+				"boards": 1,
+				"creature_count": 100,
+				"gallery_artifacts": 0,
+				"mean_ms_per_tick": 14.0014,
+				"mode": "mind_off_with_board",
+				"p50_ms_per_tick": 13.543000000000001,
+				"p95_ms_per_tick": 17.225,
+				"ticks": 300
+			},
+			"pet_only": {
+				"active_minds": 1,
+				"boards": 1,
+				"creature_count": 100,
+				"gallery_artifacts": 4,
+				"mean_ms_per_tick": 14.328700000000001,
+				"mode": "pet_only_with_board",
+				"p50_ms_per_tick": 13.979000000000001,
+				"p95_ms_per_tick": 17.822,
+				"ticks": 300
+			},
+			"population": 100
+		}
+	],
+	"ticks_per_run": 300
+}
