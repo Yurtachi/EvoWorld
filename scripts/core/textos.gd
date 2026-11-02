@@ -3,7 +3,7 @@ extends RefCounted
 ## Catálogo da apresentação. Identificadores e dados salvos continuam intactos.
 
 const CATALOGO := {
-	"caregiver": "Cuidador",
+	"caregiver": "Convivência",
 	"laboratory": "Laboratório",
 	"chat_open": "Conversar com o companheiro",
 	"chat_title": "Conversa com o companheiro",
@@ -47,7 +47,7 @@ const CATALOGO := {
 	"settings_saved": "Configurações aplicadas.",
 	"settings_failed": "Não foi possível gravar as configurações; os ajustes continuam ativos nesta sessão.",
 	"help_title": "Seu primeiro jardim",
-	"help_body": "1. Crie um jardim com nomes, semente e população inicial. Ele começa pausado.\n\n2. Use Iniciar, selecione uma criatura ou encontre seu companheiro pelo Cuidador.\n\n3. Escolha + Alimento e clique no terreno livre. A criatura precisa percebê-lo e alcançá-lo para comer.\n\n4. Converse pelo Cuidador. Para chamar/seguir, marque um alvo com o botão direito no jardim. Confira o recibo e as evidências.\n\n5. Laboratório mostra genes, famílias, curvas e eventos. O canal de sinais permite uma emissão manual com custo de energia, sem significado presumido.\n\n6. Ctrl+S salva; Ctrl+L carrega e pausa. Ajustes permite recuperar o automático e escolher velocidade/proteção.\n\nRoda: ampliar · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: capturar.\n\nAtenção: sobrevivência permite morte permanente. A proteção pausa por energia baixa ou idade limite; não repõe energia nem rejuvenesce.",
+	"help_body": "1. Crie um jardim com nomes, semente e população inicial. Ele começa pausado.\n\n2. Use Iniciar, selecione uma criatura ou encontre seu companheiro pela Convivência.\n\n3. Escolha + Alimento e clique no terreno livre. A criatura precisa percebê-lo e alcançá-lo para comer.\n\n4. Converse pela Convivência. Para chamar/seguir, marque um alvo com o botão direito no jardim. Confira o recibo e as evidências.\n\n5. Laboratório mostra genes, famílias, curvas e eventos. O canal de sinais permite uma emissão manual com custo de energia, sem significado presumido.\n\n6. Ctrl+S salva; Ctrl+L carrega e pausa. Ajustes permite recuperar o automático e escolher velocidade/proteção.\n\nRoda: ampliar · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: capturar.\n\nAtenção: sobrevivência permite morte permanente. A proteção pausa por energia baixa ou idade limite; não repõe energia nem rejuvenesce.",
 	"lab_intro": "Observações do mundo real. Variação genética e nascimentos não demonstram adaptação ou linguagem por si só.",
 	"lab_summary": "%d organismos vivos · geração máxima %d\n%d nascimentos · %d mortes no registro permanente",
 	"lab_chart": "POPULAÇÃO E DIVERSIDADE NO TEMPO",
@@ -167,7 +167,7 @@ const CATALOGO := {
 	"pet_name": "Nome do seu companheiro",
 	"seed_caption": "Semente do mundo: repita-a para recriar o estado inicial",
 	"seed_default": "7421",
-	"pet_rules": "Ajustes permite escolher proteção por pausa preventiva ou sobrevivência, com risco de morte permanente. Confira o modo no Cuidador.",
+	"pet_rules": "Ajustes permite escolher proteção por pausa preventiva ou sobrevivência, com risco de morte permanente. Confira o modo na Convivência.",
 	"names_required": "Dê um nome ao jardim e ao seu companheiro.",
 	"seed_invalid": "Use uma semente inteira entre 0 e 2147483647.",
 	"inside_boundary": "Escolha um ponto dentro dos limites do jardim.",
@@ -343,6 +343,8 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if M1_UI.has(codigo):
+		return M1_UI[codigo] if valores.is_empty() else M1_UI[codigo] % valores
 	if E4_UI.has(codigo) or E4_CATALOGO.has(codigo):
 		var e4: String = E4_UI.get(codigo, E4_CATALOGO.get(codigo, ""))
 		return e4 if valores.is_empty() else e4 % valores
@@ -405,6 +407,8 @@ static func acao(codigo: String) -> String:
 	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) or E2_CATALOGO.has("action_" + codigo) else texto("action_unknown")
 
 static func razao(original: String) -> String:
+	if original.begins_with("mind."):
+		return mente_motivo(original) if original in ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency"] else mente_desejo(original.trim_prefix("mind."))
 	if E4_RAZOES.has(original):
 		return texto(E4_RAZOES[original])
 	if E3_RAZOES.has(original):
@@ -497,7 +501,7 @@ const E1_UI := {
  "expand_ok": "Terreno expandido para %s × %s; câmera reenquadrada.", "expand_invalid": "Expansão recusada: quantidade inválida ou limite de 100.000 por eixo.",
  "protection_active": "Proteção: pausa preventiva por energia/idade.", "care_notes": "SEU JARDIM", "garden_stats": "%d criaturas · %d alimentos · %d águas · passo %d · %d quadros/s",
  "drink_badge": "Bebeu +%s", "fps_unit": "quadros/s", "fps_title": "Quadros/s · últimos 120 quadros", "fps_sample": "%d criaturas · média %s · mínimo %s quadros/s",
- "help_body": "1. Crie o jardim e nomeie o companheiro. O padrão é 12 criaturas e três águas; você pode escolher outra população. Começa pausado.\n\n2. Use Iniciar e selecione por clique, nome no terreno ou lista do Cuidador. Confira energia, hidratação, sede e último evento.\n\n3. Escolha Fruta, Semente, Folha ou Cogumelo e clique no terreno. Cogumelo tem toxicidade. + Água coloca uma região: beber exige alcançar a margem.\n\n4. Oferecer alimento à seleção coloca o tipo escolhido perto dela. O recibo acompanha aproximação e refeição; só ganho positivo confirma refeição.\n\n5. Expandir terreno permite direita ou inferior. Confira quantidade, custo zero e limite antes de confirmar. A câmera reenquadra. Laboratório mantém genes, famílias e sinais.\n\n6. Ctrl+S salva; Ctrl+L carrega e pausa. Ajustes controla população do próximo jardim, proteção e automático. Saves antigos preservam população e fisiologia.\n\nRoda: ampliar · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: capturar.\n\nA proteção pausa por energia baixa ou idade limite; não repõe reservas. Sobrevivência permite morte permanente."
+ "help_body": "1. Crie o jardim e nomeie o companheiro. O padrão é 12 criaturas e três águas; você pode escolher outra população. Começa pausado.\n\n2. Use Iniciar e selecione por clique, nome no terreno ou lista da Convivência. Confira energia, hidratação, sede e último evento.\n\n3. Escolha Fruta, Semente, Folha ou Cogumelo e clique no terreno. Cogumelo tem toxicidade. + Água coloca uma região: beber exige alcançar a margem.\n\n4. Oferecer alimento à seleção coloca o tipo escolhido perto dela. O recibo acompanha aproximação e refeição; só ganho positivo confirma refeição.\n\n5. Expandir terreno permite direita ou inferior. Confira quantidade, custo zero e limite antes de confirmar. A câmera reenquadra. Laboratório mantém genes, famílias e sinais.\n\n6. Ctrl+S salva; Ctrl+L carrega e pausa. Ajustes controla população do próximo jardim, proteção e automático. Saves antigos preservam população e fisiologia.\n\nRoda: ampliar · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: capturar.\n\nA proteção pausa por energia baixa ou idade limite; não repõe reservas. Sobrevivência permite morte permanente."
 }
 
 # E2-SIM — chaves aditivas; integração nos formatadores pertence à UI.
@@ -552,7 +556,7 @@ const E2_UI := {
 	"attention_ok": "Passo %d: contato com %s registrado. Familiaridade atualizada; energia, água e posição preservadas.",
 	"food_profile": "%s · palatabilidade %s\nNutrição %s · hidratação %s · toxicidade %s\nPreferências individuais na aba Comida.",
 	"receipt_empty": "Nenhuma intervenção nesta sessão. Oferecer não significa consumir.",
-	"help_body": "Crie um jardim, nomeie o companheiro e escolha a população (padrão: 12). Começa pausado.\n\nSelecione por clique, nome ou lista do Cuidador, que mostra a necessidade mais urgente. Corpo: estado atual. Traços: temperamento herdado. Memória, Comida e Vínculos: experiências individuais.\n\nPostura e brilho representam valência; balanço representa ativação. A criatura aparenta ativação ou tensão corporal. A expressão não indica consciência.\n\nCarinho: selecione e clique no corpo. Exige alcance e intervalo de 30 passos (3 segundos de simulação). Confira o recibo, inclusive nas recusas.\n\nFruta, Semente, Folha e Cogumelo são físicos; cogumelo tem toxicidade. + Água permite beber na margem. Oferecer coloca comida próxima; só ingerir ensina preferências.\n\nExpandir: direita/inferior, custo zero, limite 100.000 por eixo. Laboratório: genes, famílias e sinais.\n\nRoda: zoom · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: captura. Ctrl+S salva; Ctrl+L carrega.\n\nSaves antigos preservam nomes e população, com personalidade desativada. Proteção pausa por energia baixa/idade; não repõe reservas. Morte é permanente naquele mundo."
+	"help_body": "Crie um jardim, nomeie o companheiro e escolha a população (padrão: 12). Começa pausado.\n\nSelecione por clique, nome ou lista da Convivência, que mostra a necessidade mais urgente. Corpo: estado atual. Traços: temperamento herdado. Memória, Comida e Vínculos: experiências individuais.\n\nPostura e brilho representam valência; balanço representa ativação. A criatura aparenta ativação ou tensão corporal. A expressão não indica consciência.\n\nCarinho: selecione e clique no corpo. Exige alcance e intervalo de 30 passos (3 segundos de simulação). Confira o recibo, inclusive nas recusas.\n\nFruta, Semente, Folha e Cogumelo são físicos; cogumelo tem toxicidade. + Água permite beber na margem. Oferecer coloca comida próxima; só ingerir ensina preferências.\n\nExpandir: direita/inferior, custo zero, limite 100.000 por eixo. Laboratório: genes, famílias e sinais.\n\nRoda: zoom · botão do meio/WASD: mover · F: enquadrar · Espaço: pausar · F12: captura. Ctrl+S salva; Ctrl+L carrega.\n\nSaves antigos preservam nomes e população, com personalidade desativada. Proteção pausa por energia baixa/idade; não repõe reservas. Morte é permanente naquele mundo."
 }
 
 static func episodio(item: Dictionary) -> String:
@@ -610,7 +614,7 @@ const E3_UI := {
 	"te_code_water_disabled": "Buscar água indisponível: sede desativada neste save legado.",
 	"te_code_no_attempt": "Nenhuma tentativa ativa para esta ação.", "te_code_no_creature": "Selecione uma criatura viva.",
 	"te_code_unknown": "Resultado de ensino indisponível.", "te_route": "ASSISTÊNCIA · direção indicativa", "te_marker": "ALVO DE ENSINO",
-	"help_body": "Crie o jardim e escolha nomes e população (padrão: 12). Começa pausado. Selecione uma criatura no mapa ou na lista do Cuidador. Corpo e Traços mostram estado e temperamento; Memória, Comida e Vínculos mostram experiências reais. Carinho exige clicar no corpo e intervalo de 30 passos. A expressão aparente não indica consciência.\n\nENSINAR: selecione a criatura e abra Ensinar. Escolha Ir até o local marcado ou Buscar água e beber. Para local, use Marcar alvo no mapa e clique em terreno livre. Para água, coloque uma região percebida pela criatura; só beber com ganho real conclui.\n\nMostrar ativa uma rota ASSISTIDA, com movimento físico e custos reais. A linha é direção indicativa, não uma rota garantida por obstáculos. Observar sem guiar inicia uma tentativa autônoma ou desliga a assistência atual; ações já assistidas continuam registradas. Use Iniciar no rodapé (ou Espaço) para avançar. Fome/sede críticas têm prioridade e podem interromper a tarefa.\n\nRecompensar só fica disponível após conclusão física ainda não recompensada. É sinal de aprendizado: não repõe energia nem hidratação. Conclusões assistidas não comprovam aprendizado autônomo. O selo exige 5 tentativas autônomas e sucesso de pelo menos 70% nas últimas 20 retidas. Gráfico e antes/depois descrevem esse histórico limitado. Cancelar encerra a tentativa; Reiniciar treinamento exige confirmação e apaga só o ensino desta criatura.\n\nFruta, Semente, Folha e Cogumelo são físicos; cogumelo tem toxicidade. Oferecer coloca comida perto; só ingerir ensina preferências. + Água permite beber na margem. Expandir: direita/inferior, custo zero. Laboratório: genes, famílias e sinais.\n\nRoda: zoom · botão do meio/WASD: câmera · F: enquadrar · Espaço: pausar · Esc: inspecionar · F12: captura · Ctrl+S/Ctrl+L: salvar/carregar. Saves antigos preservam seus dados. Proteção pausa por energia/idade e não repõe reservas. Morte é permanente naquele mundo."
+	"help_body": "Crie o jardim e escolha nomes e população (padrão: 12). Começa pausado. Selecione uma criatura no mapa ou na lista da Convivência. Corpo e Traços mostram estado e temperamento; Memória, Comida e Vínculos mostram experiências reais. Carinho exige clicar no corpo e intervalo de 30 passos. A expressão aparente não indica consciência.\n\nENSINAR: selecione a criatura e abra Ensinar. Escolha Ir até o local marcado ou Buscar água e beber. Para local, use Marcar alvo no mapa e clique em terreno livre. Para água, coloque uma região percebida pela criatura; só beber com ganho real conclui.\n\nMostrar ativa uma rota ASSISTIDA, com movimento físico e custos reais. A linha é direção indicativa, não uma rota garantida por obstáculos. Observar sem guiar inicia uma tentativa autônoma ou desliga a assistência atual; ações já assistidas continuam registradas. Use Iniciar no rodapé (ou Espaço) para avançar. Fome/sede críticas têm prioridade e podem interromper a tarefa.\n\nRecompensar só fica disponível após conclusão física ainda não recompensada. É sinal de aprendizado: não repõe energia nem hidratação. Conclusões assistidas não comprovam aprendizado autônomo. O selo exige 5 tentativas autônomas e sucesso de pelo menos 70% nas últimas 20 retidas. Gráfico e antes/depois descrevem esse histórico limitado. Cancelar encerra a tentativa; Reiniciar treinamento exige confirmação e apaga só o ensino desta criatura.\n\nFruta, Semente, Folha e Cogumelo são físicos; cogumelo tem toxicidade. Oferecer coloca comida perto; só ingerir ensina preferências. + Água permite beber na margem. Expandir: direita/inferior, custo zero. Laboratório: genes, famílias e sinais.\n\nRoda: zoom · botão do meio/WASD: câmera · F: enquadrar · Espaço: pausar · Esc: inspecionar · F12: captura · Ctrl+S/Ctrl+L: salvar/carregar. Saves antigos preservam seus dados. Proteção pausa por energia/idade e não repõe reservas. Morte é permanente naquele mundo."
 }
 
 static func ensino_codigo(code: String) -> String:
@@ -725,3 +729,80 @@ static func fonte_e4(evidence: Dictionary) -> String:
 				rows.append(texto("source_memory_count", [value.size()]))
 		_: return ""
 	return texto("source_row", [texto(label), "\n".join(rows) if not rows.is_empty() else texto("source_empty")])
+
+# M1 — apresentação da mente simulada; identificadores permanecem nos saves.
+const M1_UI := {
+	"caregiver": "Convivência", "care_notes": "UM COMPANHEIRO NO JARDIM",
+	"m1_state": "Como aparenta estar", "m1_desire": "Desejo aparente",
+	"m1_note": "Estados computacionais simulados; não indicam consciência.",
+	"m1_disabled": "Sem mente ativa", "m1_no_selection": "Selecione uma criatura para acompanhar.",
+	"m1_inactive_reason": "Nenhum desejo simulado disponível nesta criatura.",
+	"m1_enable": "Ativar mente nesta criatura", "m1_cost": "Ativar amplia o custo de CPU por criatura. Por padrão, só o pet tem mente; acompanhar não ativa a mente.",
+	"m1_enabled": "Mente ativada na seleção. Observe após iniciar a simulação.",
+	"m1_quiet": "Ainda sem afeto dominante", "m1_affect_off": "Expressão afetiva M1 desligada",
+	"m1_wait": "O desejo aparece após iniciar a simulação.",
+	"m1_affect_frustracao": "Parece frustrado com o obstáculo",
+	"m1_affect_tranquilidade": "Aparenta tranquilidade", "m1_affect_entusiasmo": "Aparenta entusiasmo",
+	"m1_affect_receio": "Aparenta receio", "m1_affect_solidao": "Parece buscar companhia",
+	"m1_affect_satisfacao": "Aparenta satisfação", "m1_affect_saturacao_social": "Parece querer ficar sozinho",
+	"m1_name_frustracao": "Frustração", "m1_name_tranquilidade": "Tranquilidade", "m1_name_entusiasmo": "Entusiasmo",
+	"m1_name_receio": "Receio", "m1_name_solidao": "Solidão", "m1_name_satisfacao": "Satisfação", "m1_name_saturacao_social": "Saturação social",
+	"m1_goal_comer": "Parece querer comer", "m1_goal_beber": "Parece buscar água",
+	"m1_goal_descansar": "Parece querer descansar", "m1_goal_explorar": "Parece querer explorar",
+	"m1_goal_buscar_companhia": "Parece buscar companhia", "m1_goal_buscar_privacidade": "Parece querer ficar sozinho",
+	"m1_goal_brincar": "Parece querer brincar", "m1_goal_investigar_objeto": "Parece querer investigar um objeto",
+	"m1_reason_disabled": "Aguardando uma decisão da mente.", "m1_reason_score": "Este desejo teve prioridade na última escolha.",
+	"m1_reason_timeout": "O desejo anterior atingiu seu tempo limite.", "m1_reason_urgency": "Fome ou sede ganhou prioridade.",
+	"m1_cause_decay": "O estado diminuiu com o tempo.", "m1_cause_blocked_motion": "O movimento foi bloqueado repetidamente.",
+	"m1_cause_need_satisfied": "Comer ou beber trouxe benefício físico.", "m1_cause_toxic_exposure": "Houve exposição a alimento tóxico.",
+	"m1_cause_contact": "Houve contato com outra criatura.", "m1_cause_adverse_contact": "Houve disputa no contato.",
+	"m1_cause_prolonged_contact": "O contato próximo se prolongou.", "m1_cause_absence_of_contact": "Faltou contato próximo por algum tempo.",
+	"m1_cause_safe_rest": "Houve repouso em segurança.", "m1_cause_free_movement": "Houve movimento livre.",
+	"m1_cause_empty": "Ainda sem causa registrada para este estado.",
+	"m1_details": "Corpo, traços e experiências", "m1_observe": "OBSERVAR A CONVIVÊNCIA",
+	"m1_companion": "Apresentar companhia", "m1_obstacle": "Colocar obstáculo no mapa",
+	"m1_clear": "Retirar rochas próximas", "m1_observe_note": "Apresente companhia e dê tempo em 1×. Observe aproximação ou afastamento. Rochas só geram frustração se o movimento for bloqueado repetidamente; desviar não basta.",
+	"m1_companion_ok": "Companhia colocada perto; acompanhe a reação sem trocar a seleção.",
+	"m1_companion_fail": "Sem espaço livre próximo ou limite de população atingido.",
+	"m1_cleared": "%d rochas próximas retiradas. Observe a recuperação ao iniciar.",
+	"m1_lab": "MENTE DA SELEÇÃO · M1", "m1_affects": "Afetos simulados · 0 a 1",
+	"m1_causes": "Causas recentes · até 6 mudanças", "m1_scores": "Pontuações da última decisão",
+	"m1_logs": "Trocas de desejo · até 6 registros", "m1_affect_switch": "Afeto M1 ativo", "m1_memory_switch": "Memória M1 ativa",
+	"m1_ablation": "Ablação da seleção: altera escolhas futuras; não apaga o histórico. Memória e expressão legadas continuam independentes. Desligar afeto não demonstrou eliminar a diferença social de X1.",
+	"m1_history_off": "Afeto desligado; valores abaixo são históricos, sem modulação M1.",
+	"m1_value": "%s: %s", "m1_cause_row": "Passo %d · %s (%s)\n%s", "m1_log_row": "Passo %d · %s\n%s",
+	"m1_tutorial": "Primeiros 20 minutos", "m1_next": "Próxima etapa", "m1_previous": "Etapa anterior",
+	"m1_tutorial_step": "%d/5 · %s", "m1_tutorial_0": "0–3 min · Adotar\nDê um nome ao pet e use Acompanhar. Inicie em 1×; pause quando quiser observar.",
+	"m1_tutorial_1": "3–7 min · Alimentar\nOfereça fruta à seleção. Observe a aproximação e o recibo de ingestão; colocar comida não garante refeição.",
+	"m1_tutorial_2": "7–11 min · Apresentar companhia\nUse Apresentar companhia. Espere e observe os corpos; cada indivíduo pode reagir de modo diferente.",
+	"m1_tutorial_3": "11–15 min · Ver o desejo\nLeia o desejo aparente e o motivo no painel. Desejo e ação física podem diferir; fome e sede têm prioridade.",
+	"m1_tutorial_4": "15–20 min · Observar privacidade\nDê tempo ao contato. Se aparecer busca por privacidade, observe o afastamento e dê espaço. Não é garantido que esse desejo apareça; salve para continuar depois.",
+	"m1_demo": "Inspeção M1 · cenário físico reproduzível; não é um experimento de eficácia.",
+	"m1_fps_scope": "Mentes ativas: %d · pet: %s"
+}
+
+static func mente_desejo(goal: String) -> String:
+	return texto("m1_goal_" + goal) if M1_UI.has("m1_goal_" + goal) else texto("m1_wait")
+
+static func mente_motivo(reason: String) -> String:
+	var code := "m1_reason_" + reason.trim_prefix("mind.")
+	return texto(code) if M1_UI.has(code) else texto("reason_unknown")
+
+static func mente_dominante(snapshot: Dictionary) -> Dictionary:
+	var result := {"key": "", "value": 0.0}
+	if not snapshot.get("affect_enabled", false):
+		return result
+	for key in snapshot.get("afetos", {}):
+		var value := float(snapshot.afetos[key])
+		if value > result.value:
+			result = {"key": key, "value": value}
+	return result
+
+static func mente_causa(snapshot: Dictionary) -> String:
+	var dominant := mente_dominante(snapshot)
+	var causes: Array = snapshot.get("cause_log", [])
+	for i in range(causes.size() - 1, -1, -1):
+		var row: Dictionary = causes[i]
+		if row.get("estado") == dominant.key and row.get("causa") != "decay":
+			return texto("m1_cause_" + str(row.causa))
+	return texto("m1_cause_empty")

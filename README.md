@@ -23,11 +23,21 @@ O primeiro comando deve indicar 4.7.2. Se `godot` não estiver no PATH, substitu
 
 ## Criar e cuidar de um jardim
 
+O modo padrão é **Convivência**: o pet começa em destaque, com acompanhamento de câmera, estado afetivo aparente, desejo atual e um balão discreto com a causa registrada. Os textos usam “parece/aparenta”: são **estados computacionais simulados**, sem indicação de consciência. A cor, a postura e um único indicador junto à seleção variam com a intensidade do afeto dominante; desligar afeto M1 retira essa modulação. Desejo e ação física podem diferir, por exemplo durante fome, sede, ordens ou ensino.
+
+O seletor acima dos modos permite acompanhar qualquer organismo sem ativar sua mente. Só o pet recebe mente por padrão em mundos novos; os demais e os saves antigos exibem **Sem mente ativa**. **Ativar mente nesta criatura** chama `world.enable_mind`, com aviso do custo adicional de CPU. A ativação e as ablações são persistidas no save v8.
+
+**Apresentar companhia** coloca um organismo em espaço livre próximo, preservando a seleção. **Colocar obstáculo no mapa** usa a ferramenta física de rocha; **Retirar rochas próximas** remove as rochas até 120 unidades além de seus raios para observar recuperação. Use 1× e dê tempo: desviar de uma rocha não equivale a movimento bloqueado, e não há reação social garantida. Essas intervenções permitem observar situações de X1/X2, mas não substituem ensaios controlados.
+
+**Primeiros 20 minutos**, disponível na Convivência e na Ajuda, oferece cinco etapas manuais: adotar (0–3 min), alimentar (3–7), apresentar companhia (7–11), ler desejo e motivo (11–15), observar eventual privacidade e salvar (15–20). Os tempos são um roteiro, sem aceleração automática ou promessa de que um desejo específico aparecerá.
+
+O **Laboratório** separado abre com os sete afetos, pontuações da última decisão, seis mudanças recentes de `cause_log` e seis trocas de `mind_log`, traduzidos. Os controles **Afeto M1 ativo** e **Memória M1 ativa** atuam apenas na seleção, inclusive no pet; não apagam o histórico, e as funções legadas permanecem independentes. A tela marca valores afetivos históricos quando a modulação está desligada. O resultado de X1 não demonstrou eliminar a diferença social desligando afeto; veja os limites em [reports/M1_mind.md](reports/M1_mind.md). Capturas novas, validação e FPS gráfico estão em [reports/M1_ui.md](reports/M1_ui.md).
+
 Ao abrir, escolha os nomes do jardim e do companheiro, uma semente inteira de 0 a 2147483647 e a população inicial de 1 a 100. O padrão é **Jardim de Musgo**, **Mel** e **12 organismos, com três regiões de água e personalidade ativa**. Os fundadores recebem nomes do catálogo brasileiro (Mel, Bento, Tica, Juca, Lola, Zeca, Nina, Dora, Caju, Bia, Chico e Lia); o nome escolhido para o companheiro prevalece. Essa criação usa `SimWorld.new_world`; o seletor explícito continua prevalecendo e carregar saves mantém população e nomes gravados. A semente recria condições iniciais; as intervenções do jogador mudam a trajetória. Criar um jardim substitui o mundo não salvo; **Continuar explorando** mantém o mundo aberto.
 
-O jardim começa pausado. Use **Iniciar/Pausar** e **1×, 2× ou 5×**. **Inspecionar** seleciona uma criatura e mostra energia, hidratação, sede, idade, ação e último evento no **Cuidador**. A lista selecionável mostra o nome e a necessidade mais urgente; os nomes desenhados no terreno também selecionam criaturas. Genes e parentesco ficam no **Laboratório**. Acima de 30 criaturas, o enquadramento geral mostra nomes só da seleção e do companheiro; aproximar a câmera revela os demais, e a lista continua disponível. Rótulos que colidiriam são omitidos, priorizando a seleção; os corpos continuam visíveis. **Encontrar** volta ao companheiro; **Acompanhar** segue a seleção; **Mostrar alcance da visão** desenha o campo geométrico, sujeito à oclusão por rochas.
+O jardim começa pausado. Use **Iniciar/Pausar** e **1×, 2× ou 5×**. **Inspecionar** seleciona uma criatura e mostra energia, hidratação, sede, idade, ação e último evento na **Convivência**. A lista selecionável mostra o nome e a necessidade mais urgente; os nomes desenhados no terreno também selecionam criaturas. Genes e parentesco ficam no **Laboratório**. Acima de 30 criaturas, o enquadramento geral mostra nomes só da seleção e do companheiro; aproximar a câmera revela os demais, e a lista continua disponível. Rótulos que colidiriam são omitidos, priorizando a seleção; os corpos continuam visíveis. **Encontrar** volta ao companheiro; **Acompanhar** segue a seleção; **Mostrar alcance da visão** desenha o campo geométrico, sujeito à oclusão por rochas.
 
-O Cuidador oferece cinco abas, com rolagem para conteúdo longo:
+Em **Corpo, traços e experiências**, ao final da Convivência, ficam cinco abas recolhidas por padrão, com rolagem para conteúdo longo:
 
 - **Corpo**: fome, sede, fadiga, necessidade de estímulo e contato. Barras maiores indicam maior necessidade no estado atual.
 - **Traços**: curiosidade, cautela, sociabilidade e impulsividade do genoma. São tendências herdadas, distintas das necessidades atuais e do aprendizado.
@@ -66,7 +76,7 @@ Atalhos de câmera/reprodução ficam suspensos enquanto os painéis de texto es
 
 ## Conversar com o companheiro
 
-No **Cuidador**, abra **Conversar com o companheiro**, digite e pressione **Enviar** ou Enter. Exemplos: **como você está?**, **oferecer comida**, **chamar**, **seguir**, **parar**, **brincar** e **proteger**. Chamar/seguir usam o marcador azul escolhido com o botão direito no jardim; ele permanece naquele ponto até você marcar outro.
+Na **Convivência**, abra **Conversar com o companheiro**, digite e pressione **Enviar** ou Enter. Exemplos: **como você está?**, **oferecer comida**, **chamar**, **seguir**, **parar**, **brincar** e **proteger**. Chamar/seguir usam o marcador azul escolhido com o botão direito no jardim; ele permanece naquele ponto até você marcar outro.
 
 Os atalhos **Do que você gosta?**, **O que aprendeu?** e **Onde está a água?** consultam o companheiro, independentemente da seleção no mapa. Gostos exigem preferência alimentar aprendida positiva acima de 0,05; aprendizado exige o critério real de cinco tentativas autônomas recentes e pelo menos 70% de sucesso; água vem somente da percepção atual. Sem suporte, a resposta é **“Não sei; não tenho evidência suficiente nos meus registros.”** Cada resposta lista as fontes internas consultadas, incluindo fontes vazias, com rótulos em português e identificadores técnicos para rastreio: `personality.preferences`, `ensino.statistics`, `personality.episodes`, `sense.waters` e `creature.memory`. Consultas não criam ordens, vínculos ou experiência, e não marcam o mundo como alterado. Uma memória de bebida sem coordenadas não permite localizar água oculta.
 
@@ -76,7 +86,7 @@ Oferecer comida coloca alimento real sem prometer ingestão. Pedidos de moviment
 
 ## Ensinar uma habilidade
 
-Selecione uma criatura no mapa ou na lista do Cuidador e abra **Ensinar** no painel lateral. Escolha **Ir até o local marcado** ou **Buscar água e beber**. Para local, pressione **Marcar alvo no mapa** e clique em terreno livre: o alvo amarelo é separado do alvo azul dos pedidos de diálogo. Para água, a criatura usa seus sensores; coloque água visível. Aproximação sem bebida com ganho hídrico não conclui essa habilidade. Saves com sede desativada recebem uma recusa explicada.
+Selecione uma criatura no mapa ou na lista da Convivência e abra **Ensinar** no painel lateral. Escolha **Ir até o local marcado** ou **Buscar água e beber**. Para local, pressione **Marcar alvo no mapa** e clique em terreno livre: o alvo amarelo é separado do alvo azul dos pedidos de diálogo. Para água, a criatura usa seus sensores; coloque água visível. Aproximação sem bebida com ganho hídrico não conclui essa habilidade. Saves com sede desativada recebem uma recusa explicada.
 
 **Mostrar** inicia uma tentativa com rota assistida pelo cuidador. A linha amarela tracejada indica a direção do alvo; não garante um caminho livre de obstáculos. Para água, a assistência é indicada junto ao corpo, sem revelar recursos fora da percepção. A criatura anda, vira e bebe pela física normal, pagando os custos. Use **Iniciar** no rodapé ou Espaço para avançar; o mundo começa pausado. Fome e sede críticas têm prioridade.
 
