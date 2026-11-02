@@ -1,0 +1,1051 @@
+{
+  "engine_commit": "f58a85bf980a701675975bc8a81fafc7a1098c59",
+  "prereg_commit": "2ad7ba47d945ca6113ed3c046dbb1feb90ed1c06",
+  "preregister_sha256": "d2249ff20ef98ee6e7eb79e790ae841d80e135b11842e465f4a5d95058fbd522",
+  "files_sha256": {
+    "scripts/atelier/atelier.gd": "f6e46f193a3f70477bae36e8e5a20554230e18a83080d0c4f809663c4060681d",
+    "scripts/behavior/actions.gd": "11be748352f4ec1bc3928f623f38e4783679d75a13d1d2eaa51bd0eaf93b5f73",
+    "scripts/behavior/brains.gd": "7d553556b05e10d643f4a5d67485a28e0c112765ec3ba58748c0a0f9622defe3",
+    "scripts/behavior/observation.gd": "54a31a3ff08e811a3dac074d1739b3c48cd51d8c4bc47e78ad9eab3b18d37984",
+    "scripts/behavior/personality.gd": "5e9c2a276a10ef5321279cac9923a3fed85b7c0fe60894de6b3ad122d6232ac6",
+    "scripts/behavior/q_brain.gd": "793d739a9d53e54b82716013ef21a5df5e183961ab70b3190fdffca9968af81e",
+    "scripts/behavior/random_brain.gd": "910788b0620e1f2d68e0d6d43260deceb7f49c0dcd75cee810f380d17a1202aa",
+    "scripts/communication/comandos.gd": "5c699500d312038baba43ef6d8bccfe1f32738f43e7d79d9b3c13ef57949adf3",
+    "scripts/communication/dialogo.gd": "3904ec8eb3e218f83efc249817dd1ed3156273a3750f34eac7dd25e3dff590f8",
+    "scripts/communication/dialogo_textos.gd": "de19b49cf039b34d5516b2563850ee62600a29b92d13f4158a3b87a5d18db0e0",
+    "scripts/communication/signal_channel.gd": "da78bffe8848f9b2d009e439cdea402e16cb5e3b9a2c7642572160b287cfa719",
+    "scripts/core/sim_data.gd": "2fda6eb72b5636c300e6f4d20e95c64fdfb41127ae8e2b7bed7ffb1a52d0da7d",
+    "scripts/core/sim_ids.gd": "5ebade4a59b235191120b6d7aecd2ea4c234865d6d998950d63baf714a10cf50",
+    "scripts/core/sim_rng.gd": "795dd1605c02f603f13693ec79e52bee33b957d351bed12204ede58b1c8c1320",
+    "scripts/core/spatial_grid.gd": "2246bac718f75f326fa046a246e5ef9397c75e0388b458f7cbb1ff98063ead1f",
+    "scripts/core/textos.gd": "7134ca21a434b32ac6e4d1d4d2b64ff78a472e3c432cb39b322f653aa842ff82",
+    "scripts/creature/genome.gd": "a4d0e45be76cd6fe05b7e0b7f3bced82da1e36f88136543f64aefe3d4d5cd355",
+    "scripts/creature/sim_creature.gd": "cd1c257e33968b982919b461fd0b8c8cccd5c51b43fdb08b7eac6424618e6f83",
+    "scripts/environment/feeder.gd": "cf96f04c5e7161a647a4a2dac1c315c7dc380a4bcfd3cc59a9c1e61d80bcaa4b",
+    "scripts/environment/food_catalog.gd": "9c140c5269eeaeefb74e4b1151de1962cd4ece91d2d79c86102f6212cd82349f",
+    "scripts/environment/object_catalog.gd": "0220927731b28d33f90820a01cce8f59a729cba1ac0d28e9571e7facf6373208",
+    "scripts/environment/water_rules.gd": "c12a2cda362679a0b832a04286a17b4b7f0bcb173dfe9c94f03dbd70586199dc",
+    "scripts/evolution/genealogy.gd": "2ff9e61de47c42833af497a9644c019b8a5d97d2e91e01b71c1797bbab39d93c",
+    "scripts/evolution/inheritance.gd": "606d19ef004ade9267f6d16812b47717d5bb299e2a402991af9ea1b3150de4d4",
+    "scripts/interaction/ensino.gd": "b81a53fc543d23ecff4b07131938cd595f8365decdd6c112158378be33efafe6",
+    "scripts/library/book_catalog.gd": "91a3f0ae52409f411153e4e615e1e5d4be4d4d42b2d759c6d6541e1a85255f41",
+    "scripts/library/knowledge.gd": "f151f8d96a7ea3221e5404e66daf51bd68ff38fd023bbec2dee69d80e508b1fa",
+    "scripts/library/reading.gd": "08be46829712006befe73a4b6e30ff684b2247c598c75d85ced51c524ad49258",
+    "scripts/main.gd": "708bf5534425213807098521e9bf78d2600772580a6c3bcd711a58c535ac6bc5",
+    "scripts/mind/affect.gd": "9b321976618830fc13eace5f4c65c7717b5d092ad150fc07e52490aec1223d9b",
+    "scripts/mind/creature_mind.gd": "1b7f80c261b793c5d303f23fff5978e35630fcd24c67c60cab63bed86c978917",
+    "scripts/mind/motivation.gd": "128106dd8dadc5680fa6c03d42853ccfc4678df1b4176061f0e8e2ee45134269",
+    "scripts/mind/object_memory.gd": "217aa7070f60273326d2fb3a9c795e7979ba85928c266724311c4755d6498999",
+    "scripts/mind/terminal_learning.gd": "c8a0412d04f47aa79a3e0b1941886fe122e0963414b8e46682bdbbb6c081999a",
+    "scripts/persistence/save_store.gd": "8b236b6966f9b6a45ed89bed4eb0a1b288cbe6e8e4d1bc711212bba0d6cd61b4",
+    "scripts/render/food_shapes.gd": "29cc9f1a9f8e43f87a8e95ef31c12865c9fcba76b607c96079aad0eed1bd717e",
+    "scripts/render/world_view.gd": "632a9cde85093e8f32d799a2b07ca3b16b3c89f4dd9dd0a263600b79c5f11214",
+    "scripts/social/social_dynamics.gd": "bb656105f49a56ea4b0d51df57353cd409f49da7a2f8f238b8252abce3f35c34",
+    "scripts/spatial/spatial_memory.gd": "c7905e2c59f570a3c0cb6d43b1be536a2bfb41c40086a94283c73b0c6534d1c8",
+    "scripts/spatial/spatial_policy.gd": "d8d6f0f661872643e745b1f30ac6a72e9619521d217454394359ccb2b72440d8",
+    "scripts/terminal/terminal.gd": "7d02aa4530a1d4630caedeb16b238d6deaa11f594e5f71b3dbdce1de4e9e830e",
+    "scripts/terminal/terminal_catalogo.gd": "410247413da9faecbd16faa45bbf21bfb492679fea70ac5670f85e67338b0bba",
+    "scripts/terminal/terminal_estado.gd": "7d3edfeac03520d8692d705b69432dec402f6715a826a50208f2c4d021a80236",
+    "scripts/terminal/terminal_mundo.gd": "bd308b8b56ab67b14507f54f9a13ccb353419a192f67c11bbdcb0bacf7073d8e",
+    "scripts/terminal/terminal_mundo_falso.gd": "956728e7acb571f3a49e7f2f725af64027c39bac5387678af9d97df04a17cea1",
+    "scripts/terminal/terminal_mundo_real.gd": "a4755be00265d916030110af52e13b0ce7c17ba1234ffe616d85e90955b39456",
+    "scripts/terminal/terminal_parser.gd": "c30d2ec297d7be9151eecc7e0dba6058157ea5b5e3ca37fd44df29f09ac9794d",
+    "scripts/terminal/terminal_politica.gd": "226d459fe0a91345c9be0062bd866789fe8d34a301215b9ffde48932c84b524d",
+    "scripts/terminal/terminal_textos.gd": "c45d931e31d429d78fd10f46ed1e17aa48335cf9c22d95515c5ea339023a4f1f",
+    "scripts/ui/atelier_canvas.gd": "80a1a212a8d4439dec3deb75a3ed244c6ea07468dbe749993992a8f6453b4537",
+    "scripts/ui/atelier_chart.gd": "f2bf609463e67c7e85ed56ecbaf3da07469104269776cea3bdd04d74879e0fe7",
+    "scripts/ui/fps_chart.gd": "d9c4edca244889fbe66b9ec7c723f81df41bfecafe1c08760247be3adf7c5725",
+    "scripts/ui/garden_theme.gd": "7027adc51b60d160a39982b17a08f51f45db0dc7ef4d8cde25210d001944d41d",
+    "scripts/ui/knowledge_presenter.gd": "d8ef1ca3069a938375da6d770dede3f097f31796ac4d9e7ab5fee16125c138cc",
+    "scripts/ui/laboratory.gd": "add4297fc437ebf1dc13970adad3991efcae6548b54b0c58ba28b9da56bb5db5",
+    "scripts/ui/main.gd": "939b457227b0ba3d02a6ddfc836ab1939d2098fca23f56436cc200e2a3f478f5",
+    "scripts/ui/object_presenter.gd": "e1487330b75d2b54394fc7cf1d4434724a0b046e77fbf91e0dce62de8bbe2cd6",
+    "scripts/ui/personality_inspector.gd": "3ae2ab73c887181a071df473524cfdd7f73ab7fbbe5f8315354b4d568b3d53f9",
+    "scripts/ui/population_chart.gd": "c6a935fc390d1619476c833d9ab009c55e9c037d4831bb8d8d06efcf3d8b109c",
+    "scripts/ui/teaching_chart.gd": "54d65f73738154e8ade1a6b19285974df33a0da8e36bb8e070cbfac4c0276341",
+    "scripts/ui/teaching_panel.gd": "bf73f1ac318911c55558ea3da8692c6dc17c93a352c52364c3e8c2de02cb852c",
+    "scripts/ui/terminal_presenter.gd": "8e3b02e3335acbd74e6aaddfba4759a607ac1b372720e0ce72946a8dfb49e478",
+    "scripts/ui/verify_ui.gd": "17f3c688327150dc13e1331db61e15016c8726b4226b4002e57d22ffa7f83f28",
+    "scripts/world/sim_world.gd": "bed6f18ebb2b55a0f61d55303f72467da4d677cc77bfff9b323b8951412ccd68",
+    "tests/experiments/p1_eval.gd": "4314b7e89a8ff7e3c687c626f99c27aee21fe3872532fd05d710e45b2c8a7ea6",
+    "tests/experiments/p1_metrics.py": "5647a9c4f6a2d51d78747c35398c534fc10e59a3211ba615096d05f27decdcb1",
+    "tests/experiments/p1_preregistro.md": "d2249ff20ef98ee6e7eb79e790ae841d80e135b11842e465f4a5d95058fbd522",
+    "tests/experiments/p1_product_probe.gd": "549fd4ce8403a1767e6bc9931819b1bdb4a199f99bafcb3ecfb0c8cd77825cb0",
+    "tests/experiments/p1_run.py": "b5a582ef6a61eb29b0e3a7093eacaccbe464cf8e84234c19e4a761d28dfcfe3e",
+    "tests/experiments/p1_unit_runner.gd": "ed14fa8f865c0591144210271d33dc7685a9c0e8cb4f32d1799bbd1c56432c87",
+    "tests/experiments/p1_verify.py": "aa0d5430704bc133224fb28c64bdacaaf41215967b44ad4bb3d7936ed9cd8488",
+    "tests/unit/test_sim_p1.gd": "772d5cffc3caa5f678f9a8946019004cd1aabeda6eb1dd85c1c65a4ee3296a92"
+  },
+  "historical_seeds": {
+    "4": [
+      "M1b_afeto_train.json"
+    ],
+    "6": [
+      "M1b_afeto_dev.json"
+    ],
+    "20": [
+      "M1_mind_eval.json",
+      "M1b_afeto_eval.json"
+    ],
+    "41001": [
+      "E3_ensino_eval.json"
+    ],
+    "41002": [
+      "E3_ensino_eval.json"
+    ],
+    "41003": [
+      "E3_ensino_eval.json"
+    ],
+    "41004": [
+      "E3_ensino_eval.json"
+    ],
+    "41005": [
+      "E3_ensino_eval.json"
+    ],
+    "41006": [
+      "E3_ensino_eval.json"
+    ],
+    "41007": [
+      "E3_ensino_eval.json"
+    ],
+    "41008": [
+      "E3_ensino_eval.json"
+    ],
+    "41009": [
+      "E3_ensino_eval.json"
+    ],
+    "41010": [
+      "E3_ensino_eval.json"
+    ],
+    "41011": [
+      "E3_ensino_eval.json"
+    ],
+    "41012": [
+      "E3_ensino_eval.json"
+    ],
+    "41013": [
+      "E3_ensino_eval.json"
+    ],
+    "41014": [
+      "E3_ensino_eval.json"
+    ],
+    "41015": [
+      "E3_ensino_eval.json"
+    ],
+    "41016": [
+      "E3_ensino_eval.json"
+    ],
+    "51001": [
+      "E4_social_eval.json"
+    ],
+    "51002": [
+      "E4_social_eval.json"
+    ],
+    "51003": [
+      "E4_social_eval.json"
+    ],
+    "51004": [
+      "E4_social_eval.json"
+    ],
+    "51005": [
+      "E4_social_eval.json"
+    ],
+    "51006": [
+      "E4_social_eval.json"
+    ],
+    "51007": [
+      "E4_social_eval.json"
+    ],
+    "51008": [
+      "E4_social_eval.json"
+    ],
+    "81006": [
+      "M1_mind_cpu.json"
+    ],
+    "82401": [
+      "M1_mind_eval.json"
+    ],
+    "82402": [
+      "M1_mind_eval.json"
+    ],
+    "82403": [
+      "M1_mind_eval.json"
+    ],
+    "82404": [
+      "M1_mind_eval.json"
+    ],
+    "82405": [
+      "M1_mind_eval.json"
+    ],
+    "82406": [
+      "M1_mind_eval.json"
+    ],
+    "82407": [
+      "M1_mind_eval.json"
+    ],
+    "82408": [
+      "M1_mind_eval.json"
+    ],
+    "82409": [
+      "M1_mind_eval.json"
+    ],
+    "82410": [
+      "M1_mind_eval.json"
+    ],
+    "82411": [
+      "M1_mind_eval.json"
+    ],
+    "82412": [
+      "M1_mind_eval.json"
+    ],
+    "82413": [
+      "M1_mind_eval.json"
+    ],
+    "82414": [
+      "M1_mind_eval.json"
+    ],
+    "82415": [
+      "M1_mind_eval.json"
+    ],
+    "82416": [
+      "M1_mind_eval.json"
+    ],
+    "82417": [
+      "M1_mind_eval.json"
+    ],
+    "82418": [
+      "M1_mind_eval.json"
+    ],
+    "82419": [
+      "M1_mind_eval.json"
+    ],
+    "82420": [
+      "M1_mind_eval.json"
+    ],
+    "91501": [
+      "E4_social_eval.json"
+    ],
+    "91502": [
+      "E4_social_eval.json"
+    ],
+    "91503": [
+      "E4_social_eval.json"
+    ],
+    "91504": [
+      "E4_social_eval.json"
+    ],
+    "91505": [
+      "E4_social_eval.json"
+    ],
+    "91506": [
+      "E4_social_eval.json"
+    ],
+    "91507": [
+      "E4_social_eval.json"
+    ],
+    "91508": [
+      "E4_social_eval.json"
+    ],
+    "91509": [
+      "E4_social_eval.json"
+    ],
+    "91510": [
+      "E4_social_eval.json"
+    ],
+    "91511": [
+      "E4_social_eval.json"
+    ],
+    "91512": [
+      "E4_social_eval.json"
+    ],
+    "91513": [
+      "E4_social_eval.json"
+    ],
+    "91514": [
+      "E4_social_eval.json"
+    ],
+    "91515": [
+      "E4_social_eval.json"
+    ],
+    "91516": [
+      "E4_social_eval.json"
+    ],
+    "91517": [
+      "E4_social_eval.json"
+    ],
+    "91518": [
+      "E4_social_eval.json"
+    ],
+    "91519": [
+      "E4_social_eval.json"
+    ],
+    "91520": [
+      "E4_social_eval.json"
+    ],
+    "93001": [
+      "E3_ensino_eval.json"
+    ],
+    "93002": [
+      "E3_ensino_eval.json"
+    ],
+    "93003": [
+      "E3_ensino_eval.json"
+    ],
+    "93004": [
+      "E3_ensino_eval.json"
+    ],
+    "93005": [
+      "E3_ensino_eval.json"
+    ],
+    "93006": [
+      "E3_ensino_eval.json"
+    ],
+    "93007": [
+      "E3_ensino_eval.json"
+    ],
+    "93008": [
+      "E3_ensino_eval.json"
+    ],
+    "93009": [
+      "E3_ensino_eval.json"
+    ],
+    "93010": [
+      "E3_ensino_eval.json"
+    ],
+    "93011": [
+      "E3_ensino_eval.json"
+    ],
+    "93012": [
+      "E3_ensino_eval.json"
+    ],
+    "93013": [
+      "E3_ensino_eval.json"
+    ],
+    "93014": [
+      "E3_ensino_eval.json"
+    ],
+    "93015": [
+      "E3_ensino_eval.json"
+    ],
+    "93016": [
+      "E3_ensino_eval.json"
+    ],
+    "93017": [
+      "E3_ensino_eval.json"
+    ],
+    "93018": [
+      "E3_ensino_eval.json"
+    ],
+    "93019": [
+      "E3_ensino_eval.json"
+    ],
+    "93020": [
+      "E3_ensino_eval.json"
+    ],
+    "93601": [
+      "M1b_afeto_train.json"
+    ],
+    "93602": [
+      "M1b_afeto_train.json"
+    ],
+    "93603": [
+      "M1b_afeto_train.json"
+    ],
+    "93604": [
+      "M1b_afeto_cpu.json",
+      "M1b_afeto_train.json"
+    ],
+    "93701": [
+      "M1b_afeto_dev.json"
+    ],
+    "93702": [
+      "M1b_afeto_dev.json"
+    ],
+    "93703": [
+      "M1b_afeto_dev.json"
+    ],
+    "93704": [
+      "M1b_afeto_dev.json"
+    ],
+    "93705": [
+      "M1b_afeto_dev.json"
+    ],
+    "93706": [
+      "M1b_afeto_dev.json"
+    ],
+    "94831": [
+      "M1b_afeto_eval.json"
+    ],
+    "94832": [
+      "M1b_afeto_eval.json"
+    ],
+    "94833": [
+      "M1b_afeto_eval.json"
+    ],
+    "94834": [
+      "M1b_afeto_eval.json"
+    ],
+    "94835": [
+      "M1b_afeto_eval.json"
+    ],
+    "94836": [
+      "M1b_afeto_eval.json"
+    ],
+    "94837": [
+      "M1b_afeto_eval.json"
+    ],
+    "94838": [
+      "M1b_afeto_eval.json"
+    ],
+    "94839": [
+      "M1b_afeto_eval.json"
+    ],
+    "94840": [
+      "M1b_afeto_eval.json"
+    ],
+    "94841": [
+      "M1b_afeto_eval.json"
+    ],
+    "94842": [
+      "M1b_afeto_eval.json"
+    ],
+    "94843": [
+      "M1b_afeto_eval.json"
+    ],
+    "94844": [
+      "M1b_afeto_eval.json"
+    ],
+    "94845": [
+      "M1b_afeto_eval.json"
+    ],
+    "94846": [
+      "M1b_afeto_eval.json"
+    ],
+    "94847": [
+      "M1b_afeto_eval.json"
+    ],
+    "94848": [
+      "M1b_afeto_eval.json"
+    ],
+    "94849": [
+      "M1b_afeto_eval.json"
+    ],
+    "94850": [
+      "M1b_afeto_eval.json"
+    ],
+    "106101": [
+      "M2_curiosidade_train.json"
+    ],
+    "106102": [
+      "M2_curiosidade_train.json"
+    ],
+    "106103": [
+      "M2_curiosidade_train.json"
+    ],
+    "106104": [
+      "M2_curiosidade_cpu.json",
+      "M2_curiosidade_train.json"
+    ],
+    "106201": [
+      "M2_curiosidade_dev.json"
+    ],
+    "106202": [
+      "M2_curiosidade_dev.json"
+    ],
+    "106203": [
+      "M2_curiosidade_dev.json"
+    ],
+    "106204": [
+      "M2_curiosidade_dev.json"
+    ],
+    "106205": [
+      "M2_curiosidade_dev.json"
+    ],
+    "106206": [
+      "M2_curiosidade_dev.json"
+    ],
+    "107301": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107302": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107303": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107304": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107305": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107306": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107307": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107308": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107309": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107310": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107311": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107312": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107313": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107314": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107315": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107316": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107317": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107318": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107319": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107320": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107321": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107322": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107323": [
+      "M2_curiosidade_eval.json"
+    ],
+    "107324": [
+      "M2_curiosidade_eval.json"
+    ],
+    "118401": [
+      "M3_atelie_eval.json"
+    ],
+    "118402": [
+      "M3_atelie_eval.json"
+    ],
+    "118403": [
+      "M3_atelie_eval.json"
+    ],
+    "118404": [
+      "M3_atelie_eval.json"
+    ],
+    "118405": [
+      "M3_atelie_eval.json"
+    ],
+    "118406": [
+      "M3_atelie_eval.json"
+    ],
+    "118407": [
+      "M3_atelie_eval.json"
+    ],
+    "118408": [
+      "M3_atelie_eval.json"
+    ],
+    "118409": [
+      "M3_atelie_eval.json"
+    ],
+    "118410": [
+      "M3_atelie_eval.json"
+    ],
+    "118411": [
+      "M3_atelie_eval.json"
+    ],
+    "118412": [
+      "M3_atelie_eval.json"
+    ],
+    "118413": [
+      "M3_atelie_eval.json"
+    ],
+    "118414": [
+      "M3_atelie_eval.json"
+    ],
+    "118415": [
+      "M3_atelie_eval.json"
+    ],
+    "118416": [
+      "M3_atelie_eval.json"
+    ],
+    "118417": [
+      "M3_atelie_eval.json"
+    ],
+    "118418": [
+      "M3_atelie_eval.json"
+    ],
+    "118419": [
+      "M3_atelie_eval.json"
+    ],
+    "118420": [
+      "M3_atelie_eval.json"
+    ],
+    "118421": [
+      "M3_atelie_eval.json"
+    ],
+    "118422": [
+      "M3_atelie_eval.json"
+    ],
+    "118423": [
+      "M3_atelie_eval.json"
+    ],
+    "118424": [
+      "M3_atelie_eval.json"
+    ],
+    "129401": [
+      "M3b_copia_eval.json"
+    ],
+    "129402": [
+      "M3b_copia_eval.json"
+    ],
+    "129403": [
+      "M3b_copia_eval.json"
+    ],
+    "129404": [
+      "M3b_copia_eval.json"
+    ],
+    "129405": [
+      "M3b_copia_eval.json"
+    ],
+    "129406": [
+      "M3b_copia_eval.json"
+    ],
+    "129407": [
+      "M3b_copia_eval.json"
+    ],
+    "129408": [
+      "M3b_copia_eval.json"
+    ],
+    "129409": [
+      "M3b_copia_eval.json"
+    ],
+    "129410": [
+      "M3b_copia_eval.json"
+    ],
+    "129411": [
+      "M3b_copia_eval.json"
+    ],
+    "129412": [
+      "M3b_copia_eval.json"
+    ],
+    "129413": [
+      "M3b_copia_eval.json"
+    ],
+    "129414": [
+      "M3b_copia_eval.json"
+    ],
+    "129415": [
+      "M3b_copia_eval.json"
+    ],
+    "129416": [
+      "M3b_copia_eval.json"
+    ],
+    "129417": [
+      "M3b_copia_eval.json"
+    ],
+    "129418": [
+      "M3b_copia_eval.json"
+    ],
+    "129419": [
+      "M3b_copia_eval.json"
+    ],
+    "129420": [
+      "M3b_copia_eval.json"
+    ],
+    "129421": [
+      "M3b_copia_eval.json"
+    ],
+    "129422": [
+      "M3b_copia_eval.json"
+    ],
+    "129423": [
+      "M3b_copia_eval.json"
+    ],
+    "129424": [
+      "M3b_copia_eval.json"
+    ],
+    "140050": [
+      "M3c_biblioteca_cpu.json"
+    ],
+    "140401": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140402": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140403": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140404": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140405": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140406": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140407": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140408": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140409": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140410": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140411": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140412": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140413": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140414": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140415": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140416": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140417": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140418": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140419": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140420": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140421": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140422": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140423": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "140424": [
+      "M3c_biblioteca_eval.json"
+    ],
+    "151301": [
+      "M5_convivencia_cpu.json"
+    ],
+    "151401": [
+      "M5_convivencia_eval.json"
+    ],
+    "151402": [
+      "M5_convivencia_eval.json"
+    ],
+    "151403": [
+      "M5_convivencia_eval.json"
+    ],
+    "151404": [
+      "M5_convivencia_eval.json"
+    ],
+    "151405": [
+      "M5_convivencia_eval.json"
+    ],
+    "151406": [
+      "M5_convivencia_eval.json"
+    ],
+    "151407": [
+      "M5_convivencia_eval.json"
+    ],
+    "151408": [
+      "M5_convivencia_eval.json"
+    ],
+    "151409": [
+      "M5_convivencia_eval.json"
+    ],
+    "151410": [
+      "M5_convivencia_eval.json"
+    ],
+    "151411": [
+      "M5_convivencia_eval.json"
+    ],
+    "151412": [
+      "M5_convivencia_eval.json"
+    ],
+    "151413": [
+      "M5_convivencia_eval.json"
+    ],
+    "151414": [
+      "M5_convivencia_eval.json"
+    ],
+    "151415": [
+      "M5_convivencia_eval.json"
+    ],
+    "151416": [
+      "M5_convivencia_eval.json"
+    ],
+    "151417": [
+      "M5_convivencia_eval.json"
+    ],
+    "151418": [
+      "M5_convivencia_eval.json"
+    ],
+    "151419": [
+      "M5_convivencia_eval.json"
+    ],
+    "151420": [
+      "M5_convivencia_eval.json"
+    ],
+    "151421": [
+      "M5_convivencia_eval.json"
+    ],
+    "151422": [
+      "M5_convivencia_eval.json"
+    ],
+    "151423": [
+      "M5_convivencia_eval.json"
+    ],
+    "151424": [
+      "M5_convivencia_eval.json"
+    ],
+    "154301": [
+      "M4b_terminal_cpu.json"
+    ],
+    "154401": [
+      "M4b_terminal_eval.json"
+    ],
+    "154402": [
+      "M4b_terminal_eval.json"
+    ],
+    "154403": [
+      "M4b_terminal_eval.json"
+    ],
+    "154404": [
+      "M4b_terminal_eval.json"
+    ],
+    "154405": [
+      "M4b_terminal_eval.json"
+    ],
+    "154406": [
+      "M4b_terminal_eval.json"
+    ],
+    "154407": [
+      "M4b_terminal_eval.json"
+    ],
+    "154408": [
+      "M4b_terminal_eval.json"
+    ],
+    "154409": [
+      "M4b_terminal_eval.json"
+    ],
+    "154410": [
+      "M4b_terminal_eval.json"
+    ],
+    "154411": [
+      "M4b_terminal_eval.json"
+    ],
+    "154412": [
+      "M4b_terminal_eval.json"
+    ],
+    "154413": [
+      "M4b_terminal_eval.json"
+    ],
+    "154414": [
+      "M4b_terminal_eval.json"
+    ],
+    "154415": [
+      "M4b_terminal_eval.json"
+    ],
+    "154416": [
+      "M4b_terminal_eval.json"
+    ],
+    "154417": [
+      "M4b_terminal_eval.json"
+    ],
+    "154418": [
+      "M4b_terminal_eval.json"
+    ],
+    "154419": [
+      "M4b_terminal_eval.json"
+    ],
+    "154420": [
+      "M4b_terminal_eval.json"
+    ],
+    "154421": [
+      "M4b_terminal_eval.json"
+    ],
+    "154422": [
+      "M4b_terminal_eval.json"
+    ],
+    "154423": [
+      "M4b_terminal_eval.json"
+    ],
+    "154424": [
+      "M4b_terminal_eval.json"
+    ],
+    "263101": [
+      "M0_social_checkpoint.json"
+    ],
+    "263102": [
+      "M0_social_checkpoint.json"
+    ],
+    "263103": [
+      "M0_social_checkpoint.json"
+    ],
+    "263104": [
+      "M0_social_checkpoint.json"
+    ],
+    "263105": [
+      "M0_social_checkpoint.json"
+    ],
+    "263106": [
+      "M0_social_checkpoint.json"
+    ],
+    "263107": [
+      "M0_social_checkpoint.json"
+    ],
+    "263108": [
+      "M0_social_checkpoint.json"
+    ],
+    "263201": [
+      "M0_social_dev.json"
+    ],
+    "263202": [
+      "M0_social_dev.json"
+    ],
+    "263203": [
+      "M0_social_dev.json"
+    ],
+    "263204": [
+      "M0_social_dev.json"
+    ],
+    "263205": [
+      "M0_social_dev.json"
+    ],
+    "263206": [
+      "M0_social_dev.json"
+    ],
+    "263207": [
+      "M0_social_dev.json"
+    ],
+    "263208": [
+      "M0_social_dev.json"
+    ],
+    "263901": [
+      "M0_social_holdout.json"
+    ],
+    "263902": [
+      "M0_social_holdout.json"
+    ],
+    "263903": [
+      "M0_social_holdout.json"
+    ],
+    "263904": [
+      "M0_social_holdout.json"
+    ],
+    "263905": [
+      "M0_social_holdout.json"
+    ],
+    "263906": [
+      "M0_social_holdout.json"
+    ],
+    "263907": [
+      "M0_social_holdout.json"
+    ],
+    "263908": [
+      "M0_social_holdout.json"
+    ],
+    "263909": [
+      "M0_social_holdout.json"
+    ],
+    "263910": [
+      "M0_social_holdout.json"
+    ],
+    "263911": [
+      "M0_social_holdout.json"
+    ],
+    "263912": [
+      "M0_social_holdout.json"
+    ],
+    "263913": [
+      "M0_social_holdout.json"
+    ],
+    "263914": [
+      "M0_social_holdout.json"
+    ],
+    "263915": [
+      "M0_social_holdout.json"
+    ],
+    "263916": [
+      "M0_social_holdout.json"
+    ],
+    "263917": [
+      "M0_social_holdout.json"
+    ],
+    "263918": [
+      "M0_social_holdout.json"
+    ],
+    "263919": [
+      "M0_social_holdout.json"
+    ],
+    "263920": [
+      "M0_social_holdout.json"
+    ]
+  },
+  "dev_seeds": [
+    271101,
+    271102,
+    271103,
+    271104,
+    271105,
+    271106
+  ],
+  "holdout_seeds": [
+    271401,
+    271402,
+    271403,
+    271404,
+    271405,
+    271406,
+    271407,
+    271408,
+    271409,
+    271410,
+    271411,
+    271412,
+    271413,
+    271414,
+    271415,
+    271416,
+    271417,
+    271418,
+    271419,
+    271420,
+    271421,
+    271422,
+    271423,
+    271424
+  ]
+}
