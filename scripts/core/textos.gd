@@ -2,6 +2,24 @@ class_name Textos
 extends RefCounted
 ## Catálogo da apresentação. Identificadores e dados salvos continuam intactos.
 
+const M5_UI := {
+	"m5_reproduction_voluntary": "Reprodução voluntária (condicionada a vínculo e estado mental)",
+	"m5_status_seeking_partner": "Parece buscar aproximação com parceiro familiar.",
+	"m5_status_reproduction_ready": "Parece disposta a aceitar reprodução voluntária.",
+	"m5_status_refusal_unfamiliar": "Parece recusar aproximação: parceiro sem vínculo de familiaridade suficiente.",
+	"m5_status_refusal_aversion": "Parece evitar parceiro devido a aversão por conflitos anteriores.",
+	"m5_status_refusal_affect": "Parece indisposta para reprodução devido a estado afetivo desfavorável.",
+	"m5_status_refusal_critical_need": "Parece priorizar necessidades fisiológicas críticas sobre reprodução.",
+	"m5_status_refusal_partner": "Parece não obter consentimento do parceiro.",
+	"m5_birth_recorded": "Nascimento voluntário registrado: filhote #%d gerado com genitor #%d.",
+	"m5_heritage_temperament": "Temperamento herdado com mutação controlada; memórias episódicas e cultura não são transmitidas biologicamente.",
+	"m5_heritage_non_inheritance": "Verificação de herança: filhote não possui memórias, vínculos, livros lidos ou programas herdados.",
+	"m5_action_seek_mate": "Parece aproximar-se de organismo compatível para reprodução voluntária.",
+	"m5_action_refuse_mate": "Parece afastar-se ou recusar interação reprodutiva.",
+	"m5_consent_granted": "Consentimento mútuo verificado segundo os parâmetros da simulação.",
+	"m5_consent_denied": "Consentimento reprodutivo não concedido pelos parâmetros simulados."
+}
+
 const M4B_UI := {
 	"tool_terminal": "Terminal",
 	"m4b_placed": "Terminal #%d colocado. Dispositivo físico fictício com 3 manuais anexos.",
@@ -482,6 +500,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if M5_UI.has(codigo): return M5_UI[codigo] if valores.is_empty() else M5_UI[codigo] % valores
 	if M4B_UI.has(codigo): return M4B_UI[codigo] if valores.is_empty() else M4B_UI[codigo] % valores
 	if M3C_UI.has(codigo): return M3C_UI[codigo] if valores.is_empty() else M3C_UI[codigo] % valores
 	if M3_UI.has(codigo) or M3_CATALOGO.has(codigo): return (M3_UI.get(codigo, M3_CATALOGO.get(codigo, ""))) if valores.is_empty() else (M3_UI.get(codigo, M3_CATALOGO.get(codigo, "")) % valores)

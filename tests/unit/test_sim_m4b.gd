@@ -143,7 +143,7 @@ func _save_and_hostile(f: Array) -> void:
 	for version in [11, 12]:
 		legacy.save_version = version
 		var migrated = World.from_dict(legacy)
-		check(migrated != null and migrated.to_dict().save_version == 13 and migrated.terminals.is_empty() and migrated.creatures[migrated.pet_id].mind.terminal.is_empty(), "migracao inventou terminal", f)
+		check(migrated != null and migrated.to_dict().save_version == World.SAVE_VERSION and migrated.terminals.is_empty() and migrated.creatures[migrated.pet_id].mind.terminal.is_empty(), "migracao inventou terminal", f)
 	legacy.save_version = 12
 	check(World._migrate_v12(World._migrate_v12(legacy)) == World._migrate_v12(legacy), "migracao v12 nao idempotente", f)
 	legacy.creatures[0].mind.terminal = Learning.empty()

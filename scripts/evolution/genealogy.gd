@@ -105,17 +105,30 @@ static func from_array(entries: Variant, tick: int, next_id: int):
 			if (int(entry["generation"]) != 0 and not entry["legacy_root"]) or not entry["mutations"].is_empty():
 				return null
 			continue
-		# Only asexual births exist in v2. Strictly older IDs prove acyclicity,
-		# without recursion, even for lineages deeper than the GDScript stack.
-		if entry["parents"].size() != 1:
+		# Asexual (size 1) or voluntary partner (size 2). Strictly older IDs prove
+		# acyclicity without recursion, even for lineages deeper than the GDScript stack.
+		if entry["parents"].size() not in [1, 2]:
 			return null
 		var parent_id := int(entry["parents"][0])
 		if parent_id >= creature_id or not result.records.has(parent_id):
 			return null
 		var parent: Dictionary = result.records[parent_id]
-		if int(entry["generation"]) != int(parent["generation"]) + 1 or int(entry["birth_tick"]) < int(parent["birth_tick"]):
+		if int(entry["birth_tick"]) < int(parent["birth_tick"]):
 			return null
 		if int(parent["death_tick"]) != -1 and int(parent["death_tick"]) < int(entry["birth_tick"]):
+			return null
+		var expected_gen := int(parent["generation"]) + 1
+		if entry["parents"].size() == 2:
+			var partner_id := int(entry["parents"][1])
+			if partner_id == parent_id or partner_id >= creature_id or not result.records.has(partner_id):
+				return null
+			var partner: Dictionary = result.records[partner_id]
+			if int(entry["birth_tick"]) < int(partner["birth_tick"]):
+				return null
+			if int(partner["death_tick"]) != -1 and int(partner["death_tick"]) < int(entry["birth_tick"]):
+				return null
+			expected_gen = maxi(expected_gen, int(partner["generation"]) + 1)
+		if int(entry["generation"]) != expected_gen:
 			return null
 		var deltas: Dictionary = {}
 		for mutation in entry["mutations"]:
