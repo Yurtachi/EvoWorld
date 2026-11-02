@@ -240,3 +240,15 @@ warmup + 300 ticks medidos por população, comparando `mind_off` vs `pet_only`)
 [FATO] O overhead da mente ativa no pet com quadro e ateliê permaneceu abaixo de
 `0.35 ms/tick` em todas as faixas até 100 criaturas, mantendo o orçamento de
 simulação dentro da meta de tempo real.
+
+---
+
+## Revisão do coordenador (leitura do código de `scripts/atelier/atelier.gd`) — reclassificação do X4
+
+[FATO] A auditoria de ordem pré-registro→motor→holdout passa (`verify_prereg.sh`), 20 suítes exit 0, e o save v10 preserva quadros e competência.
+
+[FATO] **O X4 não demonstra “aprender a copiar formas”.** Em `step_drawing`, a criatura recebe a cada passo o **vértice exato seguinte da referência** (`err_vec = target_pt - virtual_pos`) e escolhe direção/comprimento a partir de buckets desse erro. O que o treino aprende é uma **calibração** direção/comprimento. O baseline `naive` usa deliberadamente um mapeamento descalibrado (`_uncalibrated_dir = (s_dir/2 + 5) % 8`), logo falha **por construção**. Falta o controle decisivo: um **servo geométrico sem aprendizado** (mover-se na direção do erro), que provavelmente atinge erro próximo de zero sem nenhum treino.
+
+[CLASSIFICAÇÃO] X4 = **PARTIAL (não demonstrado como aprendizado de cópia)**. O que se sustenta: o sistema produz traços como sequência real de ações primitivas, persiste desenhos, e a política aprende a corrigir um mapeamento motor deliberadamente errado. O que **não** se sustenta: “a criatura copia círculo/quadrado/linha por observação”. O erro mediano ≤ 2e-6 com 100% de sucesso reflete rastreamento de pontos dados, não generalização.
+
+[PRÓXIMO PROTOCOLO (M3b, novo pré-registro, sementes novas)] (1) a criatura **observa** a demonstração e depois reproduz **de memória**, sem receber os vértices a cada passo; (2) baselines: aleatório, servo geométrico sem aprendizado, memória sem treino; (3) formas inéditas no holdout (ex.: triângulo, cruz) e escalas/ruído motor; (4) métricas de erro de forma sobre o traço produzido, retenção após save/load.
