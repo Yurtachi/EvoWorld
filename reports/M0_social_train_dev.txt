@@ -1,0 +1,12 @@
+[FATO] Resumo derivado dos JSONs salvos na unica execucao TRAIN/DEV, exit 0; nao e transcricao do stdout.
+Comando: godot --headless --path . -s tests/experiments/social_balanced_eval.gd -- --dev
+TRAIN episodes=192 drinks=146
+checkpoint_q=[[0.0, 0.9999999992742544], [0.9999999998780239, 0.0], [0.3487631580755305, 0.38493]]
+prior_counts=[96, 96] prior=[0.5, 0.5]
+DEV status=PASS
+checkpoint_sha256=b32d8adcc637f6e74b60884ea7db19b8e04bf8b66db75bf551f765d953477921
+active: total=16/16; left=8/8; right=8/8
+disabled: total=8/16; left=0/8; right=8/8
+prior: total=8/16; left=3/8; right=5/8
+shuffled: total=8/16; left=4/8; right=4/8
+uniform: total=8/16; left=3/8; right=5/8

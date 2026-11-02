@@ -1,0 +1,28 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+test_behavior_learn.gd: ok
+test_comandos_sobrevivencia.gd: ok
+test_dialogo.gd: ok
+test_evolution.gd: ok
+test_perf_determinism.gd: ok
+E5 hostis: 693+ casos, versoes 1-7
+E5 geracoes seed=7421 ticks=1800 generation=4 births=75 alive=69
+E5 geracoes seed=9181 ticks=1800 generation=4 births=70 alive=65
+test_save_robustez.gd: ok
+test_save_store.gd: ok
+test_signal_channel.gd: ok
+test_sim_e1.gd: ok
+E2 physical rest_cost=0.041760 movement_cost=0.081600 fatigue_after_rest=0.925000 boredom_after_move=0.939500
+E2 experience mushroom_a=-0.530180 mushroom_b=-0.848288 choice_a=1 choice_b=2
+E2 profiles seed=17 unique=12 actions={"explore":3,"seek_contact":9} neutral_actions=1
+E2 profiles seed=89 unique=12 actions={"explore":1,"rest":1,"seek_contact":10} neutral_actions=1
+E2 profiles seed=9181 unique=12 actions={"rest":4,"seek_contact":8} neutral_actions=1
+E2 profiles seed=20261101 unique=12 actions={"explore":3,"seek_contact":9} neutral_actions=1
+test_sim_e2.gd: ok
+E3 measured naive=timeout distance=490.00 trained=success distance=11.36 updates=405
+test_sim_e3.gd: ok
+test_sim_e4.gd: ok
+test_sim_review.gd: ok
+test_sim_world.gd: ok
+test_smoke.gd: ok
+test_textos.gd: ok

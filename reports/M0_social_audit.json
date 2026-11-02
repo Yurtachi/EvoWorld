@@ -1,0 +1,23 @@
+{
+  "status": "PASS",
+  "independent_seed_count": 20,
+  "episodes": 200,
+  "checks": [
+    "source and checkpoint hashes unchanged",
+    "train/dev/old/holdout seeds disjoint",
+    "two sides per seed per arm",
+    "all summary metrics recomputed from rows",
+    "no-signal controls without delivery or cost",
+    "independent choices constant across paired sides",
+    "seed-cluster comparisons recomputed",
+    "preregistered PASS criteria verified"
+  ],
+  "holdout_sha256": "9be22650e756a699ef5341d10133bc8d58cc7d5acc9756c1ffafa1269b2bb896",
+  "checkpoint_sha256": "b32d8adcc637f6e74b60884ea7db19b8e04bf8b66db75bf551f765d953477921",
+  "source_sha256": {
+    "res://tests/experiments/social_balanced_eval.gd": "b5d77f9e0bc88fd17de64afd41dba5ee43a7dbf2dd8d7fd9b943e646013420ce",
+    "res://tests/experiments/social_balanced_preregistro.md": "5b7abeec4487671deffd7b8300d90a12c5916f478761861bc9f393e38574b106",
+    "res://tests/experiments/social_balanced_protocol.gd": "496633e13c1d7daada3d928f91365cbe5e35503830e916cf1ae1a648c3d1b7bc",
+    "res://tests/experiments/social_fixture.gd": "737712a22218b4e9d48c0a017bc2c876603ddfbdd74bd0503a5dade66b1915f8"
+  }
+}
