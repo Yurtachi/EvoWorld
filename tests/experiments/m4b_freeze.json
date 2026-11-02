@@ -47,7 +47,7 @@
     "scripts/terminal/terminal_textos.gd": "c45d931e31d429d78fd10f46ed1e17aa48335cf9c22d95515c5ea339023a4f1f",
     "scripts/world/sim_world.gd": "28ac90244a927e693f618095592ba9325bac169295da4a751bea15dd1967ae6c",
     "tests/experiments/m4b_terminal_cpu.gd": "abeb8f42d2bb084f50128ccbe7a3cfd809a15457244a6ccafe0050f843d0d82a",
-    "tests/experiments/m4b_terminal_eval.gd": "161ca30995f208a906a80a71283b35692c98aea80d4fdf52755943de5fc02a10",
+    "tests/experiments/m4b_terminal_eval.gd": "e043ff947b1955733a99e1401bf08f8a524f98d1d651c473734f2d1bba327f38",
     "tests/experiments/m4b_terminal_preregistro.md": "d06c550522795c098c5f51efd4d2731c83d2087f7f1be5b998e79e95940afd88",
     "tests/experiments/m4b_terminal_verify.py": "5feef77f208ed5c282f9e88aba192f2d3d5f1e5a20c759f54eec9ece22ca8801",
     "tests/experiments/m4b_unit_runner.gd": "b7d12c39d059530ed24b4f9a3be689a1fdaa2459490fa9ea29d2a30b058c8eb8",

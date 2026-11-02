@@ -26,6 +26,14 @@ func write_result(path: String, data: Dictionary) -> void:
 	file.flush()
 	file.close()
 
+static func canonical_sha(path: String) -> String:
+	var bytes := FileAccess.get_file_as_bytes(path)
+	var source := bytes.get_string_from_utf8()
+	# Godot's decoder consumes UTF-8 BOM; Git hashes those original bytes.
+	if bytes.size() >= 3 and bytes[0] == 239 and bytes[1] == 187 and bytes[2] == 191 and not source.begins_with("\ufeff"):
+		source = "\ufeff" + source
+	return source.replace("\r\n", "\n").sha256_text()
+
 func _init() -> void:
 	var args := OS.get_cmdline_user_args()
 	var holdout := "--holdout" in args
@@ -43,13 +51,12 @@ func _init() -> void:
 			quit(1)
 			return
 		for file in frozen.files:
-			var canonical: String = FileAccess.get_file_as_string(file).replace("\r\n", "\n")
-			if canonical.sha256_text() != frozen.files[file]: failures.append("freeze mismatch " + file)
+			if canonical_sha(file) != frozen.files[file]: failures.append("freeze mismatch " + file)
 		if not failures.is_empty():
 			printerr(failures)
 			quit(1)
 			return
-		meta.merge({"status": "opened", "preregister_sha256": FileAccess.get_file_as_string(PROTOCOL).replace("\r\n", "\n").sha256_text(),
+		meta.merge({"status": "opened", "preregister_sha256": canonical_sha(PROTOCOL),
 			"frozen_commit": git(["rev-parse", "HEAD"]), "preregister_commit": frozen.preregister_commit})
 		# Durable marker precedes any access to holdout scenarios.
 		write_result(path, meta)
