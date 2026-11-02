@@ -3,6 +3,7 @@ const World = preload("res://scripts/world/sim_world.gd")
 const D = preload("res://scripts/communication/dialogo.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Fixture = preload("res://tests/experiments/social_fixture.gd")
+const Balanced = preload("res://tests/experiments/social_balanced_protocol.gd")
 const P = preload("res://scripts/behavior/personality.gd")
 
 func check(ok: bool, message: String, failures: Array) -> void:
@@ -87,7 +88,47 @@ func run() -> Array:
 	check(P.from_dict(overflow) == null, "limite de vínculos validado", failures)
 	_dialogue(failures)
 	_channel(failures)
+	_balanced_controls(failures)
 	return failures
+
+func _balanced_controls(failures: Array) -> void:
+	# Only DEV seeds; these oracle rows test the design, never count as a holdout.
+	var q: Array = [[0.0, 1.0], [1.0, 0.0], [1.0, 0.0]]
+	check(Balanced.baseline_choice(263201, "prior", [0.25, 0.75]) == 1,
+		"prior sem sinal escolhe MAP aprendido, incluindo lado direito", failures)
+	check(Balanced.baseline_choice(263201, "prior", [0.75, 0.25]) == 0,
+		"prior sem sinal respeita frequência TRAIN esquerda", failures)
+	var rows: Array = []
+	for arm in Balanced.ARMS:
+		var choice := Balanced.baseline_choice(263201, arm, [0.5, 0.5]) if arm in ["uniform", "prior"] else -1
+		for side in range(2):
+			var row := Fixture.episode(263201, arm, q, false, null, side, 0, 0.0, choice)
+			rows.append(row)
+			if arm in ["disabled", "uniform", "prior"]:
+				check(not row.sent and row.received == -1 and row.signal_cost == 0.0,
+					"controle sem sinal não entrega nem cobra: " + arm, failures)
+			if choice >= 0:
+				check(row.choice == choice, "escolha sem sinal independe do lado oculto: " + arm, failures)
+	var result := Balanced.analyze(rows, 1)
+	check(result.summary.active.successes == 2, "oracle chega/bebe nos dois lados", failures)
+	for arm in Balanced.ARMS.slice(1):
+		check(result.summary[arm].successes == 1, "controle pareado tem 50%: " + arm, failures)
+		check(result.comparisons[arm].seed_wins == 1 and result.comparisons[arm].wins == 1,
+			"vitória contada por seed e episódio: " + arm, failures)
+	check(result.status == "PARTIAL", "uma seed não satisfaz mínimo pré-registrado", failures)
+	# A large overall gain cannot hide failure on one side.
+	var synthetic: Array = []
+	for arm in Balanced.ARMS:
+		for seed_value in range(263201, 263209):
+			for side in range(2):
+				var row: Dictionary = rows[0].duplicate(true)
+				row.arm = arm
+				row.seed = seed_value
+				row.side = side
+				row.drank = arm == "active" and (side == 0 or seed_value < 263205)
+				synthetic.append(row)
+	check(Balanced.analyze(synthetic, 8).status == "PARTIAL",
+		"75% agregado com 50% em um lado reprova", failures)
 
 func _dialogue(failures: Array) -> void:
 	var world = garden()

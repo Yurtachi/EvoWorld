@@ -1,11 +1,21 @@
 # E4-SIM — encontros, diálogo e informação assimétrica
 
-[FATO] **PASS no protocolo E4 restrito de simulação.** Em 20 seeds HOLDOUT
-inéditas, o receptor bebeu em 18 episódios com sinal ativo, 8 com canal desligado
-e 10 com sinal embaralhado. Todos os critérios pré-registrados passaram. Isso
-demonstra utilidade causal do conteúdo neste cenário com codificador fixo e
-decodificador aprendido; não demonstra linguagem ou comunicação espontânea no
-ecossistema. A integração visual pertence ao coordenador.
+[FATO] **PASS restrito no NOVO protocolo M0-B contrabalanceado.** Em 20 seeds
+inéditas, cada uma com ambos os lados: ativo 38/40, desligado 20/40, embaralhado
+20/40, uniforme 20/40 e decoder sem sinal com prior TRAIN 20/40. Ativo teve
+18/20 à esquerda e 20/20 à direita; ganho agregado +45 pp e 18 vitórias,
+zero derrotas, dois empates POR SEED contra cada controle. Pré-registro separado
+`33bc81e`, implementação/checkpoint congelados `f7f90f4`, TRAIN/DEV antes do
+HOLDOUT, aberto uma única vez. Dados, custos por lado e limites:
+[`M0_social.md`](M0_social.md). Utilidade demonstrada somente neste cenário
+com codificador fixo e decoder aprendido, sem linguagem emergente.
+
+[FATO] O E4 ORIGINAL abaixo é registro histórico distinto: 18/20 ativo,
+8/20 desligado, 10/20 embaralhado, com distribuição 8E/12D e controle
+desligado sempre esquerda. Seu pré-registro e JSON não foram alterados nem
+reexecutados neste ciclo; a contrabalança e os baselines adicionais pertencem
+ao novo protocolo M0-B. Os limiares originais passaram, mas a comparação antiga
+isolada não elimina a ressalva sobre prior e frequência dos lados.
 
 ## Base e autoria
 

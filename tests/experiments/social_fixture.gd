@@ -25,11 +25,11 @@ class Navigator extends RefCounted:
 static func greedy(q: Array, state: int) -> int:
 	return 1 if float(q[state][1]) > float(q[state][0]) else 0
 
-static func episode(seed_value: int, arm: String, q: Array, explore: bool = false, choice_rng = null, forced_side: int = -1, forced_symbol: int = -1, noise: float = 0.1) -> Dictionary:
+static func episode(seed_value: int, arm: String, q: Array, explore: bool = false, choice_rng = null, forced_side: int = -1, forced_symbol: int = -1, noise: float = 0.1, forced_choice: int = -1) -> Dictionary:
 	var world := World.new(seed_value, {"size": Vector2(640, 400), "creature_count": 0,
 		"food_count": 0, "obstacle_count": 0, "food_regrow": false,
 		"reproduction_enabled": false, "water_enabled": true,
-		"signal_enabled": arm != "disabled", "signal_range": 200.0,
+		"signal_enabled": arm not in ["disabled", "uniform", "prior"], "signal_range": 200.0,
 		"signal_cost": 0.3, "signal_noise": noise, "signal_ttl": 100})
 	var layout := Rng.new(seed_value)
 	var side: int = int(layout.between(0.0, 1.999999)) if forced_side < 0 else forced_side
@@ -61,6 +61,9 @@ static func episode(seed_value: int, arm: String, q: Array, explore: bool = fals
 	var choice := greedy(q, state)
 	if explore and choice_rng.between(0.0, 1.0) < 0.2:
 		choice = int(choice_rng.between(0.0, 1.999999))
+	if forced_choice >= 0:
+		assert(forced_choice <= 1)
+		choice = forced_choice
 	var receiver_policy := Navigator.new()
 	receiver_policy.goal = TARGETS[choice]
 	receiver.brain = receiver_policy
