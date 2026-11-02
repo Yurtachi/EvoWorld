@@ -3,7 +3,7 @@ extends RefCounted
 ## Receives observed consequences only; has no access to a creature's body.
 const Data = preload("res://scripts/core/sim_data.gd")
 const STATES := ["frustracao", "tranquilidade", "entusiasmo", "receio", "solidao", "satisfacao", "saturacao_social"]
-const CAUSES := ["decay", "blocked_motion", "need_satisfied", "toxic_exposure", "contact", "adverse_contact", "prolonged_contact", "absence_of_contact", "safe_rest", "free_movement"]
+const CAUSES := ["decay", "blocked_motion", "need_satisfied", "toxic_exposure", "contact", "adverse_contact", "prolonged_contact", "absence_of_contact", "safe_rest", "free_movement", "object_contact"]
 const LOG_LIMIT := 96
 var values: Dictionary = {}
 var cause_log: Array = []

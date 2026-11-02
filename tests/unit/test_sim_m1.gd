@@ -175,7 +175,7 @@ func _persistence(f: Array) -> void:
 		b.step()
 	check(snapshot(a) == snapshot(b), "mesma seed divergiu com M1", f)
 	var c = World.from_dict(JSON.parse_string(snapshot(a)))
-	check(c != null and c.to_dict().save_version == 8 and snapshot(a) == snapshot(c), "v8 roundtrip perdeu mind", f)
+	check(c != null and c.to_dict().save_version == World.SAVE_VERSION and snapshot(a) == snapshot(c), "roundtrip perdeu mind", f)
 	if c == null: return
 	for i in 100:
 		a.step()
