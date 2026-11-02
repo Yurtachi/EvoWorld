@@ -11,6 +11,7 @@ const FpsChart = preload("res://scripts/ui/fps_chart.gd")
 const PersonalityInspector = preload("res://scripts/ui/personality_inspector.gd")
 const TeachingPanel = preload("res://scripts/ui/teaching_panel.gd")
 const KnowledgePresenter = preload("res://scripts/ui/knowledge_presenter.gd")
+const TerminalPresenter = preload("res://scripts/ui/terminal_presenter.gd")
 const Books = preload("res://scripts/library/book_catalog.gd")
 const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
@@ -116,6 +117,18 @@ var book_type := "guia_capsulas"
 var knowledge_dialog: AcceptDialog
 var knowledge_text: Label
 var reading_text: Label
+var terminal_activity_label: Label
+var terminal_dialog: AcceptDialog
+var terminal_panel_text: Label
+var terminal_console_dialog: AcceptDialog
+var console_warning_label: Label
+var console_device_choice: OptionButton
+var console_input: LineEdit
+var console_output: Label
+var manual_dialog: AcceptDialog
+var manual_choice: OptionButton
+var refuse_dialog: AcceptDialog
+var refuse_duration_input: SpinBox
 var question_card: VBoxContainer
 var question_text: Label
 var question_buttons: Dictionary = {}
@@ -168,6 +181,7 @@ func _ready() -> void:
 	_build_objects()
 	_build_demo()
 	_build_library()
+	_build_terminal_ui()
 	_set_speed(speed)
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
 	get_viewport().size_changed.connect(_fit_world)
@@ -330,8 +344,13 @@ func _build_ui() -> void:
 		question_buttons[option].add_theme_font_size_override("font_size", 12)
 	question_card.hide()
 	reading_text = _wrapped(inspector, "")
+	terminal_activity_label = _wrapped(inspector, "")
 	_button(inspector, Texto.texto("m3c_open"), _open_knowledge)
 	_button(inspector, Texto.texto("m3c_tutorial_btn"), _open_library_tutorial)
+	_button(inspector, Texto.texto("m4b_terminal_btn"), _open_terminal_panel)
+	_button(inspector, Texto.texto("m4b_offer_manual_btn"), _open_offer_manual)
+	_button(inspector, Texto.texto("m4b_refuse_btn"), _open_refuse_dialog)
+	_button(inspector, Texto.texto("m4b_tutorial_btn"), _open_terminal_tutorial)
 	_label(inspector, Texto.texto("m1_state"), 12, Color("bccc98"))
 	mind_emotion = _wrapped(inspector, "")
 	mind_emotion.add_theme_font_size_override("font_size", 20)
@@ -460,6 +479,9 @@ func _build_ui() -> void:
 	bottom_col.add_child(food_row)
 	tool_buttons["book"] = _button(food_row, Texto.texto("tool_book"), _open_books)
 	tool_buttons.book.toggle_mode = true
+	tool_buttons["terminal"] = _button(food_row, Texto.texto("tool_terminal"), _set_tool.bind("terminal"))
+	tool_buttons.terminal.toggle_mode = true
+	_button(food_row, Texto.texto("m4b_console_btn"), _open_terminal_console)
 	for kind in ["fruta", "semente", "folha", "cogumelo"]:
 		var button := _button(food_row, Texto.texto("tool_" + kind), _choose_food.bind(kind))
 		button.icon = _food_icon(kind)
@@ -533,7 +555,7 @@ func _confirm_new_world() -> void:
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
-	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible):
+	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -558,7 +580,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible):
+	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -580,7 +602,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible):
+	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible) or (terminal_dialog != null and terminal_dialog.visible) or (terminal_console_dialog != null and terminal_console_dialog.visible) or (manual_dialog != null and manual_dialog.visible) or (refuse_dialog != null and refuse_dialog.visible):
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -617,6 +639,9 @@ func _apply_tool(pos: Vector2) -> void:
 		"book":
 			var id := world.place_book(pos, book_type)
 			_notify(Texto.texto("m3c_placed", [id, Texto.texto("book_" + book_type)]) if id >= 0 else Texto.texto("m3c_blocked"), 10)
+		"terminal":
+			var id := world.place_terminal(pos)
+			_notify(Texto.texto("m4b_placed", [id]) if id >= 0 else Texto.texto("m4b_blocked"), 10)
 		"board":
 			var id := world.place_board(pos)
 			if id >= 0:
@@ -662,6 +687,7 @@ func _apply_tool(pos: Vector2) -> void:
 
 func _refresh() -> void:
 	_refresh_library()
+	_refresh_terminal_ui()
 	_refresh_mind()
 	_refresh_atelier()
 	teaching.observe(world, selected_id)
@@ -1122,6 +1148,10 @@ func _capture_demo(path: String) -> void:
 			await _benchmark_fps(path)
 			get_tree().quit()
 			return
+	if state.begins_with("m4b-"):
+		await _capture_m4b(state, path)
+		get_tree().quit()
+		return
 	if state.begins_with("m3c-"):
 		await _capture_m3c(state, path)
 		get_tree().quit()
@@ -1567,6 +1597,7 @@ func _benchmark_fps(path: String) -> void:
 		_selected_board_id = bench_board_id
 		world.demonstrar_forma(bench_board_id, "circulo", {"scale": 1.0, "center": [32.0, 32.0]})
 	world.place_book(world.creatures[world.pet_id].pos + Vector2(42, 18), "guia_capsulas")
+	world.place_terminal(world.creatures[world.pet_id].pos + Vector2(-30, 24))
 	paused = false
 	_set_speed(1)
 	var warmup := Time.get_ticks_msec() + 2000
@@ -1589,6 +1620,7 @@ func _benchmark_fps(path: String) -> void:
 	result["active_minds"] = world.mind_enabled_ids.size()
 	result["objects"] = world.objects.size()
 	result["books"] = world.library.books.size()
+	result["terminals"] = world.terminals.size()
 	result["boards"] = world.boards.size()
 	result["gallery"] = world.gallery.size()
 	result["pet_mind_active"] = world.creatures.has(world.pet_id) and world.creatures[world.pet_id].mind != null
@@ -1599,7 +1631,9 @@ func _benchmark_fps(path: String) -> void:
 	else:
 		printerr("Benchmark: caminho de saída não gravável; use caminho absoluto.")
 	paused = true
-	if path.get_file().begins_with("M3c-"):
+	if path.get_file().begins_with("M4b-"):
+		_notify(Texto.texto("m4b_fps", [world.creatures.size(), Texto.numero(mean), world.terminals.size(), world.mind_enabled_ids.size()]), 15)
+	elif path.get_file().begins_with("M3c-"):
 		_notify(Texto.texto("m3c_fps", [world.creatures.size(), Texto.numero(mean), world.library.books.size(), world.mind_enabled_ids.size()]), 15)
 	elif path.get_file().begins_with("M3-"):
 		_notify(Texto.texto("m3_fps_sample", [world.creatures.size(), Texto.numero(mean), world.boards.size(), world.objects.size(), world.mind_enabled_ids.size(), Texto.texto("yes" if result.pet_mind_active else "no")]), 15)
@@ -1848,8 +1882,17 @@ func _open_objects() -> void:
 	object_dialog.popup_centered()
 
 func _tutorial_move(direction: int) -> void:
-	tutorial_step = clampi(tutorial_step + direction, 0, 6)
-	tutorial_text.text = Texto.texto("m1_tutorial_step", [tutorial_step + 1, Texto.texto("m3c_tutorial" if tutorial_step == 6 else "m1_tutorial_" + str(tutorial_step))])
+	tutorial_step = clampi(tutorial_step + direction, 0, 7)
+	var step_str := ""
+	if tutorial_step == 7:
+		step_str = Texto.texto("m4b_tutorial")
+		tutorial_text.text = "8/8 · " + step_str
+	elif tutorial_step == 6:
+		step_str = Texto.texto("m3c_tutorial")
+		tutorial_text.text = Texto.texto("m1_tutorial_step", [7, step_str])
+	else:
+		step_str = Texto.texto("m1_tutorial_" + str(tutorial_step))
+		tutorial_text.text = Texto.texto("m1_tutorial_step", [tutorial_step + 1, step_str])
 
 func _capture_m1(state: String, path: String) -> void:
 	# Explicit inspection fixture with physical consequences; never normal gameplay.
@@ -2449,4 +2492,223 @@ func _capture_m3(state: String, path: String) -> void:
 	var until := Time.get_ticks_msec() + 800
 	while Time.get_ticks_msec() < until:
 		await get_tree().process_frame
+	await capture_screenshot(path)
+
+func _build_terminal_ui() -> void:
+	terminal_dialog = _window("m4b_terminal_panel_title", Vector2i(610, 480))
+	var term_col := _window_column(terminal_dialog)
+	terminal_panel_text = _wrapped(term_col, "")
+
+	terminal_console_dialog = _window("m4b_console_title", Vector2i(640, 520))
+	var console_col := _window_column(terminal_console_dialog)
+	console_warning_label = _wrapped(console_col, Texto.texto("m4b_console_warning"))
+	var warn := console_warning_label
+	warn.add_theme_color_override("font_color", Color("ffdda5"))
+	_wrapped(console_col, Texto.texto("m4b_console_note"))
+
+	var dev_row := HBoxContainer.new()
+	console_col.add_child(dev_row)
+	_label(dev_row, "Terminal:", 12, Color("bccc98"))
+	console_device_choice = OptionButton.new()
+	console_device_choice.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	dev_row.add_child(console_device_choice)
+
+	_label(console_col, "Comandos rápidos (clique para inserir):", 12, Color("bccc98"))
+	var cmd_grid := GridContainer.new()
+	cmd_grid.columns = 4
+	console_col.add_child(cmd_grid)
+	for cmd_sample in ["OLHAR", "AJUDA", "MARCAR 3 0", "MOVER LESTE 2", "DESENHAR CIRCULO", "LER mapa", "LER livro_desenho", "REPETIR 2 { MOVER LESTE 1 }"]:
+		var b := _button(cmd_grid, cmd_sample, func(): console_input.text = cmd_sample)
+		b.add_theme_font_size_override("font_size", 11)
+
+	console_input = LineEdit.new()
+	console_input.placeholder_text = Texto.texto("m4b_console_placeholder")
+	console_col.add_child(console_input)
+	console_input.text_submitted.connect(func(_t): _run_console_command())
+
+	var btn_row := HBoxContainer.new()
+	console_col.add_child(btn_row)
+	_button(btn_row, Texto.texto("m4b_console_run"), _run_console_command)
+	_button(btn_row, Texto.texto("m4b_console_clear"), func(): console_output.text = "")
+
+	_label(console_col, Texto.texto("m4b_console_virtual_out"), 12, Color("bccc98"))
+	var out_scroll := ScrollContainer.new()
+	out_scroll.custom_minimum_size.y = 130
+	out_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	console_col.add_child(out_scroll)
+	console_output = _wrapped(out_scroll, "")
+
+	manual_dialog = _window("m4b_offer_manual_title", Vector2i(480, 260))
+	var man_col := _window_column(manual_dialog)
+	_wrapped(man_col, "Escolha um manual anexo para oferecer à criatura selecionada:")
+	manual_choice = OptionButton.new()
+	man_col.add_child(manual_choice)
+	for mkey in ["mapa", "livro_desenho", "livro_repeticao"]:
+		manual_choice.add_item(Texto.texto("m4b_manual_" + mkey))
+	_button(man_col, Texto.texto("m4b_offer_manual_confirm"), _confirm_offer_manual)
+
+	refuse_dialog = _window("m4b_refuse_dialog_title", Vector2i(440, 240))
+	var ref_col := _window_column(refuse_dialog)
+	_wrapped(ref_col, Texto.texto("m4b_refuse_duration"))
+	refuse_duration_input = SpinBox.new()
+	refuse_duration_input.min_value = 1
+	refuse_duration_input.max_value = 10000
+	refuse_duration_input.value = 180
+	ref_col.add_child(refuse_duration_input)
+	_button(ref_col, Texto.texto("m4b_refuse_confirm"), _confirm_refuse)
+
+func _open_terminal_console() -> void:
+	console_device_choice.clear()
+	for dev in world.terminals:
+		console_device_choice.add_item(Texto.texto("m4b_console_device", [int(dev.id)]), int(dev.id))
+	if console_device_choice.item_count == 0:
+		console_device_choice.add_item(Texto.texto("m4b_console_no_terminal"), -1)
+	terminal_console_dialog.popup_centered()
+
+func _run_console_command() -> void:
+	var cmd: String = console_input.text.strip_edges()
+	if cmd.is_empty(): return
+	var c = world.creatures.get(selected_id)
+	var term_id := -1
+	if console_device_choice.selected >= 0 and console_device_choice.item_count > 0:
+		term_id = console_device_choice.get_item_id(console_device_choice.selected)
+	if term_id < 0 and not world.terminals.is_empty():
+		term_id = int(world.terminals[0].id)
+
+	var Pure = preload("res://scripts/terminal/terminal.gd")
+	var TerminalState = preload("res://scripts/terminal/terminal_estado.gd")
+	var TerminalAdapter = preload("res://scripts/terminal/terminal_mundo_real.gd")
+	var TerminalFake = preload("res://scripts/terminal/terminal_mundo_falso.gd")
+
+	var adapter = null
+	if term_id >= 0 and c != null and world._terminal_ready(c, term_id):
+		adapter = TerminalAdapter.new(world, c, term_id)
+	else:
+		adapter = TerminalFake.new()
+
+	var state = TerminalState.new()
+	state.discover("MARCAR", "manual")
+	state.discover("MOVER", "manual")
+	state.discover("LER", "manual")
+	state.discover("DESENHAR", "livro")
+	state.discover("REPETIR", "livro")
+
+	var res: Dictionary = Pure.new().execute(cmd, adapter, state, world.tick)
+	var lines: Array[String] = []
+	lines.append("> " + cmd)
+	lines.append("Resultado: %s (ok=%s)" % [res.get("mensagem", ""), str(res.get("ok", false))])
+	var events: Array = res.get("eventos", [])
+	for ev in events:
+		var ev_cmd = ev.get("comando", "")
+		var ev_args = ev.get("args", [])
+		var ev_msg = ev.get("resultado", {}).get("mensagem", "")
+		var line = "  • %s %s → %s" % [ev_cmd, str(ev_args), ev_msg]
+		if ev.has("descoberto") and not str(ev.descoberto).is_empty():
+			line += " [Comando descoberto: %s]" % str(ev.descoberto)
+		if ev.has("dados") and not ev.dados.is_empty():
+			line += " %s" % str(ev.dados)
+		lines.append(line)
+	if console_output.text.is_empty():
+		console_output.text = "\n".join(lines)
+	else:
+		console_output.text = console_output.text + "\n\n" + "\n".join(lines)
+
+func _open_terminal_panel() -> void:
+	var c = world.creatures.get(selected_id)
+	terminal_panel_text.text = TerminalPresenter.describe(c, world)
+	terminal_dialog.title = Texto.texto("m4b_terminal_panel_title") + (" · " + Texto.nome_criatura(c.name) if c != null else "")
+	terminal_dialog.popup_centered()
+
+func _open_offer_manual() -> void:
+	manual_dialog.popup_centered()
+
+func _confirm_offer_manual() -> void:
+	manual_dialog.hide()
+	var c = world.creatures.get(selected_id)
+	if c == null: return
+	var books := ["mapa", "livro_desenho", "livro_repeticao"]
+	var selected_book: String = books[clampi(manual_choice.selected, 0, books.size() - 1)]
+	var nearest_id := -1
+	var nearest_dist := INF
+	for dev in world.terminals:
+		var d = c.pos.distance_to(dev.pos)
+		if d < nearest_dist:
+			nearest_dist = d
+			nearest_id = int(dev.id)
+	if nearest_id < 0 or nearest_dist > 50.0:
+		_notify(Texto.texto("m4b_offer_manual_no_terminal"), 10)
+		return
+	var ok: bool = world.terminal_offer_manual(c, nearest_id, selected_book)
+	_notify(Texto.texto("m4b_offer_manual_ok" if ok else "m4b_offer_manual_refused"), 10)
+	_refresh()
+
+func _open_refuse_dialog() -> void:
+	refuse_dialog.popup_centered()
+
+func _confirm_refuse() -> void:
+	refuse_dialog.hide()
+	var c = world.creatures.get(selected_id)
+	if c == null: return
+	var duration: int = int(refuse_duration_input.value)
+	var ok: bool = world.terminal_refuse(c, duration)
+	_notify(Texto.texto("m4b_refuse_ok", [duration]) if ok else Texto.texto("m4b_refuse_failed"), 10)
+	_refresh()
+
+func _open_terminal_tutorial() -> void:
+	tutorial_step = 7
+	_tutorial_move(0)
+	tutorial_dialog.popup_centered()
+
+func _refresh_terminal_ui() -> void:
+	if terminal_activity_label == null: return
+	var creature = world.creatures.get(selected_id)
+	terminal_activity_label.text = TerminalPresenter.status_line(creature, world)
+	if terminal_dialog != null and terminal_dialog.visible:
+		terminal_dialog.title = Texto.texto("m4b_terminal_panel_title") + (" · " + Texto.nome_criatura(creature.name) if creature != null else "")
+		terminal_panel_text.text = TerminalPresenter.describe(creature, world)
+
+func _m4b_fixture() -> void:
+	_m3c_fixture()
+	var creature = world.creatures[selected_id]
+	creature.energy = creature.max_energy * 0.95
+	creature.hydration = 95.0
+	creature.genome.temperament = {"curiosity": 0.95, "caution": 0.2, "sociability": 0.8, "impulsivity": 0.8}
+	creature.heading = 0.0
+
+func _capture_m4b(state: String, path: String) -> void:
+	_m4b_fixture()
+	var creature = world.creatures[selected_id]
+	var term_id := world.place_terminal(creature.pos + Vector2(36, 0))
+	_set_tool("terminal")
+
+	if state == "m4b-tool":
+		_refresh()
+	elif state == "m4b-console":
+		_open_terminal_console()
+		console_input.text = "AJUDA"
+		_run_console_command()
+		console_input.text = "MARCAR 3 0"
+		_run_console_command()
+	elif state == "m4b-creature":
+		world.terminal_offer_manual(creature, term_id, "mapa")
+		world.terminal_set_task(creature, "marcar_mover", Vector2i(3, 0))
+		world.step()
+		_open_terminal_panel()
+	elif state == "m4b-manual":
+		_open_offer_manual()
+	elif state == "m4b-refusal":
+		world.terminal_refuse(creature, 180)
+		_refresh()
+		_open_refuse_dialog()
+	elif state == "m4b-lab":
+		_show_lab(true)
+		lab_scroll.scroll_vertical = 0
+	elif state == "m4b-tutorial":
+		_open_terminal_tutorial()
+
+	camera.position = creature.pos + Vector2(15, 0) + _camera_bias()
+	_notify(Texto.texto("m4b_banner"), 20)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	print(JSON.stringify({"capture": state, "tick": world.tick, "action": creature.last_action, "terminals": world.terminals.size()}))
 	await capture_screenshot(path)

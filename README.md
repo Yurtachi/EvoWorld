@@ -1,4 +1,4 @@
-﻿# EvoWorld
+# EvoWorld
 
 Jardim de vida artificial em **Godot 4.7.2** e GDScript, executado localmente, sem rede ou Python durante o jogo. Adote um companheiro, ofereça alimento, introduza organismos e examine reprodução, herança, decisões e sinais registrados. A interface está em português brasileiro.
 
@@ -213,6 +213,39 @@ godot --path . -- --fps-benchmark=12 "--capture=$m3cReports/M3c-fps-12.png" --ca
 ```
 
 Também existem `m3c-catalog`, `m3c-approaching`, `m3c-answer`, `m3c-knowledge`, `m3c-contradiction`, `m3c-symbols`, `m3c-lab`, `m3c-ablation` e `m3c-tutorial`. São cenários de inspeção, seed 81303, com pet curioso/sociável, percepção de 360° e reservas iniciais altas; páginas avançam por `world.step()`. Pergunta, resposta, contato e demonstração de glifo usam as APIs reais. O benchmark usa a cena normal, seed 7421, 12 criaturas, uma mente ativa, um livro, três objetos e um quadro: não mede 12 mentes. Nenhum modo reabre avaliadores científicos ou grava saves pessoais. Validação, capturas e limites: [reports/M3c_ui.md](reports/M3c_ui.md).
+
+## M4b: terminal fictício, console e autonomia
+
+A ferramenta **Terminal**, localizada na segunda linha do rodapé (`world.place_terminal`), permite colocar um pedestal de pedra entalhada com visor de cristal/pergaminho luminescente e três abas de manuais afixados coloridos (*mapa*, *livro de desenho* e *livro de repetição*). O dispositivo tem aspecto puramente artesanal e fantástico, sem nenhuma semelhança visual com consoles de sistemas operacionais.
+
+O **Console virtual**, acessível por botão dedicado ou atalho, oferece ao jogador um console opcional e intencional. O diálogo exibe tarja de aviso obrigatória: *"terminal fictício: não executa comandos do computador"*. Aceita a DSL fictícia (`OLHAR`, `MARCAR`, `MOVER`, `DESENHAR`, `REPETIR`, `AJUDA`, `LER`), botões de inserção rápida e exibe respostas do mundo virtual em português brasileiro. Tentativas de executar comandos do sistema operacional hospedeiro (como `dir`, `ls`, `rm`, `powershell`, etc.) são ativamente rejeitadas pelo simulador.
+
+No painel de Convivência, a seção **Terminal** da criatura detalha:
+- Comandos conhecidos e sua procedência estrita (`inicial`, `ajuda`, `manual`, `livro`, `pratica`).
+- Histórico recente de tentativas com carimbo de passo, comando e status de sucesso ou erro catalogado.
+- Sequência funcional observada por objetivo em andamento.
+- Estado de recusa ou adiamento voluntário com contagem regressiva de passos.
+- **Auditoria honesta do experimento X7**: esclarece com rigor que um programa fixo roteirizado atinge o mesmo ou mais que o aprendizado (100% vs 87,5%), não há prova científica de aprendizado autônomo de soluções gerais, e a auditoria de save no holdout congelado registrou FAIL global inicial, corrigido na integração pós-holdout.
+
+O cuidador pode interagir através de **Oferecer manual** (`terminal_offer_manual`) para guiar a criatura na consulta dos manuais afixados, ou acionar **Adiar / recusar terminal** (`terminal_refuse`) para conceder uma pausa nas tarefas do terminal e priorizar necessidades vitais ou exploração livre.
+
+No **Laboratório**, a seção M4b reúne a taxonomia de erros (`CMD_UNKNOWN`, `SYNTAX_INVALID`, `PHYS_TARGET_UNREACHABLE`, etc.), os limites de ablação procedural (sem tabela de comandos o sucesso cai a 0%), a tabela de limites de CPU headless (24,7 µs/passo isolado de terminal; ~40.500 passos/s em 1 núcleo) e a lista expandida de execuções da criatura selecionada. O botão **Roteiro · terminal fictício** abre a 8ª etapa do tutorial dentro do jogo.
+
+Reproduza as capturas e benchmark do build atual com caminho absoluto:
+
+```powershell
+$m4bReports = (Resolve-Path reports).Path.Replace('\', '/')
+godot --path . -- "--capture=$m4bReports/M4b-tool.png" --capture-state=m4b-tool --capture-minimum
+godot --path . -- "--capture=$m4bReports/M4b-console.png" --capture-state=m4b-console --capture-minimum
+godot --path . -- "--capture=$m4bReports/M4b-creature.png" --capture-state=m4b-creature --capture-minimum
+godot --path . -- "--capture=$m4bReports/M4b-manual.png" --capture-state=m4b-manual --capture-minimum
+godot --path . -- "--capture=$m4bReports/M4b-refusal.png" --capture-state=m4b-refusal --capture-minimum
+godot --path . -- "--capture=$m4bReports/M4b-lab.png" --capture-state=m4b-lab --capture-minimum
+godot --path . -- "--capture=$m4bReports/M4b-tutorial.png" --capture-state=m4b-tutorial --capture-minimum
+godot --path . -- --fps-benchmark=12 "--capture=$m4bReports/M4b-fps-12.png" --capture-minimum
+```
+
+O benchmark com 12 criaturas e 1 terminal físico ativo no jardim atinge média superior a 100 FPS (103,20 FPS medidos, p95 de 13,08 ms). Todas as informações persistem no save v13. Relatório completo em [reports/M4b_ui.md](reports/M4b_ui.md).
 
 ## E1: capturas e mini gráfico de quadros/s
 

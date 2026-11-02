@@ -247,8 +247,9 @@ func _verify() -> void:
 	await _verify_m2(main, folder)
 	await _verify_m3(main, folder)
 	await _verify_m3c(main, folder)
+	await _verify_m4b(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
-	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog, main.demo_dialog]:
+	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog, main.demo_dialog, main.terminal_dialog, main.terminal_console_dialog, main.manual_dialog, main.refuse_dialog]:
 		dialog.popup_centered()
 		await process_frame
 		await process_frame
@@ -938,6 +939,88 @@ func _verify_m3c(main, folder: String) -> void:
 	main._open_knowledge()
 	_expect(main.reading_text.text.is_empty() and not main.knowledge_text.text.contains("O cuidador disse"), "M3c troca de seleção limpa conhecimento")
 	main.knowledge_dialog.hide()
+
+func _verify_m4b(main, folder: String) -> void:
+	main._m4b_fixture()
+	var c = main.world.creatures[main.selected_id]
+	# 1. Ferramenta Terminal
+	main.tool_buttons.terminal.pressed.emit()
+	var term_pos: Vector2 = c.pos + Vector2(6, 0)
+	main._apply_tool(term_pos)
+	_expect(main.world.terminals.size() == 1, "M4b ferramenta terminal coloca dispositivo no mundo")
+	var term_id: int = int(main.world.terminals[0].id)
+	_expect(main.status.text.contains("Terminal #"), "M4b status informa colocação do terminal com ID")
+
+	# 2. Console fictício do jogador
+	main._open_terminal_console()
+	_expect(main.terminal_console_dialog.visible, "M4b console do jogador abre quando solicitado")
+	_expect(main.console_warning_label != null and main.console_warning_label.text.contains("terminal fictício: não executa comandos do computador"), "M4b console possui aviso explícito de terminal fictício")
+
+	# Testar execução de comandos fictícios no console
+	main.console_input.text = "AJUDA"
+	main._run_console_command()
+	_expect(main.console_output.text.contains("Resultado:") and main.console_output.text.contains("A ação virtual foi concluída"), "M4b console executa AJUDA e mostra resposta virtual em pt-BR")
+
+	main.console_input.text = "MARCAR 3 0"
+	main._run_console_command()
+	_expect(main.console_output.text.contains("MARCAR"), "M4b console registra evento de MARCAR")
+
+	# Testar rejeição de comandos hostis / shell
+	main.console_input.text = "powershell -Command Get-Process"
+	main._run_console_command()
+	_expect(main.console_output.text.contains("não existe") or main.console_output.text.contains("não pertence") or main.console_output.text.contains("recusou"), "M4b console recusa comando de shell/OS sem executar no host")
+	main.terminal_console_dialog.hide()
+
+	# 3. Painel Terminal da criatura
+	main._refresh()
+	main._open_terminal_panel()
+	_expect(main.terminal_dialog.visible, "M4b painel terminal da criatura abre")
+	_expect(main.terminal_panel_text.text.contains("COMANDOS CONHECIDOS") and main.terminal_panel_text.text.contains("OLHAR") and main.terminal_panel_text.text.contains("AJUDA"), "M4b painel lista comandos conhecidos iniciais")
+	_expect(main.terminal_panel_text.text.contains("AVALIAÇÃO EXPERIMENTAL X7") and main.terminal_panel_text.text.contains("prova científica") and main.terminal_panel_text.text.contains("FAIL global"), "M4b painel contém texto honesto do X7 com limites e FAIL global")
+	main.terminal_dialog.hide()
+
+	# 4. Oferecer manual à criatura
+	main._open_offer_manual()
+	_expect(main.manual_dialog.visible and main.manual_choice.item_count == 3, "M4b diálogo oferecer manual abre com 3 opções")
+	main.manual_choice.select(0)
+	main._confirm_offer_manual()
+	_expect(main.world.terminal_snapshot(c).state.conhecidos.has("MARCAR"), "M4b oferecer manual revela novo comando (MARCAR)")
+
+	# 5. Adiar / recusar terminal
+	main._open_refuse_dialog()
+	_expect(main.refuse_dialog.visible, "M4b diálogo de recusa/adiamento abre")
+	main.refuse_duration_input.value = 240
+	main._confirm_refuse()
+	var snap = main.world.terminal_snapshot(c)
+	_expect(int(snap.refusal_until) >= main.world.tick + 200, "M4b criatura adia terminal e status reflete recusa")
+	_expect(main.terminal_activity_label.text.contains("Recusa / adiamento ativo"), "M4b inspector indica recusa/adiamento ativo")
+
+	# 6. Laboratório: M4b seções
+	main._show_lab(true)
+	_expect(main.lab.terminal_history != null and main.lab.terminal_memory_status != null, "M4b componentes de terminal presentes no Laboratório")
+	main.lab.terminal_history_open.button_pressed = true
+	_expect(main.lab.terminal_history.visible and main.lab.terminal_history.text.contains("COMANDOS CONHECIDOS"), "M4b histórico de terminal expansível no Laboratório")
+	_expect(main.lab.terminal_memory_status.text.contains("Memória ativa") or main.lab.terminal_memory_status.text.contains("Memória em ablação"), "M4b ablação e status de memória do terminal visíveis no Laboratório")
+
+	# 7. Tutorial: passo 8
+	main._open_terminal_tutorial()
+	_expect(main.tutorial_dialog.visible and main.tutorial_step == 7 and main.tutorial_text.text.contains("8/8"), "M4b tutorial atualizado com passo 8 sobre terminal")
+	main.tutorial_dialog.hide()
+
+	# 8. Teste de save/load com terminal no mundo
+	var m4b_dir := folder.path_join("m4b")
+	DirAccess.make_dir_recursive_absolute(m4b_dir)
+	main.store = Store.new(m4b_dir)
+	main.settings_path = m4b_dir.path_join("settings.cfg")
+	main._save()
+	var saved_dict: Dictionary = main.world.to_dict()
+	main._load()
+	_expect(main.world.terminals.size() == 1 and main.world.to_dict() == saved_dict, "M4b save/load v13 restaura terminais e estado pela UI")
+
+	# Limpeza de seleção
+	main.selected_id = -1
+	main._refresh()
+	_expect(main.terminal_activity_label.text.is_empty(), "M4b desmarcar seleção limpa atividade do terminal")
 
 func _verify_m3(main, folder: String) -> void:
 	main._m3_fixture()
