@@ -1,0 +1,26 @@
+{
+	"active_minds": 1,
+	"adapter": "NVIDIA GeForce RTX 2050",
+	"boards": 1,
+	"books": 1,
+	"display": "Windows",
+	"final_population": 1,
+	"frames": 1322,
+	"gallery": 0,
+	"godot": "4.7.2-stable (official)",
+	"initial_population": 1,
+	"mean_fps": 165.23517014348,
+	"memory_overlay": true,
+	"objects": 3,
+	"p95_frame_ms": 8.243,
+	"pet_mind_active": true,
+	"remembered_places": 5,
+	"seconds": 8.000718,
+	"speed": 1.0,
+	"terminals": 1,
+	"tick": 144,
+	"window": [
+		1280,
+		720
+	]
+}
