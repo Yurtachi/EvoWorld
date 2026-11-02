@@ -3,12 +3,23 @@ extends RefCounted
 const Data = preload("res://scripts/core/sim_data.gd")
 const LIMIT := 64
 const TTL := 36000
+const RETRY := 45
+const REASSESS := 1800
+const ABANDON_EXPECTATION := 0.25
 const REASONS := ["", "spatial.expected", "spatial.explore", "spatial.inspect", "spatial.failure", "spatial.visible"]
 
 static func empty(cell_size: float = 80.0) -> Dictionary:
 	return {"version": 1, "enabled": true, "cell_size": cell_size, "lugares": [],
 		"objetivo_atual": "", "motivo": "", "busca_indice": -1, "arrival_tick": -1,
 		"buscas": 0, "detour_until": 0, "explore_until": 0, "systematic": false}
+
+static func enable_revision(s: Dictionary) -> void:
+	# Opt-in at new-world creation. Existing v1 saves retain their exact policy.
+	s.version = 2
+	s["scan_mask"] = 0
+
+static func revised(s: Dictionary) -> bool:
+	return int(s.get("version", 1)) == 2
 
 static func key_for(resource: String, pos: Vector2, cell_size: float) -> String:
 	return "%s:%d:%d" % [resource, floori(pos.x / cell_size), floori(pos.y / cell_size)]
@@ -32,8 +43,10 @@ static func find(s: Dictionary, key: String) -> Dictionary:
 		if row.id == key: return row
 	return {}
 
-static func evidence(s: Dictionary, resource: String, pos: Vector2, tick: int, success: bool, gain: float = 0.0, source: String = "observado") -> void:
+static func evidence(s: Dictionary, resource: String, pos: Vector2, tick: int, success: bool, gain: float = 0.0, source: String = "observado", coverage: float = 1.0) -> void:
 	if not s.enabled: return
+	coverage = clampf(coverage, 0.0, 1.0)
+	if not success and revised(s) and coverage <= 0.0: return
 	var key := key_for(resource, pos, float(s.cell_size))
 	var row := find(s, key)
 	if row.is_empty():
@@ -63,10 +76,20 @@ static func evidence(s: Dictionary, resource: String, pos: Vector2, tick: int, s
 	else:
 		row.falhas = mini(1000000, int(row.falhas) + 1)
 		row.consecutivas = mini(1000000, int(row.consecutivas) + 1)
-		row.alpha = snappedf(float(row.alpha) * 0.45, 0.000001)
-		row.beta = snappedf(float(row.beta) * 0.45 + 1.0, 0.000001)
-		row.retry_tick = tick + 180 * mini(10, int(row.consecutivas))
+		if revised(s):
+			# Missing a resource is informative in proportion to inspected area.
+			# A full empty survey outweighs a single earlier positive encounter.
+			var discount := pow(0.35, coverage)
+			row.alpha = snappedf(float(row.alpha) * discount, 0.000001)
+			row.beta = snappedf(float(row.beta) * discount + 1.5 * coverage, 0.000001)
+			row.retry_tick = tick + RETRY
+		else:
+			row.alpha = snappedf(float(row.alpha) * 0.45, 0.000001)
+			row.beta = snappedf(float(row.beta) * 0.45 + 1.0, 0.000001)
+			row.retry_tick = tick + 180 * mini(10, int(row.consecutivas))
 	refresh(row, tick)
+	if not success and revised(s) and (float(row.expectativa) < ABANDON_EXPECTATION or int(row.consecutivas) >= 3):
+		row.retry_tick = tick + REASSESS
 
 static func observe(s: Dictionary, sensors: Dictionary, tick: int) -> void:
 	if not s.enabled: return
@@ -77,15 +100,34 @@ static func observe(s: Dictionary, sensors: Dictionary, tick: int) -> void:
 
 static func best(s: Dictionary, resource: String, pos: Vector2, tick: int) -> Dictionary:
 	var winner: Dictionary = {}
+	var verification: Dictionary = {}
+	var verification_value := -1.0
 	var highest := 0.015 # Exploration has a small positive opportunity value.
+	# Water regions persist physically; one observed shore is usable evidence.
+	# When thirst asks for water, a known shore beats blind wandering even at
+	# a distance. Food still requires repeated rewards before habitual recall.
+	var shore := revised(s) and resource == "agua"
+	if shore: highest = 0.0
 	if not s.enabled or tick < int(s.explore_until): return winner
 	for row in s.lugares:
-		if row.recurso != resource or int(row.retry_tick) > tick or int(row.consecutivas) >= 3 or int(row.achados) < 3: continue
-		var value := float(row.expectativa) * float(row.confianca) * float(row.ganho_medio) / (40.0 + pos.distance_to(Data.unpack_vector(row.pos)))
+		if row.recurso != resource or int(row.retry_tick) > tick or int(row.achados) < (1 if shore else 3): continue
+		if not revised(s) and int(row.consecutivas) >= 3: continue
+		var expectation := float(row.expectativa)
+		# An abandoned formerly rewarding site merits a bounded future probe,
+		# not a fabricated positive observation. Its posterior stays unchanged.
+		if revised(s) and int(row.consecutivas) > 0 and (expectation < ABANDON_EXPECTATION or int(row.consecutivas) >= 3):
+			expectation = 0.5
+		var value := expectation * float(row.confianca) * float(row.ganho_medio) / (40.0 + pos.distance_to(Data.unpack_vector(row.pos)))
+		# A first inconclusive absence creates a short confirmation task. Its
+		# information value must not disappear merely because expected food value
+		# fell below exploration's reward threshold; abandonment ends this task.
+		if revised(s) and int(row.consecutivas) in [1, 2] and float(row.expectativa) >= ABANDON_EXPECTATION and value > verification_value:
+			verification = row
+			verification_value = value
 		if value > highest:
 			highest = value
 			winner = row
-	return winner
+	return verification if winner.is_empty() else winner
 
 static func snapshot(s: Dictionary) -> Dictionary:
 	var rows: Array = []
@@ -99,7 +141,9 @@ static func snapshot(s: Dictionary) -> Dictionary:
 static func valid(s: Variant, max_tick: int = 2147483647, size: Vector2 = Vector2(100000, 100000)) -> bool:
 	if not s is Dictionary: return false
 	if s.is_empty(): return true # Legacy minds keep their historical policy until enabled.
-	if s.size() != 12 or not Data.integer(s.get("version"), 1) or int(s.version) != 1 or not s.get("enabled") is bool or not s.get("systematic") is bool: return false
+	if not Data.integer(s.get("version"), 1) or int(s.version) not in [1, 2]: return false
+	if s.size() != (13 if revised(s) else 12) or not s.get("enabled") is bool or not s.get("systematic") is bool: return false
+	if revised(s) and (not Data.integer(s.get("scan_mask")) or int(s.scan_mask) > 131071): return false
 	if not Data.integer(s.get("detour_until")) or int(s.detour_until) > max_tick + 30: return false
 	if not Data.integer(s.get("explore_until")) or int(s.explore_until) > max_tick + 90: return false
 	if not Data.number(s.get("cell_size")) or float(s.cell_size) < 22.5 or float(s.cell_size) > 120.0: return false

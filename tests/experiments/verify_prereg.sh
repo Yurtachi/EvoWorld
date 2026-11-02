@@ -78,6 +78,11 @@ if git cat-file -e "$revision:tests/experiments/p1_holdout.json" 2>/dev/null; th
     python tests/experiments/p1_verify.py "$revision"
 fi
 
+# P1b is a new single-opening experiment; P1 remains immutable.
+if git cat-file -e "$revision:tests/experiments/p1b_holdout.json" 2>/dev/null; then
+    python tests/experiments/p1b_verify.py "$revision"
+fi
+
 if git cat-file -e "$revision:reports/M5_convivencia_eval.json" 2>/dev/null; then
     verify M5 ffe9e14 \
         tests/experiments/m5_convivencia_preregistro.md tests/experiments/m5_convivencia_eval.gd \

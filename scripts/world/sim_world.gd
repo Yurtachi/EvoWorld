@@ -26,6 +26,7 @@ const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
 const SAVE_VERSION := 16 # Bounded spatial evidence and expectations per pet.
 const SpatialPolicy = preload("res://scripts/spatial/spatial_policy.gd")
+static var validation_error := ""
 const Terminal = preload("res://scripts/terminal/terminal.gd")
 const TerminalAdapter = preload("res://scripts/terminal/terminal_mundo_real.gd")
 const TerminalState = preload("res://scripts/terminal/terminal_estado.gd")
@@ -138,6 +139,8 @@ static func new_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
 	var result = load("res://scripts/world/sim_world.gd").new(world_seed, initial)
 	if not config.has("creature_count") and result.creatures.has(result.pet_id):
 		result.creatures[result.pet_id].enable_spatial_memory()
+		if result.creatures[result.pet_id].mind != null:
+			Mind.Spatial.enable_revision(result.creatures[result.pet_id].mind.spatial)
 	return result
 
 static func new_pet_world(world_seed: int = 1, nome: String = "") -> SimWorld:
@@ -146,7 +149,12 @@ static func new_pet_world(world_seed: int = 1, nome: String = "") -> SimWorld:
 static func new_ecosystem_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
 	var initial := config.duplicate(true)
 	initial.merge({"creature_count": ECOSYSTEM_CREATURE_COUNT, "reproduction_enabled": true, "food_regrow": true}, false)
-	return new_world(world_seed, initial)
+	var result := new_world(world_seed, initial)
+	for creature in result.creatures.values():
+		if creature.mind != null:
+			creature.enable_spatial_memory()
+			Mind.Spatial.enable_revision(creature.mind.spatial)
+	return result
 
 func set_reproduction(enabled: bool) -> void:
 	reproduction_enabled = enabled
@@ -874,7 +882,27 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 		var obstacle: Dictionary = obstacles[index]
 		if _visible(creature, obstacle["pos"]):
 			result["obstacles"].append(obstacle.duplicate())
+	if _has_spatial(creature) and Mind.Spatial.revised(creature.mind.spatial):
+		result["spatial_survey"] = _sense_spatial_area(creature)
 	return result
+
+func _sense_spatial_area(creature: Creature) -> Dictionary:
+	# A sensory ray-coverage channel, not a query about hidden resources.
+	# Geometry filters rays here, including occluders whose centers lie outside
+	# FOV/range. Only the remembered target supplies the sampling positions.
+	var state: Dictionary = creature.mind.spatial
+	var remembered := Mind.Spatial.find(state, state.objetivo_atual)
+	if remembered.is_empty(): return {}
+	var target := Data.unpack_vector(remembered.pos)
+	var mask := 0
+	for sample in 17:
+		var point := target
+		if sample > 0:
+			var radius := float(state.cell_size) * (0.5 if sample <= 8 else 1.0)
+			point += Vector2.from_angle(TAU * ((sample - 1) % 8) / 8.0) * radius
+		if point.x < 0.0 or point.y < 0.0 or point.x > size.x or point.y > size.y: continue
+		if _visible(creature, point) and not _occluded(creature.pos, point): mask |= 1 << sample
+	return {"id": remembered.id, "mask": mask}
 
 func _update_creature(creature: Creature) -> void:
 	if not creature.alive:
@@ -1145,7 +1173,8 @@ func _move(creature: Creature, visible_obstacles: Array) -> bool:
 			break
 	var target := creature.pos + direction * distance
 	if target != _inside(target, creature.genome.size) or _occluded(creature.pos, target, creature.genome.size):
-		creature.heading += rng.between(1.0, 2.2)
+		var turn_rng = creature.mind.rng if _has_spatial(creature) and Mind.Spatial.revised(creature.mind.spatial) else rng
+		creature.heading += turn_rng.between(1.0, 2.2)
 		creature.last_action = "avoid_obstacle"
 		creature.last_reason = "Physical boundary contact; turning"
 		if creature.mind != null:
@@ -1502,6 +1531,18 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
 	# Migration must not duplicate unbounded structures or silently discard
 	# hostile data in fields introduced by later versions.
+	validation_error = ""
+	# Diagnose this optional component before generic JSON/schema rejection,
+	# including nonfinite or wrongly typed fields. Never mutate the input or
+	# silently erase a creature's remembered experience to make a save load.
+	if data.get("creatures") is Array and data.creatures.size() <= 10000:
+		var limit := int(data.tick) if Data.integer(data.get("tick")) else 2147483647
+		var bounds := Data.unpack_vector(data.size) if Data.vector(data.get("size")) else Vector2(100000, 100000)
+		for entry in data.creatures:
+			if entry is Dictionary and entry.get("mind") is Dictionary and entry.mind.has("spatial"):
+				if not Mind.Spatial.valid(entry.mind.spatial, limit, bounds) or (Data.integer(data.get("save_version")) and int(data.save_version) < 16):
+					validation_error = "Invalid spatial memory (mind.spatial); checkpoint preserved."
+					return null
 	if not Data.json_data(data):
 		return null
 	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, SAVE_VERSION]:
@@ -2026,7 +2067,12 @@ func _spatial_seek(creature: Creature, sensors: Dictionary, resource: String) ->
 		mind.spatial.objetivo_atual = ""
 		mind.spatial.arrival_tick = -1
 		mind.spatial.motivo = "spatial.explore"
-		if creature.age % 15 == 0: creature.heading += rng.between(-0.9, 0.9)
+		if Mind.Spatial.revised(mind.spatial):
+			# In an energy emergency, spend the remaining travel budget covering
+			# space rather than repeatedly testing uncertain remembered sites.
+			var emergency_target := SpatialPolicy.sweep(mind.spatial, creature.pos, creature.genome.vision_range, size)
+			creature.heading = SpatialPolicy.heading(creature, mind.spatial, emergency_target, tick)
+		elif creature.age % 15 == 0: creature.heading += _spatial_turn(creature)
 		creature.last_action = "explore"
 		creature.last_reason = "spatial.explore"
 		return _move(creature, sensors.get("obstacles", []))
@@ -2037,7 +2083,7 @@ func _spatial_seek(creature: Creature, sensors: Dictionary, resource: String) ->
 		if mind.mind_log.size() > Mind.LOG_LIMIT: mind.mind_log.pop_front()
 	creature.last_reason = mind.spatial.motivo
 	if decision.get("wander", false):
-		if creature.age % 15 == 0: creature.heading += rng.between(-0.9, 0.9)
+		if creature.age % 15 == 0: creature.heading += _spatial_turn(creature)
 		creature.last_action = "explore"
 		return _move(creature, sensors.get("obstacles", []))
 	if decision.scan:
@@ -2047,6 +2093,12 @@ func _spatial_seek(creature: Creature, sensors: Dictionary, resource: String) ->
 	creature.heading = SpatialPolicy.heading(creature, mind.spatial, decision.target, tick)
 	creature.last_action = "seek_place" if mind.spatial.motivo == "spatial.expected" else "explore"
 	return _move(creature, sensors.get("obstacles", []))
+
+func _spatial_turn(creature: Creature) -> float:
+	# Mind RNG is already derived from seed ^ (id * 104729), and persisted.
+	# Version is the feature flag: historical spatial v1 keeps world RNG draws.
+	var source = creature.mind.rng if Mind.Spatial.revised(creature.mind.spatial) else rng
+	return source.between(-0.9, 0.9)
 
 func _personality_action(creature: Creature, sensors: Dictionary, motive: String) -> bool:
 	if motive == "rest":
@@ -2076,7 +2128,8 @@ func _personality_action(creature: Creature, sensors: Dictionary, motive: String
 	creature.last_reason = "personality.curiosity"
 	if creature.age % 15 == 0:
 		var turn: float = 0.2 + 0.8 * float(creature.temperament["impulsivity"])
-		creature.heading += rng.between(-turn, turn)
+		var turn_rng = creature.mind.rng if _has_spatial(creature) and Mind.Spatial.revised(creature.mind.spatial) else rng
+		creature.heading += turn_rng.between(-turn, turn)
 	return _move(creature, sensors["obstacles"])
 
 func _personality_encounters(creature: Creature, sensors: Dictionary) -> void:
