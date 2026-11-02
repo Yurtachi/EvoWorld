@@ -281,7 +281,7 @@ func _round_trip(f: Array) -> void:
 ## Each profile is tested in an independent scene to remove crowd/order effects.
 func _profiles(f: Array) -> void:
 	for random_seed in [17, 89, 9181, 20261101]:
-		var founders := World.new_world(random_seed)
+		var founders := World.new_ecosystem_world(random_seed)
 		var unique: Dictionary = {}
 		var actions: Dictionary = {}
 		var first: Array = []
