@@ -73,6 +73,10 @@ func _draw() -> void:
 		_draw_board(board)
 	for book in world.library.books:
 		_draw_book(book)
+	for terminal in world.terminals:
+		_draw_terminal(terminal)
+	for marker in world.terminal_markers:
+		_draw_terminal_marker(marker)
 	for creature in world.creatures.values():
 		if creature.id == selected_id and show_sensors:
 			_sensor(creature)
@@ -107,7 +111,7 @@ func _draw() -> void:
 	_draw_social()
 	_draw_mind_marker()
 	if show_pointer and tool != "select" and Rect2(Vector2.ZERO, world.size).has_point(pointer):
-		var radius := 30.0 if tool == "water" else (24.0 if tool == "obstacle" else (13.0 if tool == "creature" else 7.0))
+		var radius := 30.0 if tool == "water" else (24.0 if tool == "obstacle" else (13.0 if tool == "creature" else (12.0 if tool == "terminal" else 7.0)))
 		draw_circle(pointer, radius, Color(0.96, 0.91, 0.68, 0.18))
 		draw_arc(pointer, radius, 0, TAU, 40, Color("f1dfab"), 1.5, true)
 		if tool in ["board", "demo"]:
@@ -129,6 +133,43 @@ func _draw_book(book: Dictionary) -> void:
 		draw_set_transform(pos + Vector2(-width / 2 / zoom, -12), 0, Vector2.ONE / zoom)
 		draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color("17372b"))
 		draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("fff2d1"))
+		draw_set_transform(Vector2.ZERO)
+
+
+func _draw_terminal(terminal: Dictionary) -> void:
+	var pos: Vector2 = terminal.pos
+	draw_circle(pos + Vector2(1, 3), 12, Color(0.04, 0.12, 0.09, 0.45))
+	draw_rect(Rect2(pos - Vector2(12, 10), Vector2(24, 20)), Color("2c3d36"))
+	draw_rect(Rect2(pos - Vector2(10, 8), Vector2(20, 16)), Color("455a4e"))
+	draw_rect(Rect2(pos - Vector2(7, 6), Vector2(14, 12)), Color("dbe8ba"))
+	draw_line(pos + Vector2(-4, -2), pos + Vector2(4, -2), Color("3d5448"), 1.2, true)
+	draw_line(pos + Vector2(-3, 1), pos + Vector2(3, 1), Color("3d5448"), 1.0, true)
+	draw_circle(pos + Vector2(0, 3.5), 1.2, Color("3d5448"))
+	draw_rect(Rect2(pos + Vector2(10, -6), Vector2(3, 3)), Color("9b7653"))
+	draw_rect(Rect2(pos + Vector2(10, -1), Vector2(3, 3)), Color("5a7d6e"))
+	draw_rect(Rect2(pos + Vector2(10, 4), Vector2(3, 3)), Color("7a6585"))
+	var zoom := maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	if zoom >= 0.65:
+		var text := Texto.texto("m4b_terminal_tag", [int(terminal.id)])
+		var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		draw_set_transform(pos + Vector2(-width / 2 / zoom, -14), 0, Vector2.ONE / zoom)
+		draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color("17372b"))
+		draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("fff2d1"))
+		draw_set_transform(Vector2.ZERO)
+
+func _draw_terminal_marker(marker: Dictionary) -> void:
+	var mpos: Vector2 = Vector2(marker.pos[0], marker.pos[1])
+	draw_circle(mpos, 5, Color(0.49, 0.75, 0.66, 0.35))
+	draw_arc(mpos, 6, 0, TAU, 16, Color("7ebfa8"), 1.2, true)
+	draw_line(mpos - Vector2(4, 0), mpos + Vector2(4, 0), Color("7ebfa8"), 1.0, true)
+	draw_line(mpos - Vector2(0, 4), mpos + Vector2(0, 4), Color("7ebfa8"), 1.0, true)
+	var zoom := maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	if zoom >= 0.8:
+		var text := Texto.texto("m4b_marker_tag", [int(mpos.x), int(mpos.y), int(marker.owner_id)])
+		var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+		draw_set_transform(mpos + Vector2(-width / 2 / zoom, -9), 0, Vector2.ONE / zoom)
+		draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, 3, Color("17372b"))
+		draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("cbe3cf"))
 		draw_set_transform(Vector2.ZERO)
 
 func _water(pos: Vector2, radius: float) -> void:

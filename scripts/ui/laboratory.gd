@@ -3,6 +3,7 @@ signal intervention
 ## Consultas somente de leitura; emissão/ativação são intervenções explícitas.
 const Texto = preload("res://scripts/core/textos.gd")
 const KnowledgePresenter = preload("res://scripts/ui/knowledge_presenter.gd")
+const TerminalPresenter = preload("res://scripts/ui/terminal_presenter.gd")
 const Genes = preload("res://scripts/creature/genome.gd")
 const Chart = preload("res://scripts/ui/population_chart.gd")
 const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
@@ -30,6 +31,9 @@ var symbol_input: OptionButton
 var emit_button: Button
 var emission_receipt: Label
 var signal_controls: VBoxContainer
+var terminal_history_open: Button
+var terminal_history: Label
+var terminal_memory_status: Label
 var _world
 var _last_tick := -1
 var _last_selection := -2
@@ -55,6 +59,22 @@ var atelier_attempts: Label
 
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_heading("m4b_lab_title")
+	_text(Texto.texto("m4b_x7_honest_text"))
+	_heading("m4b_lab_errors_title")
+	_text(Texto.texto("m4b_lab_errors_desc"))
+	_heading("m4b_lab_ablation_title")
+	_text(Texto.texto("m4b_lab_ablation_desc"))
+	terminal_memory_status = _text("")
+	_heading("m4b_lab_cpu_title")
+	_text(Texto.texto("m4b_lab_cpu_table"))
+	terminal_history_open = Button.new()
+	terminal_history_open.text = Texto.texto("m4b_terminal_btn")
+	terminal_history_open.toggle_mode = true
+	add_child(terminal_history_open)
+	terminal_history = _text("")
+	terminal_history.hide()
+	terminal_history_open.toggled.connect(func(enabled): terminal_history.visible = enabled)
 	_heading("m3c_lab")
 	_text(Texto.texto("m3c_x6"))
 	_text(Texto.texto("m3c_ablation"))
@@ -309,8 +329,17 @@ func _ablate(enabled: bool, affect: bool) -> void:
 	observe(_world, _last_selection, true)
 
 func _observe_mind(creature) -> void:
-	knowledge.text = KnowledgePresenter.describe(creature, _world.tick)
 	var active: bool = creature != null and creature.mind != null
+	knowledge.text = KnowledgePresenter.describe(creature, _world.tick)
+	if terminal_history != null:
+		terminal_history.text = TerminalPresenter.describe(creature, _world)
+	if terminal_memory_status != null:
+		if active:
+			var s: Dictionary = creature.terminal_snapshot() if creature.has_method("terminal_snapshot") else _world.terminal_snapshot(creature)
+			var mem_state: String = "Memória ativa (tabela atualizada)" if creature.mind.memory_enabled else "Memória em ablação (tabela congelada/não atualizada)"
+			terminal_memory_status.text = "%s · sequências na tabela: %d · tentativas gravadas: %d" % [mem_state, s.get("table", {}).size(), s.get("state", {}).get("tentativas", []).size()]
+		else:
+			terminal_memory_status.text = Texto.texto("m1_disabled")
 	for button in [affect_switch, memory_switch, curiosity_switch]:
 		button.disabled = not active
 		button.set_pressed_no_signal(false)
@@ -318,6 +347,8 @@ func _observe_mind(creature) -> void:
 		label.text = ""
 	if not active:
 		mind_summary.text = Texto.texto("m1_disabled")
+		if terminal_history != null: terminal_history.text = Texto.texto("m1_disabled")
+		if terminal_memory_status != null: terminal_memory_status.text = Texto.texto("m1_disabled")
 		return
 	var snapshot: Dictionary = creature.mind_snapshot()
 	curiosity_switch.set_pressed_no_signal(snapshot.get("objects", {}).get("curiosity_enabled", true))

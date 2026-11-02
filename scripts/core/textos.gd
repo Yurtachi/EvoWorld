@@ -2,6 +2,85 @@ class_name Textos
 extends RefCounted
 ## Catálogo da apresentação. Identificadores e dados salvos continuam intactos.
 
+const M4B_UI := {
+	"tool_terminal": "Terminal",
+	"m4b_placed": "Terminal #%d colocado. Dispositivo físico fictício com 3 manuais anexos.",
+	"m4b_blocked": "Não foi possível colocar o terminal nesta posição ou o limite de 16 foi atingido.",
+	"m4b_terminal_tag": "Terminal #%d",
+	"m4b_marker_tag": "Marca (%d,%d) · #%d",
+	"m4b_console_btn": "Console virtual",
+	"m4b_console_title": "Terminal fictício do jogador",
+	"m4b_console_warning": "terminal fictício: não executa comandos do computador",
+	"m4b_console_note": "Linguagem fictícia: OLHAR, MARCAR, MOVER, DESENHAR, REPETIR, AJUDA, LER.\nRespostas refletem o mundo virtual. Aviso: terminal fictício: não executa comandos do computador.",
+	"m4b_console_run": "Executar instrução fictícia",
+	"m4b_console_clear": "Limpar saída",
+	"m4b_console_no_terminal": "Nenhum terminal físico encontrado no mundo.",
+	"m4b_console_device": "Terminal físico: #%d",
+	"m4b_console_placeholder": "Ex: AJUDA ou OLHAR ou MARCAR 3 0",
+	"m4b_console_response_ok": "Ação virtual concluída no terminal #%d.",
+	"m4b_console_virtual_out": "Saída virtual:",
+	"m4b_terminal_btn": "Terminal · comandos e tentativas",
+	"m4b_terminal_panel_title": "Terminal fictício da criatura",
+	"m4b_terminal_scope": "Registros do terminal da criatura, sem afirmar compreensão. As instruções operam no mundo simulado.",
+	"m4b_commands_known": "COMANDOS CONHECIDOS · proveniência de descoberta",
+	"m4b_no_commands": "Nenhum comando descoberto ainda.",
+	"m4b_cmd_inicial": "inicial",
+	"m4b_cmd_ajuda": "ajuda",
+	"m4b_cmd_manual": "manual",
+	"m4b_cmd_livro": "livro",
+	"m4b_cmd_pratica": "prática",
+	"m4b_cmd_row": "• %s (origem: %s)",
+	"m4b_task_info": "Objetivo atual: %s · Alvo relativo: %s",
+	"m4b_recent_attempts": "TENTATIVAS RECENTES (últimas %d)",
+	"m4b_attempt_row": "Passo %d: “%s” → %s",
+	"m4b_attempt_ok": "sucesso",
+	"m4b_attempt_err": "erro: %s",
+	"m4b_no_attempts": "Nenhuma tentativa registrada.",
+	"m4b_sequences_by_goal": "SEQUÊNCIAS POR OBJETIVO · tabela de memória",
+	"m4b_sequence_row": "Objetivo: %s | Sequência: %s\nTentativas: %d · Sucessos: %d · Pontuação estimada: %s",
+	"m4b_no_sequences": "Nenhuma sequência memorizada.",
+	"m4b_status_active": "Programa em execução: passo %d/%d · instrução atual: %s",
+	"m4b_status_idle": "Sem atividade no terminal registrada.",
+	"m4b_status_approaching": "Parece interessada no terminal · aproximando-se do dispositivo.",
+	"m4b_status_using": "Parece interagindo com o terminal fictício.",
+	"m4b_status_reading_manual": "Parece consultando manual anexo ao terminal.",
+	"m4b_refusal_status": "Recusa / adiamento ativo até o passo %d (%d passos restantes).",
+	"m4b_cooldown_status": "Intervalo pós-sessão ativo até o passo %d.",
+	"m4b_refuse_btn": "Adiar / recusar terminal",
+	"m4b_refuse_dialog_title": "Adiar uso do terminal",
+	"m4b_refuse_confirm": "Confirmar adiamento",
+	"m4b_refuse_duration": "Passos de adiamento (1 a 10000):",
+	"m4b_refuse_ok": "Adiamento registrado por %d passos.",
+	"m4b_refuse_failed": "Não foi possível registrar o adiamento.",
+	"m4b_offer_manual_btn": "Oferecer manual",
+	"m4b_offer_manual_title": "Oferecer manual à criatura",
+	"m4b_manual_mapa": "mapa (páginas: MARCAR, MOVER, LER)",
+	"m4b_manual_livro_desenho": "livro_desenho (página: DESENHAR)",
+	"m4b_manual_livro_repeticao": "livro_repeticao (página: REPETIR)",
+	"m4b_offer_manual_confirm": "Oferecer manual selecionado",
+	"m4b_offer_manual_ok": "Manual oferecido: a criatura consultou a página física.",
+	"m4b_offer_manual_refused": "Manual não aceito: a criatura recusou ou necessidades urgentes (fome/sede) prevaleceram.",
+	"m4b_offer_manual_no_terminal": "A criatura não está ao alcance de um terminal com manuais.",
+	"m4b_x7_honest_title": "AVALIAÇÃO EXPERIMENTAL X7 · evidências e limites",
+	"m4b_x7_honest_text": "Resultados pré-registrados X7 (24 sementes, 5 braços, 2880 tentativas):\n• Um programa fixo roteirizado/heurística atinge 100% de sucesso, igualando ou superando a aprendizagem (87,5%).\n• Os modelos geométricos são pré-configurados pelo motor; não há prova científica de aprendizagem geral de solução de problemas.\n• A auditoria independente pós-holdout encontrou falhas de carregamento de saves, resultando em FAIL global no protocolo original (corrigido posteriormente em engenharia).\n• O braço com ablação de memória obteve 0% de resolução, demonstrando a dependência estrita da tabela associativa.",
+	"m4b_lab_title": "TERMINAL FICTÍCIO · ensaios, erros e orçamento",
+	"m4b_lab_errors_title": "HISTÓRICO E CÓDIGOS DE ERRO",
+	"m4b_lab_errors_desc": "Tentativas e desfechos são registrados de forma opaca (máx. 48):\n• sintaxe: sequência incompleta ou símbolos estranhos\n• comando: comando inexistente no catálogo\n• argumento: argumento fora do domínio permitido\n• desconhecido: comando ainda não descoberto\n• recusado: ação rejeitada pelo mundo (colisão/limites)\n• objetivo: programa concluiu, mas objetivo físico falhou\n• passos / tempo: orçamento esgotado\n• interrompido: cancelado por fome, sede ou recusa",
+	"m4b_lab_ablation_title": "ABLAÇÃO DE MEMÓRIA DO TERMINAL",
+	"m4b_lab_ablation_desc": "Ao desativar a Memória M1 da criatura (controle Memória ativa), a tabela de objetivos deixa de registrar sucessos e falhas. No X7, essa ablação reduziu a taxa de sucesso para 0%, provando que sem a tabela a seleção não soluciona alvos.",
+	"m4b_lab_cpu_title": "LIMITES DE CPU E ORÇAMENTO COOPERATIVO (HEADLESS)",
+	"m4b_lab_cpu_table": "Medição headless (200 amostras/célula, semente 154301, ms/passo):\n• 12 criaturas: 2,60 ms (sem terminal) / 2,91 ms (com terminal, máx 2 ações/tick)\n• 30 criaturas: 7,30 ms / 7,85 ms (máx 3 ações/tick)\n• 60 criaturas: 14,79 ms / 17,97 ms (máx 6 ações/tick)\n• 100 criaturas: 27,41 ms / 33,81 ms (máx 8 ações/tick)\nOrçamento: máx 1 instrução atômica/passo por criatura, limite de 40 passos por sessão, recarga de 2 passos e máx 16 dispositivos.",
+	"m4b_tutorial_btn": "Roteiro · terminal fictício",
+	"m4b_tutorial": "30–35 min · Terminal fictício, comandos e autonomia\nUse a ferramenta Terminal e clique perto da criatura para colocar um dispositivo com três manuais anexos. O terminal possui aspecto de pedra/console fictício da simulação.\nInicie a simulação em 1×: criaturas curiosas ou ociosas podem se aproximar por iniciativa própria para operar o terminal, executando no máximo uma instrução atômica por passo com custo de energia.\nAbra o painel 'Terminal da criatura' no menu lateral para consultar comandos conhecidos (OLHAR e AJUDA iniciais), tentativas com sucesso ou erro e a sequência memorizada para cada objetivo.\nExperimente oferecer um manual anexo (mapa, livro_desenho, livro_repeticao) ou use a opção de recusa para adiar a atividade, respeitando a autonomia e as necessidades de sobrevivência da criatura.\nAbra o Console virtual do jogador para testar a linguagem fictícia (OLHAR, MARCAR, MOVER, DESENHAR, REPETIR, AJUDA, LER), notando o aviso de que o terminal fictício não executa comandos reais do computador.\nNo Laboratório, analise o histórico de erros, a ablação de memória e os limites de CPU, com o relato honesto dos limites do experimento X7.",
+	"m4b_banner": "Inspeção M4b · terminal fictício, APIs reais e transparência X7.",
+	"m4b_fps": "%d criaturas · %s quadros/s · %d terminal(is) · %d mente(s) ativa(s)",
+	"action_seek_terminal": "Aproximando-se do terminal",
+	"action_use_terminal": "Operando terminal fictício",
+	"action_read_terminal_manual": "Consultando manual do terminal",
+	"m1_goal_usar_terminal": "Parece interessada em usar o terminal",
+	"m1_reason_iniciativa.terminal": "Terminal percebido e curiosidade, lacuna de comandos ou ociosidade favorecem o uso."
+}
+
 const M3C_UI := {
 	"tool_book": "Livro", "place_book": "livro",
 	"m3c_catalog": "Biblioteca · catálogo offline", "m3c_place": "Escolher e colocar no jardim",
@@ -403,6 +482,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if M4B_UI.has(codigo): return M4B_UI[codigo] if valores.is_empty() else M4B_UI[codigo] % valores
 	if M3C_UI.has(codigo): return M3C_UI[codigo] if valores.is_empty() else M3C_UI[codigo] % valores
 	if M3_UI.has(codigo) or M3_CATALOGO.has(codigo): return (M3_UI.get(codigo, M3_CATALOGO.get(codigo, ""))) if valores.is_empty() else (M3_UI.get(codigo, M3_CATALOGO.get(codigo, "")) % valores)
 	if M2_UI.has(codigo):
@@ -466,6 +546,7 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
+	if M4B_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if M3C_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if M3_UI.has("action_" + codigo) or M3_CATALOGO.has("action_" + codigo): return texto("action_" + codigo)
 	if M2_UI.has("action_" + codigo): return texto("action_" + codigo)
@@ -888,11 +969,13 @@ const M2_UI := {
 }
 
 static func mente_desejo(goal: String) -> String:
+	if M4B_UI.has("m1_goal_" + goal): return texto("m1_goal_" + goal)
 	if M3C_UI.has("m1_goal_" + goal): return texto("m1_goal_" + goal)
 	return texto("m1_goal_" + goal) if M1_UI.has("m1_goal_" + goal) or M3_UI.has("m1_goal_" + goal) else texto("m1_wait")
 
 static func mente_motivo(reason: String) -> String:
 	var code := "m1_reason_" + reason.trim_prefix("mind.")
+	if M4B_UI.has(code): return texto(code)
 	if M3C_UI.has(code): return texto(code)
 	return texto(code) if M1_UI.has(code) or M2_UI.has(code) or M3_UI.has(code) else texto("reason_unknown")
 
