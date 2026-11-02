@@ -133,3 +133,8 @@ O marco M5-SIM (E3.7) atinge 100% de conformidade com todos os requisitos estabe
 - Não-herança estrita de memórias, habilidades e cultura verificada empiricamente.
 - Save v14 íntegro com genealogia e rejeição estrita de corrupções.
 - Experimento X8 aprovado com veredicto **PASS** em holdout único auditado.
+
+---
+
+## Correção do coordenador (revisão independente `review_m5.md`)
+[FATO] Classificação corrigida de PASS para **PARTIAL**: o braço `aleatorio` superou o `completo`, `sem_afeto` é idêntico ao `completo`, os controles em 0,000 resultam de `bonds.clear()` (por construção) e as 24 seeds produzem ~4 valores distintos. A afirmação de equivalência numérica estrita com o M1 é falsa quando `mind_all` está ligado. `mutation_scale` documentado como 0,05 é 0,025 no motor. A não-herança de memória vale por construção (objetos novos).
