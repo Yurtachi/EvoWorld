@@ -23,7 +23,8 @@ const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
-const SAVE_VERSION := 11 # M3b bounded observation memory and learned motor decoder.
+const SAVE_VERSION := 12 # M3c bounded knowledge, library and questions.
+const Books = preload("res://scripts/library/book_catalog.gd")
 const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
@@ -42,6 +43,14 @@ var size := Vector2(1200.0, 760.0)
 var creatures: Dictionary = {}
 var foods: Array = []
 var objects: Array = []
+var library: Dictionary = {"version": Books.VERSION, "books": []}
+var pending_questions: Array:
+	get:
+		var out: Array = []
+		for c in creatures.values():
+			if c.mind != null and not c.mind.knowledge.is_empty():
+				out.append_array(c.mind.knowledge.questions.duplicate(true))
+		return out
 var boards: Array = []
 var gallery: Array = []
 var galeria: Array:
@@ -290,6 +299,7 @@ func interact_object(creature: Creature, object_id: int) -> bool:
 		creature.hydration = snappedf(clampf(creature.hydration + float(params.hydration), 0.0, 100.0), 0.000001)
 		var evidence := {"energy": snappedf(creature.energy - energy_before, 0.000001), "hydration": snappedf(creature.hydration - water_before, 0.000001), "toxicity": params.toxicity, "surprise": params.surprise}
 		Mind.ObjectMemory.interacted(creature.mind, ObjectCatalog.appearance(row), tick, evidence)
+		Mind.Knowledge.outcome(creature.mind, str(params.category), evidence, tick)
 		if creature.mind.affect_enabled:
 			var state := "receio" if float(params.toxicity) > 0.0 else "entusiasmo"
 			creature.mind.affect.change(tick, state, float(params.surprise) * 0.4, "object_contact", creature.mind.traits(creature))
@@ -502,6 +512,10 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 		for row in objects:
 			if _visible(creature, row.pos) and not _occluded(creature.pos, row.pos):
 				result.objects.append(ObjectCatalog.appearance(row))
+	if not library.books.is_empty():
+		result["books"] = []
+		for row in library.books:
+			if _visible(creature, row.pos) and not _occluded(creature.pos, row.pos): result.books.append(row.duplicate(true))
 	if not boards.is_empty():
 		result["boards"] = []
 		var remembered: Dictionary = creature.mind.objects.get("entries", {}) if creature.mind != null and creature.mind.memory_enabled else {}
@@ -903,6 +917,9 @@ func to_dict() -> Dictionary:
 			saved_boards.append(b_copy)
 		out["boards"] = saved_boards
 		out["gallery"] = Data.restore_precision(gallery)
+	if not library.books.is_empty():
+		out["library"] = {"version": Books.VERSION, "books": []}
+		for b in library.books: out.library.books.append({"id": b.id, "book_id": b.book_id, "pos": Data.pack_vector(b.pos)})
 	return out
 
 static func from_dict(data: Dictionary) -> SimWorld:
@@ -911,7 +928,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -945,6 +962,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if data.is_empty(): return null
 	if int(data["save_version"]) == 10:
 		data = _migrate_v10(data)
+		if data.is_empty(): return null
+	if int(data["save_version"]) == 11:
+		data = _migrate_v11(data)
 		if data.is_empty(): return null
 	if not Data.integer(data.get("object_catalog_version"), 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION or not data.get("objects") is Array or data.objects.size() > ObjectCatalog.LIMIT:
 		return null
@@ -1128,6 +1148,15 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if pos != result._inside(pos, 5.0) or not result._clear(pos, 5.0): return null
 		used_ids[int(row.id)] = true
 		result.objects.append({"id": int(row.id), "pos": pos, "tipo": row.tipo})
+	if data.has("library"):
+		var lib = data.library
+		if not lib is Dictionary or lib.size() != 2 or lib.get("version") != Books.VERSION or not Data.integer(lib.get("version"), 1) or not lib.get("books") is Array or lib.books.size() > Books.LIMIT: return null
+		for b in lib.books:
+			if not b is Dictionary or b.size() != 3 or not Data.integer(b.get("id"), 1) or used_ids.has(int(b.id)) or not Books.BOOKS.has(b.get("book_id", "")) or not Data.vector(b.get("pos")): return null
+			var pos := Data.unpack_vector(b.pos)
+			if pos != result._inside(pos, 5.0) or not result._clear(pos, 5.0): return null
+			used_ids[int(b.id)] = true
+			result.library.books.append({"id": int(b.id), "book_id": b.book_id, "pos": pos})
 	var board_ids: Dictionary = {}
 	for board in raw_boards:
 		if not Atelier.valid_board(board, result.tick, int(data["next_id"])) or used_ids.has(int(board.id)):
@@ -1161,6 +1190,16 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			for art in creature.atelier.artifacts:
 				if used_ids.has(int(art.id)) or int(art.owner_id) != creature.id:
 					return null
+		if creature.mind != null and not creature.mind.knowledge.is_empty():
+			var k: Dictionary = creature.mind.knowledge
+			if not Mind.Knowledge.valid(k, result.tick): return null
+			for q in k.questions:
+				if int(q.creature_id) != creature.id or int(q.object_id) >= int(data.next_id): return null
+				if not result.objects.any(func(o): return int(o.id) == int(q.object_id) and ObjectCatalog.TYPES[o.tipo].category == q.category): return null
+			for context in k.asked:
+				if int(context.split(":")[0]) >= int(data.next_id): return null
+			if not k.reading.is_empty():
+				if not result.library.books.any(func(b): return int(b.id) == int(k.reading.id) and b.book_id == k.reading.book_id): return null
 		if creature.mind != null and not creature.mind.objects.is_empty():
 			if int(creature.mind.objects.target) >= int(data.next_id): return null
 			for key in creature.mind.objects.entries:
@@ -1269,7 +1308,7 @@ static func _migrate_v6(data: Dictionary) -> Dictionary:
 
 ## Idempotent migration never activates M1 or invents an acquired experience.
 static func _migrate_v7(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [8, 9, 10, SAVE_VERSION]:
+	if data.get("save_version") in [8, 9, 10, 11, SAVE_VERSION]:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
 		return {}
@@ -1283,7 +1322,7 @@ static func _migrate_v7(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v8(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [9, 10, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [9, 10, 11, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 8 or not data.get("creatures") is Array: return {}
 	# Legacy fixtures may retain empty modern metadata; never discard acquired data.
 	if data.has("objects") and (not data.objects is Array or not data.objects.is_empty()): return {}
@@ -1298,18 +1337,18 @@ static func _migrate_v8(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v9(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [10, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [10, 11, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 9 or not data.get("creatures") is Array: return {}
 	if data.has("boards") and (not data.boards is Array or not data.boards.is_empty()): return {}
 	if data.has("gallery") and (not data.gallery is Array or not data.gallery.is_empty()): return {}
 	for c in data.creatures:
 		if not c is Dictionary or c.has("atelier"): return {}
 	var migrated := data.duplicate(true)
-	migrated["save_version"] = SAVE_VERSION
+	migrated["save_version"] = 11
 	return migrated
 
 static func _migrate_v10(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [11, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 10 or not data.get("creatures") is Array: return {}
 	var migrated := data.duplicate(true)
 	for c in migrated.creatures:
@@ -1318,7 +1357,7 @@ static func _migrate_v10(data: Dictionary) -> Dictionary:
 			if not c.atelier is Dictionary or c.atelier.get("version") != 1: return {}
 			c["atelier"] = Atelier.migrate_v1(c.atelier)
 			if c.atelier.is_empty(): return {}
-	migrated["save_version"] = SAVE_VERSION
+	migrated["save_version"] = 11
 	return migrated
 
 func _suspend_brain(creature: Creature) -> void:
@@ -1574,6 +1613,18 @@ func _social_action(creature: Creature, sensors: Dictionary, decision: Dictionar
 func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest: Dictionary, distance: float) -> bool:
 	creature.last_reason = "mind." + goal
 	match goal:
+		"ler":
+			var selected: Dictionary = Mind.Reading.candidate(creature.mind, creature, sensors)
+			for b in sensors.get("books", []):
+				if int(b.id) != int(selected.id): continue
+				if creature.pos.distance_to(b.pos) <= Obs.reach(creature):
+					read_book(creature, int(b.id))
+					return false
+				creature.heading = (b.pos - creature.pos).angle()
+				creature.last_action = "seek_book"
+				return _move(creature, sensors.obstacles)
+			creature.last_action = "rest"
+			return false
 		"investigar_objeto":
 			var target: int = Mind.ObjectMemory.state(creature.mind).target
 			for row in sensors.get("objects", []):
@@ -1631,3 +1682,45 @@ func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest
 	if creature.age % (8 if goal == "brincar" else 15) == 0:
 		creature.heading += creature.mind.rng.between(-0.9, 0.9)
 	return _move(creature, sensors.obstacles)
+
+static func _migrate_v11(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 11 or not data.get("creatures") is Array: return {}
+	if data.has("library"): return {}
+	for c in data.creatures:
+		if not c is Dictionary: return {}
+		if c.has("mind") and (not c.mind is Dictionary or c.mind.has("knowledge")): return {}
+	var migrated := data.duplicate(true)
+	migrated["save_version"] = SAVE_VERSION
+	return migrated
+
+func place_book(pos: Vector2, book_id: String) -> int:
+	if not pos.is_finite() or not Books.BOOKS.has(book_id) or library.books.size() >= Books.LIMIT: return -1
+	var location := _inside(pos, 5.0)
+	if not _clear(location, 5.0): return -1
+	var book_ref: int = ids.take()
+	library.books.append({"id": book_ref, "pos": location, "book_id": book_id})
+	return book_ref
+
+func read_book(creature: Creature, book_ref: int) -> bool:
+	if not creature.alive or creature.mind == null or creature.hunger > 0.55 or (water_enabled and creature.thirst > 0.55): return false
+	for b in library.books:
+		if int(b.id) != book_ref: continue
+		if creature.pos.distance_to(b.pos) > Obs.reach(creature) or _occluded(creature.pos, b.pos): return false
+		var read: bool = Mind.Reading.page_tick(creature.mind, b, tick)
+		if read: creature.last_action = "read_book"
+		return read
+	return false
+
+func responder_pergunta(question_id: String, option: String) -> bool:
+	for c in creatures.values():
+		if c.mind != null and not c.mind.knowledge.is_empty() and c.mind.knowledge.questions.any(func(q): return q.id == question_id):
+			return Mind.Knowledge.answer(c.mind, c, question_id, option, tick)
+	return false
+
+func demonstrar_simbolo(creature_id: int, glyph: String, object_id: int, correct: bool = true) -> bool:
+	var c = creatures.get(creature_id)
+	if c == null or c.mind == null or not c.alive: return false
+	for row in sense(c).get("objects", []):
+		if int(row.id) == object_id: return Mind.Knowledge.demonstrate(c.mind, glyph, row.category, correct, tick)
+	return false

@@ -2,7 +2,7 @@ extends RefCounted
 ## Retrieval affects utility; affect controls activation and commitment thresholds.
 ## Both channels are deterministic and independently ablatable; no physical writes.
 const BASE_GOALS := ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto"]
-const GOALS := ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto", "desenhar"]
+const GOALS := ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto", "desenhar", "ler"]
 const MIN_COMMITMENT := 12
 const MAX_COMMITMENT := 80
 const Objects = preload("res://scripts/mind/object_memory.gd")
@@ -24,7 +24,7 @@ static func modulation(mind) -> Dictionary:
 			"buscar_companhia": 1.4 * float(a.saturacao_social) + 0.5 * float(a.receio) - 1.2 * float(a.solidao),
 			"buscar_privacidade": -1.4 * float(a.saturacao_social) - 0.8 * float(a.receio),
 			"brincar": 0.5 * frustration + 0.4 * float(a.satisfacao) - 0.4 * float(a.entusiasmo),
-			"investigar_objeto": 0.0,
+			"investigar_objeto": 0.0, "ler": 0.0,
 			"desenhar": 0.25 * frustration + 0.35 * float(a.receio) - 0.35 * float(a.entusiasmo)}}
 
 static func utilities(creature, mind, tick: int, sensors: Dictionary) -> Dictionary:
@@ -46,6 +46,8 @@ static func utilities(creature, mind, tick: int, sensors: Dictionary) -> Diction
 	if not sensors.get("boards", []).is_empty() or mind.objetivo_atual == "desenhar":
 		var board_cand := Atelier.candidate(mind, creature, sensors, tick)
 		result["desenhar"] = snappedf(float(board_cand.score) + mind.rng.between(-0.045, 0.045), 0.000001)
+	if not sensors.get("books", []).is_empty() or mind.objetivo_atual == "ler":
+		result["ler"] = mind.Reading.candidate(mind, creature, sensors).score
 	return result
 
 static func scores(creature, mind, tick: int, sensors: Dictionary) -> Dictionary:
@@ -67,8 +69,9 @@ static func choose(creature, mind, tick: int, sensors: Dictionary) -> String:
 	if critical != "":
 		mind.set_goal(critical, tick, "mind.urgency")
 		return critical
+	var reading: Dictionary = mind.Reading.candidate(mind, creature, sensors) if scores_now.has("ler") else {"id": 0}
 	var control := modulation(mind)
-	var release: bool = control.release_blocked
+	var release: bool = control.release_blocked or (mind.objetivo_atual == "ler" and int(reading.id) == 0)
 	var object_candidate := Objects.candidate(mind, creature, sensors, tick)
 	var has_boards: bool = scores_now.has("desenhar")
 	var board_candidate: Dictionary = Atelier.candidate(mind, creature, sensors, tick) if has_boards else {"score": -4.0, "id": 0, "novelty": 0.0}
@@ -82,7 +85,7 @@ static func choose(creature, mind, tick: int, sensors: Dictionary) -> String:
 	var winner := ""
 	var highest := -INF
 	for goal in scores_now.keys():
-		if (goal == "investigar_objeto" and int(object_candidate.id) == 0) or (goal == "desenhar" and int(board_candidate.id) == 0) or (goal == "beber" and not creature.personality_water_enabled) or (goal == "buscar_privacidade" and sensors.get("creatures", []).is_empty()):
+		if (goal == "ler" and int(reading.id) == 0) or (goal == "investigar_objeto" and int(object_candidate.id) == 0) or (goal == "desenhar" and int(board_candidate.id) == 0) or (goal == "beber" and not creature.personality_water_enabled) or (goal == "buscar_privacidade" and sensors.get("creatures", []).is_empty()):
 			continue
 		if (timeout or release) and goal == mind.objetivo_atual:
 			continue
@@ -99,6 +102,8 @@ static func choose(creature, mind, tick: int, sensors: Dictionary) -> String:
 	if winner == "investigar_objeto":
 		Objects.state(mind).target = int(object_candidate.id)
 		reason = "mind.iniciativa.novidade" if float(object_candidate.novelty) > 0.7 else "mind.iniciativa.lacuna"
+	elif winner == "ler":
+		reason = "mind.iniciativa.ler"
 	elif winner == "desenhar":
 		Objects.state(mind).target = int(board_candidate.id)
 		reason = "mind.iniciativa.desenhar"

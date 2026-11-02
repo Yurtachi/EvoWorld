@@ -1,0 +1,33 @@
+{
+	"rows": [
+		{
+			"max_ms": 8.108,
+			"median_ms": 3.287,
+			"p95_ms": 4.38,
+			"population": 12,
+			"ticks": 240
+		},
+		{
+			"max_ms": 25.0,
+			"median_ms": 12.263,
+			"p95_ms": 15.539,
+			"population": 30,
+			"ticks": 240
+		},
+		{
+			"max_ms": 38.71,
+			"median_ms": 26.674,
+			"p95_ms": 31.363,
+			"population": 60,
+			"ticks": 240
+		},
+		{
+			"max_ms": 81.459,
+			"median_ms": 57.402,
+			"p95_ms": 70.678,
+			"population": 100,
+			"ticks": 240
+		}
+	],
+	"seed": 140050
+}

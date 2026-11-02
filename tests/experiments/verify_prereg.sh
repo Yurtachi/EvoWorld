@@ -56,4 +56,10 @@ python tests/experiments/m3_atelier_verify.py "$revision"
 verify M3b 9460b1e \
     tests/experiments/m3b_copia_preregistro.md tests/experiments/m3b_copia_eval.gd \
     reports/M3b_copia_eval.json preregister_sha256
-python tests/experiments/m3b_copia_verify.py "$revision"
+# X5 validates its historical freeze, before later milestones change the engine.
+python tests/experiments/m3b_copia_verify.py "$(git log -1 --format=%H "$revision" -- reports/M3b_copia_eval.json)"
+
+verify M3c 4eb4050 \
+    tests/experiments/m3c_biblioteca_preregistro.md tests/experiments/m3c_biblioteca_eval.gd \
+    reports/M3c_biblioteca_eval.json preregister_sha256
+python tests/experiments/m3c_biblioteca_verify.py "$revision"
