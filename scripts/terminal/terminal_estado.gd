@@ -81,12 +81,14 @@ static func valid(data: Variant) -> bool:
 		return false
 	if typeof(data.conhecidos) != TYPE_DICTIONARY or data.conhecidos.size() > C.COMMANDS.size():
 		return false
-	if data.conhecidos.get("OLHAR") != "inicial" or data.conhecidos.get("AJUDA") != "inicial":
+	if typeof(data.conhecidos.get("OLHAR")) != TYPE_STRING or data.conhecidos.get("OLHAR") != "inicial" or typeof(data.conhecidos.get("AJUDA")) != TYPE_STRING or data.conhecidos.get("AJUDA") != "inicial":
 		return false
 	for command in data.conhecidos:
-		if command not in C.COMMANDS:
+		if typeof(command) != TYPE_STRING or command not in C.COMMANDS:
 			return false
 		var source = data.conhecidos[command]
+		if typeof(source) != TYPE_STRING:
+			return false
 		if command in ["OLHAR", "AJUDA"]:
 			if source != "inicial": return false
 		elif command in HELP:

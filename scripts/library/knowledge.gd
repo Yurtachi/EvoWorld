@@ -144,7 +144,7 @@ static func valid(s: Variant, tick: int) -> bool:
 		var parts: PackedStringArray = context.split(":")
 		if parts.size() != 2 or not Data.integer_text(parts[0]) or int(parts[0]) <= 0 or parts[1] not in CATEGORIES or not Data.integer(s.asked[context]) or int(s.asked[context]) > tick: return false
 	for q in s.questions:
-		if not q is Dictionary or q.size() != 7 or not q.get("id") is String or not Data.integer(q.get("creature_id"), 1) or not Data.integer(q.get("object_id"), 1) or q.get("category") not in CATEGORIES or q.get("goal") != "investigar_objeto" or q.get("text_key") != "library.question.unknown" or not Data.integer(q.get("tick")) or int(q.tick) > tick: return false
+		if not q is Dictionary or q.size() != 7 or not q.get("id") is String or not Data.integer(q.get("creature_id"), 1) or not Data.integer(q.get("object_id"), 1) or not q.get("category") is String or q.get("category") not in CATEGORIES or not q.get("goal") is String or q.get("goal") != "investigar_objeto" or not q.get("text_key") is String or q.get("text_key") != "library.question.unknown" or not Data.integer(q.get("tick")) or int(q.tick) > tick: return false
 		var parts: PackedStringArray = q.id.split(":")
 		if parts.size() != 2 or parts[0] != str(int(q.creature_id)) or not Data.integer_text(parts[1]) or int(parts[1]) <= 0 or int(parts[1]) >= int(s.next_id) or ids.has(int(parts[1])): return false
 		if not s.asked.has(str(int(q.object_id)) + ":" + str(q.category)): return false
