@@ -10,6 +10,8 @@ const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
 const FpsChart = preload("res://scripts/ui/fps_chart.gd")
 const PersonalityInspector = preload("res://scripts/ui/personality_inspector.gd")
 const TeachingPanel = preload("res://scripts/ui/teaching_panel.gd")
+const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
+const OBJECT_TYPES := ["capsula_neutra", "capsula_agradavel", "capsula_aversiva", "pedra"]
 const SIDEBAR := 350.0
 var teaching: VBoxContainer
 var teaching_scroll: ScrollContainer
@@ -105,6 +107,13 @@ var mind_intensity: ProgressBar
 var tutorial_step := 0
 var tutorial_text: Label
 var tutorial_dialog: AcceptDialog
+var object_dialog: AcceptDialog
+var object_choice: OptionButton
+var object_type := "capsula_neutra"
+var object_reaction: Label
+var object_activity: Label
+var _object_sensor_key := ""
+var _visible_objects: Array = []
 @onready var view = $WorldView
 @onready var camera: Camera2D = $Camera2D
 
@@ -124,6 +133,7 @@ func _ready() -> void:
 	_build_help()
 	_build_tutorial()
 	_build_expand()
+	_build_objects()
 	_set_speed(speed)
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
 	get_viewport().size_changed.connect(_fit_world)
@@ -286,6 +296,10 @@ func _build_ui() -> void:
 	bubble.add_theme_stylebox_override("panel", GardenTheme.panel(Color("354e42"), 10, 10))
 	inspector.add_child(bubble)
 	mind_reason = _wrapped(bubble, "")
+	_label(inspector, Texto.texto("m2_reaction"), 12, Color("bccc98"))
+	object_reaction = _wrapped(inspector, "")
+	object_reaction.add_theme_font_size_override("font_size", 17)
+	object_activity = _wrapped(inspector, "")
 	mind_cost = _wrapped(inspector, Texto.texto("m1_cost"))
 	mind_enable = _button(inspector, Texto.texto("m1_enable"), _enable_selected_mind)
 	_wrapped(inspector, Texto.texto("m1_note"))
@@ -293,6 +307,7 @@ func _build_ui() -> void:
 	offer_button = _button(inspector, Texto.texto("offer"), _offer_food)
 	_separator(inspector)
 	_label(inspector, Texto.texto("m1_observe"), 12, Color("bccc98"))
+	_button(inspector, Texto.texto("m2_present"), _open_objects)
 	_button(inspector, Texto.texto("m1_companion"), _present_companion)
 	_button(inspector, Texto.texto("m1_obstacle"), _set_tool.bind("obstacle"))
 	_button(inspector, Texto.texto("m1_clear"), _clear_nearby_rocks)
@@ -356,6 +371,8 @@ func _build_ui() -> void:
 		var button := _button(toolbar, Texto.texto("tool_" + key), _set_tool.bind(key))
 		button.toggle_mode = true
 		tool_buttons[key] = button
+	tool_buttons["object"] = _button(toolbar, Texto.texto("tool_object"), _open_objects)
+	tool_buttons.object.toggle_mode = true
 	var food_row := HBoxContainer.new()
 	bottom_col.add_child(food_row)
 	for kind in ["fruta", "semente", "folha", "cogumelo"]:
@@ -431,7 +448,7 @@ func _confirm_new_world() -> void:
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
-	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible):
+	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible):
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -456,7 +473,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible):
+	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -478,7 +495,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible):
+	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible):
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -509,6 +526,9 @@ func _apply_tool(pos: Vector2) -> void:
 		"food":
 			var id := world.place_food(pos, food_type)
 			_notify(Texto.texto("food_placed" if id >= 0 else "food_blocked"))
+		"object":
+			var id := world.place_object(pos, object_type)
+			_notify(Texto.texto("m2_placed", [id]) if id >= 0 else Texto.texto("m2_blocked"), 10)
 		"water":
 			var id := world.place_water(pos)
 			_notify(Texto.texto("water_placed" if id >= 0 else "water_blocked"))
@@ -656,6 +676,8 @@ func _load(slot: String = "world") -> void:
 	_notify(Texto.mensagem(result.message), 10)
 
 func _reset_session() -> void:
+	_object_sensor_key = ""
+	_visible_objects.clear()
 	if teaching != null:
 		teaching.world = null
 	comandos = ComandosAPI.new()
@@ -983,6 +1005,10 @@ func _capture_demo(path: String) -> void:
 			await _benchmark_fps(path)
 			get_tree().quit()
 			return
+	if state.begins_with("m2-"):
+		await _capture_m2(state, path)
+		get_tree().quit()
+		return
 	if state.begins_with("e3-"):
 		await _capture_e3(state, path)
 		get_tree().quit()
@@ -1406,6 +1432,8 @@ func _benchmark_fps(path: String) -> void:
 		get_tree().quit(1)
 		return
 	protected_mode = false
+	for offset in [Vector2(24, 0), Vector2(0, 50), Vector2(-45, 0)]:
+		world.place_object(world.creatures[world.pet_id].pos + offset, OBJECT_TYPES[world.objects.size() % OBJECT_TYPES.size()])
 	paused = false
 	_set_speed(1)
 	var warmup := Time.get_ticks_msec() + 2000
@@ -1426,6 +1454,7 @@ func _benchmark_fps(path: String) -> void:
 	var p95: float = intervals[int((intervals.size() - 1) * 0.95)] * 1000
 	var result := {"initial_population": initial_population, "final_population": world.creatures.size(), "frames": intervals.size(), "seconds": elapsed, "mean_fps": mean, "p95_frame_ms": p95, "godot": Engine.get_version_info().string, "adapter": RenderingServer.get_video_adapter_name(), "display": DisplayServer.get_name(), "window": [get_window().size.x, get_window().size.y], "speed": speed, "tick": world.tick}
 	result["active_minds"] = world.mind_enabled_ids.size()
+	result["objects"] = world.objects.size()
 	result["pet_mind_active"] = world.creatures.has(world.pet_id) and world.creatures[world.pet_id].mind != null
 	var output := FileAccess.open(path.get_basename() + ".json", FileAccess.WRITE)
 	if output != null:
@@ -1434,7 +1463,7 @@ func _benchmark_fps(path: String) -> void:
 	else:
 		printerr("Benchmark: caminho de saída não gravável; use caminho absoluto.")
 	paused = true
-	_notify(Texto.texto("fps_sample", [world.creatures.size(), Texto.numero(mean), Texto.numero(1.0 / intervals.back())]), 15)
+	_notify(Texto.texto("m2_fps_sample", [world.creatures.size(), Texto.numero(mean), world.objects.size(), world.mind_enabled_ids.size(), Texto.texto("yes" if result.pet_mind_active else "no")]), 15)
 	print(JSON.stringify(result))
 	await capture_screenshot(path)
 
@@ -1573,11 +1602,20 @@ func _refresh_mind() -> void:
 	mind_cost.visible = creature != null and not active
 	mind_intensity.visible = active
 	if not active:
+		object_reaction.text = Texto.texto("m1_disabled")
+		object_activity.text = ""
 		mind_emotion.text = Texto.texto("m1_disabled")
 		mind_desire.text = Texto.texto("m1_no_selection" if creature == null else "m1_disabled")
 		mind_reason.text = Texto.texto("m1_no_selection" if creature == null else "m1_inactive_reason")
 		return
 	var snapshot: Dictionary = creature.mind_snapshot()
+	# Refresh perception once per changed simulation state, not per rendered frame.
+	var sensor_key := "%d/%d/%d/%d" % [world.tick, creature.id, world.objects.size(), world.obstacles.size()]
+	if sensor_key != _object_sensor_key:
+		_visible_objects = world.sense(creature, false).get("objects", [])
+		_object_sensor_key = sensor_key
+	object_reaction.text = Texto.texto(ObjectPresenter.reaction(snapshot, _visible_objects, world.tick, creature.last_action))
+	object_activity.text = Texto.texto("m2_activity", [Texto.acao(creature.last_action)])
 	var dominant := Texto.mente_dominante(snapshot)
 	mind_emotion.text = Texto.texto("m1_affect_" + str(dominant.key)) if dominant.value > 0.01 else Texto.texto("m1_quiet" if snapshot.affect_enabled else "m1_affect_off")
 	mind_intensity.value = float(dominant.value) * 100
@@ -1642,6 +1680,26 @@ func _build_tutorial() -> void:
 	_button(row, Texto.texto("m1_next"), _tutorial_move.bind(1))
 	_tutorial_move(0)
 
+func _build_objects() -> void:
+	object_dialog = _window("m2_catalog", Vector2i(520, 340))
+	object_dialog.ok_button_text = Texto.texto("m2_place")
+	var column := _window_column(object_dialog)
+	_wrapped(column, Texto.texto("m2_kind"))
+	object_choice = OptionButton.new()
+	for kind in OBJECT_TYPES:
+		object_choice.add_item(Texto.texto("m2_" + kind))
+	column.add_child(object_choice)
+	_wrapped(column, Texto.texto("m2_catalog_note"))
+	_wrapped(column, Texto.texto("m2_place_note"))
+	object_dialog.confirmed.connect(func():
+		object_type = OBJECT_TYPES[object_choice.selected]
+		_set_tool("object"))
+
+func _open_objects() -> void:
+	_set_tool(tool)
+	object_choice.select(OBJECT_TYPES.find(object_type))
+	object_dialog.popup_centered()
+
 func _tutorial_move(direction: int) -> void:
 	tutorial_step = clampi(tutorial_step + direction, 0, 4)
 	tutorial_text.text = Texto.texto("m1_tutorial_step", [tutorial_step + 1, Texto.texto("m1_tutorial_" + str(tutorial_step))])
@@ -1688,6 +1746,74 @@ func _capture_m1(state: String, path: String) -> void:
 		lab_scroll.scroll_vertical = int(lab.mind_scores.position.y) - 40
 	if state == "m1-tools":
 		caregiver_scroll.scroll_vertical = int(offer_button.position.y) - 40
+	var until := Time.get_ticks_msec() + 800
+	while Time.get_ticks_msec() < until:
+		await get_tree().process_frame
+	await capture_screenshot(path)
+
+func _m2_fixture() -> void:
+	# Explicit UI inspection fixture, independent of scientific TRAIN/DEV/HOLDOUT.
+	world = World.new_world(81102, {"creature_count": 0, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false})
+	var genes = load("res://scripts/creature/genome.gd").new()
+	genes.size = 8.0
+	genes.speed = 30.0
+	genes.vision_range = 180.0
+	genes.vision_fov = snappedf(TAU, 0.000001)
+	genes.temperament = {"curiosity": 0.9, "caution": 0.8, "sociability": 0.2, "impulsivity": 0.3}
+	world.pet_id = world.spawn_creature(Vector2(300, 300), Texto.texto("pet_default"), genes)
+	world.enable_mind(world.pet_id)
+	selected_id = world.pet_id
+	var creature = world.creatures[selected_id]
+	creature.energy = creature.max_energy * 0.9
+	creature.hydration = 90.0
+	creature.heading = 0.0
+	paused = true
+	_reset_session()
+	view.set_world(world)
+	_show_lab(false)
+	_focus_selected()
+
+func _capture_m2(state: String, path: String) -> void:
+	_m2_fixture()
+	var creature = world.creatures[selected_id]
+	var history := state in ["m2-habituated", "m2-aversive", "m2-memory", "m2-cautious"]
+	if history:
+		# Eight real local contacts; advance only clock between acquisitions.
+		# Restored reserves isolate the displayed history from physiological urgency.
+		var id := world.place_object(creature.pos + Vector2(-13, 0), "capsula_aversiva" if state in ["m2-aversive", "m2-cautious"] else "capsula_neutra")
+		for index in range(8):
+			world.tick += 181
+			creature.energy = creature.max_energy * 0.9
+			creature.hydration = 90.0
+			assert(world.interact_object(creature, id))
+		creature.energy = creature.max_energy * 0.9
+		creature.hydration = 90.0
+	object_type = "capsula_neutra"
+	_set_tool("object")
+	_apply_tool(creature.pos + Vector2(24, 0))
+	var origin: Vector2 = creature.pos
+	if state != "m2-new" and state != "m2-catalog" and state != "m2-tutorial":
+		for index in range(80):
+			world.step()
+			if state != "m2-investigating" or creature.last_action == "investigate_object": break
+	_refresh()
+	if state in ["m2-memory", "m2-aversive", "m2-lab", "m2-ablation"]: _show_lab(true)
+	if state == "m2-ablation":
+		lab.memory_switch.button_pressed = false
+		lab.curiosity_switch.button_pressed = false
+	if state == "m2-catalog": object_dialog.popup_centered()
+	if state == "m2-tutorial":
+		tutorial_step = 3
+		_tutorial_move(0)
+		tutorial_dialog.popup_centered()
+	_notify(Texto.texto("m2_demo"), 20)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if state in ["m2-memory", "m2-aversive"]:
+		lab_scroll.scroll_vertical = int(lab.object_memory.position.y) - 26
+	if state == "m2-ablation":
+		lab_scroll.scroll_vertical = int(lab.memory_switch.position.y) - 5
+	print(JSON.stringify({"capture": state, "tick": world.tick, "action": creature.last_action, "goal": creature.mind.objetivo_atual, "reason": creature.mind.motivo, "distance_moved": origin.distance_to(creature.pos), "reaction": object_reaction.text, "objects": world.objects.size()}))
 	var until := Time.get_ticks_msec() + 800
 	while Time.get_ticks_msec() < until:
 		await get_tree().process_frame

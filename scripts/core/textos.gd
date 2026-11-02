@@ -343,6 +343,8 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if M2_UI.has(codigo):
+		return M2_UI[codigo] if valores.is_empty() else M2_UI[codigo] % valores
 	if M1_UI.has(codigo):
 		return M1_UI[codigo] if valores.is_empty() else M1_UI[codigo] % valores
 	if E4_UI.has(codigo) or E4_CATALOGO.has(codigo):
@@ -402,13 +404,14 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
+	if M2_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if E4_CATALOGO.has("action_" + codigo):
 		return texto("action_" + codigo)
 	return texto("action_" + codigo) if CATALOGO.has("action_" + codigo) or E1_CATALOGO.has("action_" + codigo) or E2_CATALOGO.has("action_" + codigo) else texto("action_unknown")
 
 static func razao(original: String) -> String:
 	if original.begins_with("mind."):
-		return mente_motivo(original) if original in ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency"] else mente_desejo(original.trim_prefix("mind."))
+		return mente_motivo(original) if original.begins_with("mind.iniciativa.") or original in ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency"] else mente_desejo(original.trim_prefix("mind."))
 	if E4_RAZOES.has(original):
 		return texto(E4_RAZOES[original])
 	if E3_RAZOES.has(original):
@@ -765,7 +768,7 @@ const M1_UI := {
 	"m1_companion_ok": "Companhia colocada perto; acompanhe a reação sem trocar a seleção.",
 	"m1_companion_fail": "Sem espaço livre próximo ou limite de população atingido.",
 	"m1_cleared": "%d rochas próximas retiradas. Observe a recuperação ao iniciar.",
-	"m1_lab": "MENTE DA SELEÇÃO · M1", "m1_affects": "Afetos simulados · 0 a 1",
+	"m1_lab": "MENTE DA SELEÇÃO · M2", "m1_affects": "Afetos simulados · 0 a 1",
 	"m1_causes": "Causas recentes · até 6 mudanças", "m1_scores": "Pontuações da última decisão",
 	"m1_logs": "Trocas de desejo · até 6 registros", "m1_affect_switch": "Afeto M1 ativo", "m1_memory_switch": "Memória M1 ativa",
 	"m1_ablation": "Ablação da seleção: altera escolhas futuras; não apaga o histórico. Memória e expressão legadas continuam independentes. Desligar afeto não demonstrou eliminar a diferença social de X1.",
@@ -775,10 +778,48 @@ const M1_UI := {
 	"m1_tutorial_step": "%d/5 · %s", "m1_tutorial_0": "0–3 min · Adotar\nDê um nome ao pet e use Acompanhar. Inicie em 1×; pause quando quiser observar.",
 	"m1_tutorial_1": "3–7 min · Alimentar\nOfereça fruta à seleção. Observe a aproximação e o recibo de ingestão; colocar comida não garante refeição.",
 	"m1_tutorial_2": "7–11 min · Apresentar companhia\nUse Apresentar companhia. Espere e observe os corpos; cada indivíduo pode reagir de modo diferente.",
-	"m1_tutorial_3": "11–15 min · Ver o desejo\nLeia o desejo aparente e o motivo no painel. Desejo e ação física podem diferir; fome e sede têm prioridade.",
+	"m1_tutorial_3": "11–15 min · Apresentar um objeto novo\nUse Objeto, escolha uma cápsula e coloque-a perto do pet, no campo de visão. Inicie em 1× e espere sem comandar. Observe interesse, hesitação e aproximação; fome e sede têm prioridade. Colocar não garante investigação.",
 	"m1_tutorial_4": "15–20 min · Observar privacidade\nDê tempo ao contato. Se aparecer busca por privacidade, observe o afastamento e dê espaço. Não é garantido que esse desejo apareça; salve para continuar depois.",
 	"m1_demo": "Inspeção M1 · cenário físico reproduzível; não é um experimento de eficácia.",
 	"m1_fps_scope": "Mentes ativas: %d · pet: %s"
+}
+
+const M2_UI := {
+	"tool_object": "Objeto", "place_object": "um objeto novo", "m2_present": "Apresentar objeto novo",
+	"m2_catalog": "Apresentar um objeto", "m2_kind": "Catálogo de aparências",
+	"m2_capsula_neutra": "Cápsula lisa · lote A", "m2_capsula_agradavel": "Cápsula lisa · lote B",
+	"m2_capsula_aversiva": "Cápsula lisa · lote C", "m2_pedra": "Pedra rugosa",
+	"m2_catalog_note": "As três cápsulas têm a mesma aparência. Cada lote pode produzir consequências diferentes; o pet só as descobre por contato. Escolher um lote não revela seu efeito.",
+	"m2_place": "Colocar no jardim", "m2_place_note": "Clique perto do pet, no campo de visão. Depois inicie em 1× e espere sem comandar. A criatura pode ignorar, aproximar-se ou hesitar.",
+	"m2_placed": "Objeto #%d colocado. Inicie em 1× e observe sem comandar.",
+	"m2_blocked": "Não foi possível colocar: posição bloqueada, fora do jardim ou limite de 128 objetos.",
+	"m2_reaction": "DIANTE DOS OBJETOS", "m2_unnoticed": "Nenhum objeto percebido agora.",
+	"m2_curious": "Parece curioso com o objeto.", "m2_cautious": "Parece cauteloso diante do objeto.",
+	"m2_familiar": "Já conhece isso e perdeu o interesse aparente.", "m2_noticed": "Notou um objeto; ainda não parece querer investigar.",
+	"m2_investigating": "Parece investigar o objeto por contato.",
+	"m2_activity": "Ação física: %s", "action_seek_object": "Aproximando-se do objeto",
+	"action_investigate_object": "Investigando o objeto por contato",
+	"m1_reason_iniciativa.novidade": "A novidade percebida favoreceu a iniciativa de investigar.",
+	"m1_reason_iniciativa.lacuna": "A lacuna de experiência com o objeto favoreceu a iniciativa.",
+	"m1_reason_iniciativa.evento": "Um evento percebido favoreceu a iniciativa.",
+	"m1_cause_object_contact": "Houve contato físico com um objeto e consequências medidas.",
+	"m2_objects": "Objetos · conhecimento da seleção", "m2_empty": "Ainda sem memória de objetos. Ver não ensina consequências.",
+	"m2_curiosity_switch": "Curiosidade por objetos ativa",
+	"m2_ablation": "Ablação experimental: desligar memória remove aquisição e uso de familiaridade e risco; desligar curiosidade retira seu termo da escolha. Altera escolhas futuras e persiste no save. Não apaga registros nem o intervalo físico entre contatos.",
+	"m2_memory_off": "Memória desligada: registros abaixo são históricos, sem uso na escolha.",
+	"m2_curiosity_off": "Curiosidade desligada: a novidade não contribui para a escolha.",
+	"m2_memory_row": "#%d · %s · fonte: %s\nConfiança: %s · validade até passo %d (%s)\nNovidade: %s · familiaridade: %s\nHipótese por categoria: %s\n%s",
+	"m2_source_observado": "observado", "m2_source_interagido": "interagido",
+	"m2_category_capsula": "cápsula lisa", "m2_category_pedra": "pedra rugosa",
+	"m2_valid": "vigente", "m2_expired": "expirada", "m2_evidence_none": "Sem evidência de contato; hipótese não é fato.",
+	"m2_evidence": "Contato no passo %d · evidência: Δenergia %s, Δhidratação %s, toxicidade %s, surpresa %s. Evidência válida até %d.",
+	"m2_category_row": "Categoria %s · fonte: %s\nValor aprendido: %s · confiança: %s\nContatos: %d · familiaridade: %s\n%s",
+	"m2_evidence_deadline": "Evidência válida até o passo %d.",
+	"m2_more": "%d outras memórias preservadas; exibição limitada às 6 mais recentes.",
+	"m2_demo": "Inspeção M2 · cenário controlado, sem ordens; movimento e contato reais.",
+	"m2_fps_scope": "Objetos físicos: %d · mentes ativas: %d · pet: %s",
+	"m2_fps_sample": "%d criaturas · %s quadros/s · %d objetos · %d mente ativa · pet: %s",
+	"m2_object_tag": "#%d"
 }
 
 static func mente_desejo(goal: String) -> String:
@@ -786,7 +827,7 @@ static func mente_desejo(goal: String) -> String:
 
 static func mente_motivo(reason: String) -> String:
 	var code := "m1_reason_" + reason.trim_prefix("mind.")
-	return texto(code) if M1_UI.has(code) else texto("reason_unknown")
+	return texto(code) if M1_UI.has(code) or M2_UI.has(code) else texto("reason_unknown")
 
 static func mente_dominante(snapshot: Dictionary) -> Dictionary:
 	var result := {"key": "", "value": 0.0}
