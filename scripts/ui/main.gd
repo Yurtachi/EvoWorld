@@ -102,12 +102,10 @@ var _world_dirty := false
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color("152d25"))
 	get_window().min_size = Vector2i(1100, 680)
-	for arg in OS.get_cmdline_user_args():
-		if arg.begins_with("--fps-benchmark="):
-			initial_population = clampi(arg.get_slice("=", 1).to_int(), 1, 100)
-			_capture_mode = true
-		if arg.begins_with("--capture="):
-			_capture_mode = true
+	var capture := _capture_options(OS.get_cmdline_user_args(), OS.is_debug_build())
+	_capture_mode = not capture.path.is_empty()
+	if _capture_mode and capture.benchmark:
+		initial_population = capture.population
 	if DisplayServer.get_name() != "headless" and not _capture_mode:
 		_read_settings()
 	_build_ui()
@@ -120,13 +118,7 @@ func _ready() -> void:
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
 	get_viewport().size_changed.connect(_fit_world)
 	# Reproducible capture mode uses this same running scene and real SimWorld.
-	var capture_path := ""
-	for argument in OS.get_cmdline_user_args():
-		if argument.begins_with("--capture="):
-			capture_path = argument.trim_prefix("--capture=")
-	for argument in OS.get_cmdline_user_args():
-		if argument.begins_with("--fps-benchmark=") and capture_path.is_empty():
-			capture_path = "reports/E4-fps-%d.png" % initial_population
+	var capture_path: String = capture.path
 	if not capture_path.is_empty():
 		_capture_demo.call_deferred(capture_path)
 	else:
@@ -888,7 +880,44 @@ func capture_screenshot(path: String = "") -> void:
 	else:
 		_notify(Texto.texto("screenshot_failed", [error]))
 
+static func _capture_options(arguments: PackedStringArray, debug_build: bool) -> Dictionary:
+	var result := {"path": "", "benchmark": false, "population": 12}
+	if not debug_build:
+		return result
+	var explicit_path := false
+	for argument in arguments:
+		if argument.begins_with("--capture="):
+			explicit_path = true
+			result.path = argument.trim_prefix("--capture=")
+		if argument.begins_with("--fps-benchmark="):
+			var count := argument.trim_prefix("--fps-benchmark=")
+			if count.length() > 3 or not count.is_valid_int() or count.to_int() < 1 or count.to_int() > 100:
+				return {"path": "", "benchmark": false, "population": 12}
+			result.benchmark = true
+			result.population = count.to_int()
+	if result.benchmark and not explicit_path:
+		result.path = "user://E4-fps-%d.png" % result.population
+	result.path = result.path.replace("\\", "/")
+	if not result.path.is_empty() and not _capture_path_valid(result.path):
+		result.path = ""
+	return result
+
+static func _capture_path_valid(path: String) -> bool:
+	if path.is_empty() or path.contains("\\"):
+		return false
+	for i in path.length():
+		if path.unicode_at(i) < 32:
+			return false
+	# Reject traversal before simplification, including user://../ outside user data.
+	if ".." in path.split("/") or path.get_file().is_empty() or path.get_extension().to_lower() != "png":
+		return false
+	if path.begins_with("user://"):
+		return path.trim_prefix("user://").is_relative_path() and not path.trim_prefix("user://").contains(":")
+	return path.is_absolute_path() and not path.contains("://")
+
 func _capture_demo(path: String) -> void:
+	if not OS.is_debug_build() or not _capture_path_valid(path):
+		return
 	var arguments := OS.get_cmdline_user_args()
 	if "--capture-minimum" in arguments:
 		get_window().size = Vector2i(1100, 680)
@@ -1315,6 +1344,8 @@ func _capture_e1(state: String, path: String) -> void:
 	await capture_screenshot(path)
 
 func _benchmark_fps(path: String) -> void:
+	if not OS.is_debug_build() or not _capture_path_valid(path):
+		return
 	if DisplayServer.get_name() == "headless":
 		printerr("O benchmark gráfico exige uma janela renderizada.")
 		get_tree().quit(1)
