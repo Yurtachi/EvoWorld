@@ -6,6 +6,9 @@ const Genes = preload("res://scripts/creature/genome.gd")
 const Chart = preload("res://scripts/ui/population_chart.gd")
 const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
 const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
+const Atelier = preload("res://scripts/atelier/atelier.gd")
+const AtelierChart = preload("res://scripts/ui/atelier_chart.gd")
+const ATELIER_POLICIES := ["trained", "frozen", "naive", "random"]
 const SAMPLE_LIMIT := 180
 const LIST_LIMIT := 12
 var samples: Array = []
@@ -38,6 +41,14 @@ var affect_switch: CheckButton
 var memory_switch: CheckButton
 var curiosity_switch: CheckButton
 var object_memory: Label
+var atelier_warning: Label
+var atelier_status: Label
+var atelier_learning_switch: CheckButton
+var atelier_policy_select: OptionButton
+var atelier_ablation_note: Label
+var atelier_competence: Label
+var atelier_chart: Control
+var atelier_attempts: Label
 
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -60,6 +71,29 @@ func _ready() -> void:
 	warning.add_theme_color_override("font_color", Color("ffdda5"))
 	_heading("m2_objects")
 	object_memory = _text("")
+	_heading("m3_lab_title")
+	atelier_warning = _text(Texto.texto("m3_lab_warning"))
+	atelier_warning.add_theme_color_override("font_color", Color("ffdda5"))
+	atelier_status = _text("")
+	atelier_learning_switch = CheckButton.new()
+	atelier_learning_switch.text = Texto.texto("m3_learning_switch")
+	add_child(atelier_learning_switch)
+	atelier_learning_switch.toggled.connect(_ablate_atelier_learning)
+	_text(Texto.texto("m3_policy_label"))
+	atelier_policy_select = OptionButton.new()
+	for mode in ATELIER_POLICIES:
+		atelier_policy_select.add_item(Texto.texto("m3_policy_" + mode))
+	add_child(atelier_policy_select)
+	atelier_policy_select.item_selected.connect(_select_atelier_policy)
+	atelier_ablation_note = _text(Texto.texto("m3_ablation_note"))
+	atelier_ablation_note.add_theme_color_override("font_color", Color("ffdda5"))
+	_heading("m3_competence")
+	atelier_competence = _text("")
+	_heading("m3_chart_title")
+	atelier_chart = AtelierChart.new()
+	add_child(atelier_chart)
+	_heading("m3_attempts")
+	atelier_attempts = _text("")
 	_heading("m1_affects")
 	mind_values = _text("")
 	_heading("m1_scores")
@@ -139,6 +173,7 @@ func observe(world, selected_id: int, force: bool = false) -> void:
 	if not is_visible_in_tree() and not force:
 		return
 	_observe_mind(world.creatures.get(selected_id))
+	_observe_atelier(world.creatures.get(selected_id))
 	var births := 0
 	var deaths := 0
 	var max_generation := 0
@@ -329,3 +364,107 @@ func _object_rows(snapshot: Dictionary) -> String:
 		var proof := Texto.texto("m2_evidence_deadline", [int(known.evidence_tick) + ObjectMemory.TTL]) if known.source == "interagido" else Texto.texto("m2_evidence_none")
 		rows.append(Texto.texto("m2_category_row", [Texto.texto("m2_category_" + category), Texto.texto("m2_source_" + known.source), Texto.numero(known.value, 3), Texto.numero(known.confidence, 2), known.samples, Texto.numero(known.familiarity, 3), proof]))
 	return "\n\n".join(rows) if not rows.is_empty() else Texto.texto("m2_empty")
+
+func _ablate_atelier_learning(enabled: bool) -> void:
+	if _world == null: return
+	var creature = _world.creatures.get(_last_selection)
+	if creature == null: return
+	if creature.atelier == null:
+		creature.atelier = Atelier.new()
+	creature.atelier.learning = enabled
+	if not enabled and creature.atelier.policy_mode == "trained":
+		creature.atelier.policy_mode = "frozen"
+	elif enabled and creature.atelier.policy_mode == "frozen":
+		creature.atelier.policy_mode = "trained"
+	intervention.emit()
+	observe(_world, _last_selection, true)
+
+func _select_atelier_policy(index: int) -> void:
+	if _world == null or index < 0 or index >= ATELIER_POLICIES.size(): return
+	var creature = _world.creatures.get(_last_selection)
+	if creature == null: return
+	if creature.atelier == null:
+		creature.atelier = Atelier.new()
+	var mode: String = ATELIER_POLICIES[index]
+	creature.atelier.policy_mode = mode
+	if mode == "trained":
+		creature.atelier.learning = true
+	elif mode == "frozen":
+		creature.atelier.learning = false
+	intervention.emit()
+	observe(_world, _last_selection, true)
+
+func _observe_atelier(creature) -> void:
+	var has_creature: bool = creature != null
+	atelier_learning_switch.disabled = not has_creature
+	atelier_policy_select.disabled = not has_creature
+	if not has_creature:
+		atelier_learning_switch.set_pressed_no_signal(false)
+		atelier_status.text = Texto.texto("m1_no_selection")
+		atelier_competence.text = Texto.texto("m1_no_selection")
+		atelier_attempts.text = Texto.texto("m3_attempts_empty")
+		atelier_chart.observe([])
+		return
+	var snap: Dictionary = creature.atelier_snapshot()
+	var learning_on: bool = bool(snap.get("learning", true)) if creature.atelier != null else true
+	var policy_mode: String = str(snap.get("policy_mode", "trained")) if creature.atelier != null else "trained"
+	atelier_learning_switch.set_pressed_no_signal(learning_on)
+	var policy_index: int = ATELIER_POLICIES.find(policy_mode)
+	if policy_index >= 0:
+		atelier_policy_select.select(policy_index)
+	atelier_status.text = Texto.texto("m3_policy_status", [
+		Texto.texto("m3_learning_on" if learning_on else "m3_learning_off"),
+		Texto.texto("m3_policy_" + policy_mode),
+		int(snap.get("updates", 0))
+	])
+	var comp: Dictionary = snap.get("competence", {})
+	var comp_rows: Array[String] = []
+	for shape in Atelier.SHAPES:
+		var item: Dictionary = comp.get(shape, {})
+		var demo_now := false
+		if _world != null:
+			for b in _world.boards:
+				if str(b.get("reference_shape", "")) == shape:
+					demo_now = true
+					break
+		var practiced_count: int = int(item.get("attempts", 0))
+		var demo_str: String = Texto.texto("m3_state_demo_yes" if demo_now else ("m3_state_demo_past" if practiced_count > 0 else "m3_state_demo_no"))
+		var prac_str: String = Texto.texto("m3_state_prac_yes", [practiced_count]) if practiced_count > 0 else Texto.texto("m3_state_prac_no")
+		var learned: bool = bool(item.get("learned", false))
+		var learned_str: String = Texto.texto("m3_state_learned_yes" if learned else ("m3_state_learned_calibrating" if practiced_count > 0 else "m3_state_learned_no"))
+		var rate_str: String = Texto.numero(float(item.get("success_rate", 0.0)) * 100.0, 0)
+		var med_str: String = Texto.numero(float(item.get("median_error", 1.0)), 3) if practiced_count > 0 else "—"
+		var last_str: String = Texto.numero(float(item.get("last_error", 1.0)), 3) if practiced_count > 0 else "—"
+		comp_rows.append(Texto.texto("m3_comp_row", [
+			Texto.texto("shape_" + shape),
+			demo_str,
+			prac_str,
+			learned_str,
+			practiced_count,
+			rate_str,
+			int(item.get("successes", 0)),
+			practiced_count,
+			med_str,
+			last_str
+		]))
+	atelier_competence.text = "\n\n".join(comp_rows)
+	var attempts: Array = snap.get("attempts", [])
+	atelier_chart.observe(attempts)
+	var attempt_rows: Array[String] = []
+	for index in range(attempts.size() - 1, maxi(-1, attempts.size() - 9), -1):
+		var att: Dictionary = attempts[index]
+		var shape_key: String = str(att.get("shape", "rabisco"))
+		if shape_key.is_empty():
+			shape_key = "rabisco"
+		var detail_state: String = Texto.texto("m3_attempt_scribble" if shape_key == "rabisco" else ("m3_attempt_calibrated" if bool(att.get("success", false)) else "m3_attempt_practiced"))
+		attempt_rows.append(Texto.texto("m3_attempt_detail", [
+			int(att.get("id", index + 1)),
+			int(att.get("tick", 0)),
+			int(att.get("board_id", 0)),
+			Texto.texto("shape_" + shape_key),
+			Texto.numero(float(att.get("error", 0.0)), 3),
+			Texto.numero(float(att.get("error_reduction", 0.0)), 3),
+			int(att.get("updates", 0)),
+			detail_state
+		]))
+	atelier_attempts.text = "\n\n".join(attempt_rows) if not attempt_rows.is_empty() else Texto.texto("m3_attempts_empty")

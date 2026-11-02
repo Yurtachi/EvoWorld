@@ -11,6 +11,9 @@ const FpsChart = preload("res://scripts/ui/fps_chart.gd")
 const PersonalityInspector = preload("res://scripts/ui/personality_inspector.gd")
 const TeachingPanel = preload("res://scripts/ui/teaching_panel.gd")
 const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
+const Atelier = preload("res://scripts/atelier/atelier.gd")
+const AtelierCanvas = preload("res://scripts/ui/atelier_canvas.gd")
+const DEMO_SHAPES := ["linha", "circulo", "quadrado"]
 const OBJECT_TYPES := ["capsula_neutra", "capsula_agradavel", "capsula_aversiva", "pedra"]
 const SIDEBAR := 350.0
 var teaching: VBoxContainer
@@ -114,6 +117,21 @@ var object_reaction: Label
 var object_activity: Label
 var _object_sensor_key := ""
 var _visible_objects: Array = []
+var demo_dialog: AcceptDialog
+var demo_shape_choice: OptionButton
+var demo_scale_input: SpinBox
+var demo_center_x_input: SpinBox
+var demo_center_y_input: SpinBox
+var demo_preview_canvas: Control
+var demo_shape := "linha"
+var board_canvas: Control
+var board_status_label: Label
+var board_live_label: Label
+var gallery_title_label: Label
+var gallery_empty_label: Label
+var gallery_list: VBoxContainer
+var _gallery_signature := ""
+var _selected_board_id := -1
 @onready var view = $WorldView
 @onready var camera: Camera2D = $Camera2D
 
@@ -134,6 +152,7 @@ func _ready() -> void:
 	_build_tutorial()
 	_build_expand()
 	_build_objects()
+	_build_demo()
 	_set_speed(speed)
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
 	get_viewport().size_changed.connect(_fit_world)
@@ -197,7 +216,7 @@ func _process(delta: float) -> void:
 		camera.position = world.creatures[selected_id].pos + _camera_bias()
 	view.selected_id = selected_id
 	view.pointer = get_global_mouse_position()
-	view.show_pointer = _over_world(get_viewport().get_mouse_position()) and not new_dialog.visible
+	view.show_pointer = _over_world(get_viewport().get_mouse_position()) and not new_dialog.visible and (demo_dialog == null or not demo_dialog.visible)
 	view.queue_redraw()
 	status_time = maxf(0, status_time - delta)
 	_refresh()
@@ -319,6 +338,35 @@ func _build_ui() -> void:
 	attention.toggle_mode = true
 	tool_buttons["attention"] = attention
 	_separator(inspector)
+	_label(inspector, Texto.texto("m3_title"), 12, Color("bccc98"))
+	var board_row := HBoxContainer.new()
+	board_row.add_theme_constant_override("separation", 8)
+	inspector.add_child(board_row)
+	board_canvas = AtelierCanvas.new()
+	board_row.add_child(board_canvas)
+	var board_info := VBoxContainer.new()
+	board_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	board_row.add_child(board_info)
+	board_status_label = _wrapped(board_info, Texto.texto("m3_board_none"))
+	board_live_label = _wrapped(board_info, "")
+	board_live_label.add_theme_color_override("font_color", Color("dbe8a5"))
+	_button(inspector, Texto.texto("m3_present"), _set_tool.bind("board"))
+	_button(inspector, Texto.texto("m3_open_demo"), _open_demo)
+	var quick_demo := HBoxContainer.new()
+	inspector.add_child(quick_demo)
+	for shape_key in DEMO_SHAPES:
+		var shape_btn := _button(quick_demo, Texto.texto("shape_" + shape_key), _demonstrate_shape.bind(shape_key))
+		shape_btn.add_theme_font_size_override("font_size", 13)
+		shape_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_button(inspector, Texto.texto("m3_tutorial_btn"), _open_atelier_tutorial)
+	gallery_title_label = _label(inspector, Texto.texto("m3_gallery"), 12, Color("bccc98"))
+	gallery_title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	gallery_empty_label = _wrapped(inspector, Texto.texto("m3_gallery_empty"))
+	gallery_list = VBoxContainer.new()
+	gallery_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gallery_list.add_theme_constant_override("separation", 6)
+	inspector.add_child(gallery_list)
+	_separator(inspector)
 	energy_text = _label(inspector, Texto.texto("energy"), 15)
 	energy_bar = ProgressBar.new()
 	energy_bar.custom_minimum_size.y = 9
@@ -373,6 +421,10 @@ func _build_ui() -> void:
 		tool_buttons[key] = button
 	tool_buttons["object"] = _button(toolbar, Texto.texto("tool_object"), _open_objects)
 	tool_buttons.object.toggle_mode = true
+	tool_buttons["board"] = _button(toolbar, Texto.texto("tool_board"), _set_tool.bind("board"))
+	tool_buttons.board.toggle_mode = true
+	tool_buttons["demo"] = _button(toolbar, Texto.texto("tool_demo"), _open_demo)
+	tool_buttons.demo.toggle_mode = true
 	var food_row := HBoxContainer.new()
 	bottom_col.add_child(food_row)
 	for kind in ["fruta", "semente", "folha", "cogumelo"]:
@@ -448,7 +500,7 @@ func _confirm_new_world() -> void:
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
-	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible):
+	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible):
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -473,7 +525,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible):
+	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -495,7 +547,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible):
+	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible):
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -529,6 +581,27 @@ func _apply_tool(pos: Vector2) -> void:
 		"object":
 			var id := world.place_object(pos, object_type)
 			_notify(Texto.texto("m2_placed", [id]) if id >= 0 else Texto.texto("m2_blocked"), 10)
+		"board":
+			var id := world.place_board(pos)
+			if id >= 0:
+				_selected_board_id = id
+			_notify(Texto.texto("m3_placed", [id]) if id >= 0 else Texto.texto("m3_blocked"), 10)
+		"demo":
+			var board_id := _nearest_board_id(pos)
+			if board_id < 0:
+				_notify(Texto.texto("m3_demo_no_board"), 10)
+			else:
+				_selected_board_id = board_id
+				var params := _demo_params()
+				var ok := world.demonstrar_forma(board_id, demo_shape, params)
+				var center: Array = params.get("center", [32.0, 32.0])
+				_notify(Texto.texto("m3_demo_ok_params", [
+					Texto.texto("shape_" + demo_shape),
+					board_id,
+					Texto.numero(float(params.get("scale", 1.0)), 2),
+					str(int(roundf(float(center[0])))),
+					str(int(roundf(float(center[1]))))
+				]) if ok else Texto.texto("m3_demo_no_board"), 10)
 		"water":
 			var id := world.place_water(pos)
 			_notify(Texto.texto("water_placed" if id >= 0 else "water_blocked"))
@@ -549,8 +622,11 @@ func _apply_tool(pos: Vector2) -> void:
 	_refresh()
 	_world_dirty = true
 
+
+
 func _refresh() -> void:
 	_refresh_mind()
+	_refresh_atelier()
 	teaching.observe(world, selected_id)
 	view.teaching_snapshot = teaching.snapshot
 	view.teaching_target = teaching.target if teaching.selected_skill() == "ir_ate_local" else Vector2.INF
@@ -675,8 +751,12 @@ func _load(slot: String = "world") -> void:
 		_refresh()
 	_notify(Texto.mensagem(result.message), 10)
 
+
+
 func _reset_session() -> void:
 	_object_sensor_key = ""
+	_gallery_signature = ""
+	_selected_board_id = -1
 	_visible_objects.clear()
 	if teaching != null:
 		teaching.world = null
@@ -1005,6 +1085,10 @@ func _capture_demo(path: String) -> void:
 			await _benchmark_fps(path)
 			get_tree().quit()
 			return
+	if state.begins_with("m3-"):
+		await _capture_m3(state, path)
+		get_tree().quit()
+		return
 	if state.begins_with("m2-"):
 		await _capture_m2(state, path)
 		get_tree().quit()
@@ -1099,6 +1183,7 @@ func _capture_demo(path: String) -> void:
 	while Time.get_ticks_msec() < warmup_until:
 		await get_tree().process_frame
 	await capture_screenshot(path)
+
 	if state in ["save", "load", "invalid-load"]:
 		for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
 			var fixture := folder.path_join("world.json" + suffix)
@@ -1175,6 +1260,7 @@ func _capture_e4(state: String, path: String) -> void:
 	while Time.get_ticks_msec() < warmup:
 		await get_tree().process_frame
 	await capture_screenshot(path)
+
 
 func _panel(parent: Node, offsets: Vector4, anchors: Vector4) -> PanelContainer:
 	var panel := PanelContainer.new()
@@ -1424,6 +1510,7 @@ func _capture_e1(state: String, path: String) -> void:
 		await get_tree().process_frame
 	await capture_screenshot(path)
 
+
 func _benchmark_fps(path: String) -> void:
 	if not OS.is_debug_build() or not _capture_path_valid(path):
 		return
@@ -1434,6 +1521,10 @@ func _benchmark_fps(path: String) -> void:
 	protected_mode = false
 	for offset in [Vector2(24, 0), Vector2(0, 50), Vector2(-45, 0)]:
 		world.place_object(world.creatures[world.pet_id].pos + offset, OBJECT_TYPES[world.objects.size() % OBJECT_TYPES.size()])
+	var bench_board_id := world.place_board(world.creatures[world.pet_id].pos + Vector2(0, -34))
+	if bench_board_id >= 0:
+		_selected_board_id = bench_board_id
+		world.demonstrar_forma(bench_board_id, "circulo", {"scale": 1.0, "center": [32.0, 32.0]})
 	paused = false
 	_set_speed(1)
 	var warmup := Time.get_ticks_msec() + 2000
@@ -1455,6 +1546,8 @@ func _benchmark_fps(path: String) -> void:
 	var result := {"initial_population": initial_population, "final_population": world.creatures.size(), "frames": intervals.size(), "seconds": elapsed, "mean_fps": mean, "p95_frame_ms": p95, "godot": Engine.get_version_info().string, "adapter": RenderingServer.get_video_adapter_name(), "display": DisplayServer.get_name(), "window": [get_window().size.x, get_window().size.y], "speed": speed, "tick": world.tick}
 	result["active_minds"] = world.mind_enabled_ids.size()
 	result["objects"] = world.objects.size()
+	result["boards"] = world.boards.size()
+	result["gallery"] = world.gallery.size()
 	result["pet_mind_active"] = world.creatures.has(world.pet_id) and world.creatures[world.pet_id].mind != null
 	var output := FileAccess.open(path.get_basename() + ".json", FileAccess.WRITE)
 	if output != null:
@@ -1463,18 +1556,25 @@ func _benchmark_fps(path: String) -> void:
 	else:
 		printerr("Benchmark: caminho de saída não gravável; use caminho absoluto.")
 	paused = true
-	_notify(Texto.texto("m2_fps_sample", [world.creatures.size(), Texto.numero(mean), world.objects.size(), world.mind_enabled_ids.size(), Texto.texto("yes" if result.pet_mind_active else "no")]), 15)
+	if path.get_file().begins_with("M3-"):
+		_notify(Texto.texto("m3_fps_sample", [world.creatures.size(), Texto.numero(mean), world.boards.size(), world.objects.size(), world.mind_enabled_ids.size(), Texto.texto("yes" if result.pet_mind_active else "no")]), 15)
+	else:
+		_notify(Texto.texto("m2_fps_sample", [world.creatures.size(), Texto.numero(mean), world.objects.size(), world.mind_enabled_ids.size(), Texto.texto("yes" if result.pet_mind_active else "no")]), 15)
 	print(JSON.stringify(result))
 	await capture_screenshot(path)
+
 
 
 func _compact_buttons(row: Container) -> void:
 	for child in row.get_children():
 		if child is Button:
-			child.add_theme_font_size_override("font_size", 14)
-			child.add_theme_stylebox_override("normal", GardenTheme.panel(Color("354e42"), 8, 8))
-			child.add_theme_stylebox_override("hover", GardenTheme.panel(Color("496454"), 8, 8))
-			child.add_theme_stylebox_override("pressed", GardenTheme.panel(Color("d5deaa"), 8, 8))
+			child.add_theme_font_size_override("font_size", 13)
+			child.add_theme_stylebox_override("normal", GardenTheme.panel(Color("354e42"), 6, 7))
+			child.add_theme_stylebox_override("hover", GardenTheme.panel(Color("496454"), 6, 7))
+			child.add_theme_stylebox_override("pressed", GardenTheme.panel(Color("d5deaa"), 6, 7))
+
+
+
 
 
 func _give_attention(pos: Vector2) -> void:
@@ -1533,6 +1633,7 @@ func _capture_e2(state: String, path: String) -> void:
 	await capture_screenshot(path)
 
 
+
 func _capture_e3(state: String, path: String) -> void:
 	# Explicit open-terrain fixture; real API, physics and Q updates throughout.
 	world = World.new_world(7421, {"creature_count": 1, "food_count": 0, "obstacle_count": 0, "water_count": 0, "food_regrow": false, "reproduction_enabled": false})
@@ -1588,6 +1689,7 @@ func _capture_e3(state: String, path: String) -> void:
 	while Time.get_ticks_msec() < warmup:
 		await get_tree().process_frame
 	await capture_screenshot(path)
+
 
 func _focus_selected() -> void:
 	if world != null and world.creatures.has(selected_id):
@@ -1701,7 +1803,7 @@ func _open_objects() -> void:
 	object_dialog.popup_centered()
 
 func _tutorial_move(direction: int) -> void:
-	tutorial_step = clampi(tutorial_step + direction, 0, 4)
+	tutorial_step = clampi(tutorial_step + direction, 0, 5)
 	tutorial_text.text = Texto.texto("m1_tutorial_step", [tutorial_step + 1, Texto.texto("m1_tutorial_" + str(tutorial_step))])
 
 func _capture_m1(state: String, path: String) -> void:
@@ -1750,6 +1852,7 @@ func _capture_m1(state: String, path: String) -> void:
 	while Time.get_ticks_msec() < until:
 		await get_tree().process_frame
 	await capture_screenshot(path)
+
 
 func _m2_fixture() -> void:
 	# Explicit UI inspection fixture, independent of scientific TRAIN/DEV/HOLDOUT.
@@ -1814,6 +1917,376 @@ func _capture_m2(state: String, path: String) -> void:
 	if state == "m2-ablation":
 		lab_scroll.scroll_vertical = int(lab.memory_switch.position.y) - 5
 	print(JSON.stringify({"capture": state, "tick": world.tick, "action": creature.last_action, "goal": creature.mind.objetivo_atual, "reason": creature.mind.motivo, "distance_moved": origin.distance_to(creature.pos), "reaction": object_reaction.text, "objects": world.objects.size()}))
+	var until := Time.get_ticks_msec() + 800
+	while Time.get_ticks_msec() < until:
+		await get_tree().process_frame
+	await capture_screenshot(path)
+
+func _build_demo() -> void:
+	demo_dialog = _window("m3_demo_title", Vector2i(540, 470))
+	demo_dialog.ok_button_text = Texto.texto("m3_demo_apply")
+	var column := _window_column(demo_dialog)
+	_wrapped(column, Texto.texto("m3_demo_shape"))
+	demo_shape_choice = OptionButton.new()
+	for shape_key in DEMO_SHAPES:
+		demo_shape_choice.add_item(Texto.texto("shape_" + shape_key))
+	column.add_child(demo_shape_choice)
+	_wrapped(column, Texto.texto("m3_demo_scale"))
+	demo_scale_input = SpinBox.new()
+	demo_scale_input.min_value = 0.45
+	demo_scale_input.max_value = 1.60
+	demo_scale_input.step = 0.05
+	demo_scale_input.value = 1.0
+	column.add_child(demo_scale_input)
+	var scale_menu := demo_scale_input.get_line_edit().get_menu()
+	_localize_edit_menu(scale_menu)
+	scale_menu.about_to_popup.connect(_localize_edit_menu.bind(scale_menu))
+	var center_row := HBoxContainer.new()
+	center_row.add_theme_constant_override("separation", 12)
+	column.add_child(center_row)
+	var cx_col := VBoxContainer.new()
+	cx_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center_row.add_child(cx_col)
+	_wrapped(cx_col, Texto.texto("m3_demo_pos_x"))
+	demo_center_x_input = SpinBox.new()
+	demo_center_x_input.min_value = 10
+	demo_center_x_input.max_value = 54
+	demo_center_x_input.step = 2
+	demo_center_x_input.value = 32
+	cx_col.add_child(demo_center_x_input)
+	var cx_menu := demo_center_x_input.get_line_edit().get_menu()
+	_localize_edit_menu(cx_menu)
+	cx_menu.about_to_popup.connect(_localize_edit_menu.bind(cx_menu))
+	var cy_col := VBoxContainer.new()
+	cy_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center_row.add_child(cy_col)
+	_wrapped(cy_col, Texto.texto("m3_demo_pos_y"))
+	demo_center_y_input = SpinBox.new()
+	demo_center_y_input.min_value = 10
+	demo_center_y_input.max_value = 54
+	demo_center_y_input.step = 2
+	demo_center_y_input.value = 32
+	cy_col.add_child(demo_center_y_input)
+	var cy_menu := demo_center_y_input.get_line_edit().get_menu()
+	_localize_edit_menu(cy_menu)
+	cy_menu.about_to_popup.connect(_localize_edit_menu.bind(cy_menu))
+	var preview_row := HBoxContainer.new()
+	preview_row.add_theme_constant_override("separation", 12)
+	column.add_child(preview_row)
+	demo_preview_canvas = AtelierCanvas.new()
+	preview_row.add_child(demo_preview_canvas)
+	_wrapped(preview_row, Texto.texto("m3_demo_hint")).size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	demo_shape_choice.item_selected.connect(func(_idx): _update_demo_preview())
+	demo_scale_input.value_changed.connect(func(_val): _update_demo_preview())
+	demo_center_x_input.value_changed.connect(func(_val): _update_demo_preview())
+	demo_center_y_input.value_changed.connect(func(_val): _update_demo_preview())
+	demo_dialog.confirmed.connect(_confirm_demo)
+	_update_demo_preview()
+
+func _demo_params() -> Dictionary:
+	return {
+		"scale": float(demo_scale_input.value) if demo_scale_input != null else 1.0,
+		"center": [
+			float(demo_center_x_input.value) if demo_center_x_input != null else 32.0,
+			float(demo_center_y_input.value) if demo_center_y_input != null else 32.0
+		]
+	}
+
+func _update_demo_preview() -> void:
+	if demo_shape_choice == null or demo_preview_canvas == null:
+		return
+	demo_shape = DEMO_SHAPES[clampi(demo_shape_choice.selected, 0, DEMO_SHAPES.size() - 1)]
+	var ref: Array = Atelier.build_reference_strokes(demo_shape, _demo_params())
+	demo_preview_canvas.reference_strokes = ref
+	demo_preview_canvas.strokes = []
+	demo_preview_canvas.queue_redraw()
+	if view != null:
+		view.demo_preview_strokes = ref
+		view.queue_redraw()
+
+func _open_demo() -> void:
+	_set_tool(tool)
+	demo_shape_choice.select(maxi(0, DEMO_SHAPES.find(demo_shape)))
+	_update_demo_preview()
+	demo_dialog.popup_centered()
+
+func _confirm_demo() -> void:
+	_update_demo_preview()
+	_set_tool("demo")
+	if world != null and not world.boards.is_empty():
+		var target_id := _selected_board_id
+		var found := false
+		for b in world.boards:
+			if int(b.id) == target_id:
+				found = true
+				break
+		if not found:
+			target_id = int(world.boards.back().id)
+			_selected_board_id = target_id
+		var params := _demo_params()
+		if world.demonstrar_forma(target_id, demo_shape, params):
+			var center: Array = params.get("center", [32.0, 32.0])
+			_notify(Texto.texto("m3_demo_ok_params", [
+				Texto.texto("shape_" + demo_shape),
+				target_id,
+				Texto.numero(float(params.get("scale", 1.0)), 2),
+				str(int(roundf(float(center[0])))),
+				str(int(roundf(float(center[1]))))
+			]), 10)
+			_world_dirty = true
+			_refresh()
+
+func _demonstrate_shape(shape_key: String) -> void:
+	if shape_key not in DEMO_SHAPES:
+		return
+	demo_shape = shape_key
+	if demo_shape_choice != null:
+		demo_shape_choice.select(DEMO_SHAPES.find(shape_key))
+	_update_demo_preview()
+	if world == null or world.boards.is_empty():
+		_set_tool("board")
+		_notify(Texto.texto("m3_demo_no_board"), 10)
+		return
+	var target_id := _selected_board_id
+	var found := false
+	for b in world.boards:
+		if int(b.id) == target_id:
+			found = true
+			break
+	if not found:
+		target_id = int(world.boards.back().id)
+		_selected_board_id = target_id
+	var params := _demo_params()
+	if world.demonstrar_forma(target_id, demo_shape, params):
+		var center: Array = params.get("center", [32.0, 32.0])
+		_notify(Texto.texto("m3_demo_ok_params", [
+			Texto.texto("shape_" + demo_shape),
+			target_id,
+			Texto.numero(float(params.get("scale", 1.0)), 2),
+			str(int(roundf(float(center[0])))),
+			str(int(roundf(float(center[1]))))
+		]), 10)
+		_world_dirty = true
+		_refresh()
+
+func _nearest_board_id(pos: Vector2) -> int:
+	if world == null or world.boards.is_empty():
+		return -1
+	var best_id := -1
+	var best_dist := INF
+	for board in world.boards:
+		var dist: float = pos.distance_to(board.pos)
+		if dist < best_dist:
+			best_dist = dist
+			best_id = int(board.id)
+	return best_id
+
+func _open_atelier_tutorial() -> void:
+	tutorial_step = 5
+	_tutorial_move(0)
+	tutorial_dialog.popup_centered()
+
+func _refresh_atelier() -> void:
+	if world == null or board_canvas == null:
+		return
+	if world.boards.is_empty():
+		board_canvas.setup([], [], false)
+		board_status_label.text = Texto.texto("m3_board_none")
+		board_live_label.text = ""
+	else:
+		var board: Dictionary = world.boards.back()
+		for b in world.boards:
+			if int(b.id) == _selected_board_id:
+				board = b
+				break
+			if int(b.get("owner_id", 0)) == selected_id:
+				board = b
+		var active_strokes: Array = board.get("active_strokes", [])
+		var display_strokes: Array = active_strokes
+		if display_strokes.is_empty() and not board.get("artifacts", []).is_empty():
+			display_strokes = board.artifacts.back().get("strokes", [])
+		var drawing_creature = null
+		for c in world.creatures.values():
+			if c.atelier != null and int(c.atelier.active.get("board_id", -1)) == int(board.id) and str(c.atelier.active.get("status", "")) == "active":
+				drawing_creature = c
+				break
+		var show_pen := false
+		var pen_pt := Vector2(32.0, 32.0)
+		if drawing_creature != null and not active_strokes.is_empty() and not active_strokes.back().is_empty():
+			var last_pt = active_strokes.back().back()
+			if last_pt is Array and last_pt.size() >= 2:
+				show_pen = true
+				pen_pt = Vector2(float(last_pt[0]), float(last_pt[1]))
+		board_canvas.setup(display_strokes, board.get("reference_strokes", []), show_pen, pen_pt)
+		var ref_shape: String = str(board.get("reference_shape", ""))
+		if ref_shape.is_empty():
+			board_status_label.text = Texto.texto("m3_board_status_free", [int(board.id)])
+		else:
+			var ref_params: Dictionary = board.get("reference_params", {})
+			var center: Array = ref_params.get("center", [32.0, 32.0])
+			var cx: int = int(roundf(float(center[0]))) if center.size() >= 2 else 32
+			var cy: int = int(roundf(float(center[1]))) if center.size() >= 2 else 32
+			board_status_label.text = Texto.texto("m3_board_status_ref", [
+				int(board.id),
+				Texto.texto("shape_" + ref_shape),
+				Texto.numero(float(ref_params.get("scale", 1.0)), 2),
+				str(cx),
+				str(cy)
+			])
+		if drawing_creature != null:
+			var act: Dictionary = drawing_creature.atelier.active
+			board_live_label.text = Texto.texto("m3_live_drawing", [
+				int(act.get("step_index", 0)),
+				int(act.get("total_segments", 8)),
+				int(board.id),
+				Texto.nome_criatura(str(drawing_creature.name))
+			])
+		elif not board.get("artifacts", []).is_empty():
+			board_live_label.text = Texto.texto("m3_live_done", [int(board.id), int(board.get("artifacts", []).size())])
+		else:
+			board_live_label.text = Texto.texto("m3_live_idle")
+	var own_count := 0
+	for a in world.gallery:
+		if int(a.get("owner_id", -1)) == selected_id:
+			own_count += 1
+	gallery_title_label.text = Texto.texto("m3_gallery_count", [world.gallery.size(), own_count])
+	var last_gallery_id: int = int(world.gallery.back().get("id", -1)) if not world.gallery.is_empty() else 0
+	var sig := "%d:%d:%d" % [world.gallery.size(), last_gallery_id, selected_id]
+	if sig != _gallery_signature:
+		_gallery_signature = sig
+		gallery_empty_label.visible = world.gallery.is_empty()
+		for child in gallery_list.get_children():
+			child.queue_free()
+		for idx in range(world.gallery.size() - 1, maxi(-1, world.gallery.size() - 7), -1):
+			var art: Dictionary = world.gallery[idx]
+			var card := PanelContainer.new()
+			card.add_theme_stylebox_override("panel", GardenTheme.panel(Color("283d33"), 6, 6))
+			gallery_list.add_child(card)
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 8)
+			card.add_child(row)
+			var mini := AtelierCanvas.new(true)
+			var ref_for_mini: Array = []
+			var t_shape: String = str(art.get("target_shape", "rabisco"))
+			if t_shape in DEMO_SHAPES:
+				var b_params := {}
+				for b in world.boards:
+					if int(b.id) == int(art.get("board_id", -1)) and str(b.get("reference_shape", "")) == t_shape:
+						b_params = b.get("reference_params", {})
+						break
+				ref_for_mini = Atelier.build_reference_strokes(t_shape, b_params)
+			mini.setup(art.get("strokes", []), ref_for_mini, false)
+			row.add_child(mini)
+			var owner_str: String = Texto.nome_criatura(str(art.get("owner_name", "")))
+			var detail := Texto.texto("m3_artifact_scribble", [int(art.get("strokes", []).size())]) if t_shape == "rabisco" or t_shape.is_empty() else Texto.texto("m3_artifact_guided", [Texto.texto("shape_" + t_shape), Texto.numero(float(art.get("error", 0.0)), 3)])
+			var caption := Texto.texto("m3_artifact_card", [
+				str(art.get("title", "")),
+				owner_str,
+				int(art.get("owner_id", -1)),
+				int(art.get("created_tick", 0)),
+				int(art.get("board_id", -1)),
+				detail
+			])
+			var info_label := _wrapped(row, caption)
+			info_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if world.gallery.size() > 6:
+			_wrapped(gallery_list, Texto.texto("m3_gallery_more", [world.gallery.size() - 6]))
+
+func _m3_fixture() -> void:
+	world = World.new_world(81203, {"creature_count": 0, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false})
+	var genes = load("res://scripts/creature/genome.gd").new()
+	genes.size = 8.5
+	genes.speed = 32.0
+	genes.vision_range = 180.0
+	genes.vision_fov = snappedf(TAU, 0.000001)
+	genes.temperament = {"curiosity": 0.9, "caution": 0.25, "sociability": 0.2, "impulsivity": 0.8}
+	world.pet_id = world.spawn_creature(Vector2(300, 300), Texto.texto("pet_default"), genes)
+	world.enable_mind(world.pet_id)
+	selected_id = world.pet_id
+	var creature = world.creatures[selected_id]
+	creature.energy = creature.max_energy * 0.95
+	creature.hydration = 95.0
+	creature.heading = 0.0
+	paused = true
+	_reset_session()
+	view.set_world(world)
+	_show_lab(false)
+	_focus_selected()
+
+func _capture_m3(state: String, path: String) -> void:
+	_m3_fixture()
+	var creature = world.creatures[selected_id]
+	creature.heading = -PI * 0.5
+	_set_tool("board")
+	_apply_tool(creature.pos + Vector2(0, -28))
+	var board_id: int = int(world.boards[0].id)
+	if state == "m3-scribble":
+		for _step in range(70):
+			world.step()
+			if not world.gallery.is_empty():
+				break
+	elif state == "m3-demo":
+		demo_shape_choice.select(1)
+		demo_scale_input.value = 1.15
+		demo_center_x_input.value = 34
+		demo_center_y_input.value = 30
+		_confirm_demo()
+		_open_demo()
+	elif state == "m3-drawing":
+		_demonstrate_shape("quadrado")
+		for _step in range(45):
+			world.step()
+			if creature.atelier != null and str(creature.atelier.active.get("status", "")) == "active" and int(creature.atelier.active.get("step_index", 0)) >= 4:
+				break
+	elif state in ["m3-gallery", "m3-lab-curve", "m3-ablation"]:
+		var sessions := 4 if state == "m3-lab-curve" else 2
+		for shape_key in DEMO_SHAPES:
+			for _session in range(sessions):
+				creature.energy = creature.max_energy * 0.95
+				creature.hydration = 95.0
+				world.demonstrar_forma(board_id, shape_key, {"scale": 1.0, "center": [32.0, 32.0]})
+				world.demonstrar_forma(board_id, shape_key, {"scale": 1.0, "center": [32.0, 32.0]})
+
+				var before_attempts: int = creature.atelier.attempts.size() if creature.atelier != null else 0
+				for _step in range(90):
+					world.step()
+					if creature.atelier != null and creature.atelier.attempts.size() > before_attempts:
+						break
+		if state == "m3-gallery":
+			world.demonstrar_forma(board_id, "circulo", {"scale": 1.1, "center": [32.0, 32.0]})
+	elif state == "m3-tutorial":
+		_demonstrate_shape("circulo")
+		for _step in range(18):
+			world.step()
+		_open_atelier_tutorial()
+	camera.position = creature.pos + Vector2(0, -14) + _camera_bias()
+	_refresh()
+	if state in ["m3-lab-curve", "m3-ablation"]:
+		_show_lab(true)
+	if state == "m3-ablation":
+		lab.atelier_learning_switch.button_pressed = false
+		lab._select_atelier_policy(2)
+	_notify(Texto.texto("m3_demo_banner"), 20)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if state == "m3-drawing":
+		caregiver_scroll.scroll_vertical = int(board_canvas.get_parent().position.y) - 24
+	if state == "m3-gallery":
+		caregiver_scroll.scroll_vertical = int(gallery_title_label.position.y) - 10
+	if state == "m3-lab-curve":
+		lab_scroll.scroll_vertical = int(lab.atelier_chart.position.y) - 65
+	if state == "m3-ablation":
+		lab_scroll.scroll_vertical = int(lab.atelier_status.position.y)
+	var snap: Dictionary = creature.atelier_snapshot()
+	print(JSON.stringify({
+		"capture": state,
+		"tick": world.tick,
+		"boards": world.boards.size(),
+		"gallery": world.gallery.size(),
+		"attempts": snap.get("attempts", []).size(),
+		"updates": snap.get("updates", 0),
+		"policy_mode": snap.get("policy_mode", "trained")
+	}))
 	var until := Time.get_ticks_msec() + 800
 	while Time.get_ticks_msec() < until:
 		await get_tree().process_frame

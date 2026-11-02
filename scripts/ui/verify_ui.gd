@@ -245,8 +245,9 @@ func _verify() -> void:
 	await _verify_e4(main, folder)
 	await _verify_m1(main, folder)
 	await _verify_m2(main, folder)
+	await _verify_m3(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
-	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog]:
+	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog, main.demo_dialog]:
 		dialog.popup_centered()
 		await process_frame
 		await process_frame
@@ -853,4 +854,84 @@ func _verify_m1(main, folder: String) -> void:
 	_expect(main.mind_desire.text == Texto.texto("m1_no_selection") and main.lab.mind_scores.text.is_empty(), "M1 seleção ausente limpa dados antigos")
 	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
 		var path := folder.path_join("m1.json" + suffix)
+		if FileAccess.file_exists(path): DirAccess.remove_absolute(path)
+
+
+func _verify_m3(main, folder: String) -> void:
+	main._m3_fixture()
+	var creature = main.world.creatures[main.selected_id]
+	var before: Dictionary = main.world.to_dict()
+	main._refresh()
+	main.lab.observe(main.world, creature.id, true)
+	_expect(main.world.to_dict() == before, "M3 inspeção de UI e laboratório não altera o mundo")
+	main.tool_buttons.board.pressed.emit()
+	main._apply_tool(creature.pos + Vector2(20, 0))
+	_expect(main.world.boards.size() == 1 and main.status.text.contains("Quadro #"), "M3 ferramenta Quadro coloca quadro real via place_board")
+	main._refresh()
+	_expect(main.board_status_label.text.contains("Quadro #") and main.board_status_label.text.contains("livre"), "M3 painel mostra quadro livre recém-colocado")
+	for _step in range(70):
+		main.world.step()
+		if not main.world.gallery.is_empty():
+			break
+	main._refresh()
+	await process_frame
+	_expect(not main.world.gallery.is_empty() and str(main.world.gallery[0].get("target_shape", "")) == "rabisco", "M3 criatura realiza rabisco livre espontâneo sem referência")
+	_expect(main.gallery_list.get_child_count() >= 1 and not main.gallery_empty_label.visible, "M3 galeria exibe criação com miniatura em Convivência")
+	main.tool_buttons.demo.pressed.emit()
+	_expect(main.demo_dialog.visible and main.demo_shape_choice.item_count == 3, "M3 diálogo Demonstrar abre com linha, círculo e quadrado")
+	main.demo_shape_choice.select(1)
+	main.demo_scale_input.value = 1.2
+	main.demo_center_x_input.value = 36
+	main.demo_center_y_input.value = 28
+	main.demo_dialog.confirmed.emit()
+	main.demo_dialog.hide()
+	var board_id: int = int(main.world.boards[0].id)
+	_expect(str(main.world.boards[0].get("reference_shape", "")) == "circulo" and not main.world.boards[0].get("reference_strokes", []).is_empty(), "M3 Demonstrar aplica forma, escala e posição via demonstrar_forma")
+	_expect(not main.board_canvas.reference_strokes.is_empty() and main.board_status_label.text.contains("Círculo"), "M3 guia de referência visível no quadro e no painel")
+	var saw_live_drawing := false
+	for _step in range(50):
+		main.world.step()
+		if creature.atelier != null and str(creature.atelier.active.get("status", "")) == "active" and not main.world.boards[0].get("active_strokes", []).is_empty():
+			main._refresh()
+			if creature.last_action == "draw_stroke" and main.board_live_label.text.contains("Traço em tempo real"):
+				saw_live_drawing = true
+			break
+	_expect(saw_live_drawing, "M3 traços da criatura aparecem em tempo real durante draw_stroke")
+	for shape_key in ["circulo", "circulo", "circulo", "circulo", "linha"]:
+		creature.energy = creature.max_energy * 0.95
+		creature.hydration = 95.0
+		main.world.demonstrar_forma(board_id, shape_key, {"scale": 1.0, "center": [32.0, 32.0]})
+		var prev_attempts: int = creature.atelier.attempts.size() if creature.atelier != null else 0
+		for _step in range(90):
+			main.world.step()
+			if creature.atelier != null and creature.atelier.attempts.size() > prev_attempts:
+				break
+	main.world.demonstrar_forma(board_id, "quadrado", {"scale": 1.0, "center": [32.0, 32.0]})
+	main._refresh()
+	main._show_lab(true)
+	_expect(main.lab.atelier_warning.text.contains("Ainda não copia de memória"), "M3 Laboratório exibe aviso honesto de limites (ainda não copia de memória)")
+	_expect(main.lab.atelier_competence.text.contains("demonstrado") and main.lab.atelier_competence.text.contains("praticado") and main.lab.atelier_competence.text.contains("aprendeu calibração guiada (ainda não copia de memória)"), "M3 competência distingue demonstrado, praticado e aprendeu com texto honesto")
+	_expect(main.lab.atelier_chart.total_points >= 4 and not main.lab.atelier_attempts.text.is_empty(), "M3 curva de erro e histórico de tentativas alimentados por dados reais")
+	_expect(main.lab.atelier_status.text.contains("Treino do ateliê: ativo") and main.lab.atelier_status.text.contains("ainda não copia de memória"), "M3 status mostra se treino/política está ativo e limite honesto")
+	main.lab.atelier_learning_switch.button_pressed = false
+	main.lab._select_atelier_policy(2)
+	_expect(not creature.atelier.learning and creature.atelier.policy_mode == "naive", "M3 ablação de treino e política no Laboratório altera estado real")
+	main.store.save_world(main.world, "m3", {"name": "M3 UI"})
+	var saved_m3: Dictionary = main.world.to_dict()
+	main._load("m3")
+	await process_frame
+	_expect(main.world.to_dict() == saved_m3 and main.gallery_list.get_child_count() >= 1, "M3 save/load v10 preserva quadros, galeria, ateliê e ablações")
+	main._open_atelier_tutorial()
+	_expect(main.tutorial_dialog.visible and main.tutorial_step == 5 and main.tutorial_text.text.contains("6/6") and main.tutorial_text.text.contains("ainda não copia de memória"), "M3 roteiro de tutorial do ateliê acessível e honesto")
+	main.tutorial_dialog.hide()
+	await process_frame
+	await process_frame
+	_expect(main.tool_buttons.board.get_global_rect().end.x < 1100 - main.SIDEBAR - 30 and main.tool_buttons.demo.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "M3 ferramentas Quadro e Demonstrar cabem na largura mínima")
+	_expect(main.lab.atelier_competence.size.x <= main.lab_scroll.size.x, "M3 texto de competência quebra linhas na largura mínima")
+	main.selected_id = -1
+	main._refresh()
+	main.lab.observe(main.world, -1, true)
+	_expect(main.lab.atelier_learning_switch.disabled and main.lab.atelier_policy_select.disabled, "M3 sem seleção desabilita controles de ablação do ateliê")
+	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var path := folder.path_join("m3.json" + suffix)
 		if FileAccess.file_exists(path): DirAccess.remove_absolute(path)
