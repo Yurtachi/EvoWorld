@@ -4,6 +4,9 @@ const World = preload("res://scripts/world/sim_world.gd")
 const Memory = preload("res://scripts/spatial/spatial_memory.gd")
 const Policy = preload("res://scripts/spatial/spatial_policy.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
+const Store = preload("res://scripts/persistence/save_store.gd")
+const Text = preload("res://scripts/core/textos.gd")
+const Strategy = preload("res://tests/experiments/p1b_strategy_world.gd")
 
 func check(ok: bool, message: String, f: Array) -> void:
 	if not ok: f.append(message)
@@ -19,6 +22,8 @@ func run() -> Array:
 	_negative_evidence(f)
 	_ecosystem_rng(f)
 	_legacy_and_save(f)
+	_spatial_save_diagnostic(f)
+	_strategy_control(f)
 	return f
 
 # Deny arbitrary receivers, including aliases and chains, while permitting
@@ -156,3 +161,44 @@ func _legacy_and_save(f: Array) -> void:
 		var hostile := pre.duplicate(true)
 		hostile.creatures[0].mind.spatial.scan_mask = mask
 		check(World.from_dict(hostile) == null, "mascara hostil aceita", f)
+
+func _spatial_save_diagnostic(f: Array) -> void:
+	var w = garden(382013)
+	w.step()
+	var valid: Dictionary = w.to_dict()
+	for value in ["corrompido", null, NAN, {"version": 99}]:
+		var hostile := valid.duplicate(true)
+		hostile.creatures[0].mind.spatial = value
+		check(World.from_dict(hostile) == null and World.validation_error.contains("mind.spatial"), "spatial invalido rejeitado sem diagnostico", f)
+	check(World.from_dict(valid) != null and World.validation_error.is_empty(), "diagnostico antigo contaminou carga valida", f)
+	var hostile := valid.duplicate(true)
+	hostile.creatures[0].mind.spatial.scan_mask = 131072
+	var unchanged := JSON.stringify(hostile, "", true, true)
+	var store := Store.new("user://p1b_diagnostic_" + str(OS.get_process_id()))
+	DirAccess.make_dir_recursive_absolute(store.directory)
+	var encoded: Dictionary = store._encode(JSON.stringify({"world": hostile, "metadata": {}}, "", true, true))
+	check(encoded.ok, "envelope hostil de teste nao codificado", f)
+	if not encoded.ok: return
+	var path: String = store.directory.path_join("world.json")
+	store._write(path, encoded.text)
+	var rejected: Dictionary = store.load_world()
+	check(not rejected.ok and rejected.message.contains("mind.spatial"), "SaveStore perdeu diagnostico espacial", f)
+	check(Text.mensagem(rejected.message).contains("memória espacial"), "diagnostico espacial sem traducao pt-BR", f)
+	check(FileAccess.get_file_as_string(path) == encoded.text and JSON.stringify(hostile, "", true, true) == unchanged, "rejeicao espacial modificou arquivo/entrada", f)
+	DirAccess.remove_absolute(path)
+	DirAccess.remove_absolute(store.directory)
+
+func _strategy_control(f: Array) -> void:
+	var w = garden(382014)
+	var c = w.creatures[w.pet_id]
+	c.energy = 35.0
+	w._eat(c, w.place_food(c.pos, "fruta"))
+	var state: Dictionary = w.to_dict()
+	var baseline = Strategy.from_state(state, c.pos)
+	check(baseline != null, "estrategia nao clonou mundo pareado", f)
+	if baseline == null: return
+	var observed: Array = baseline.creatures[baseline.pet_id].mind.spatial.lugares.duplicate(true)
+	var previous_pos: Vector2 = baseline.creatures[baseline.pet_id].pos
+	for i in 20: baseline.step()
+	check(baseline.creatures[baseline.pet_id].mind.spatial.lugares == observed, "estrategia inseriu/revisou evidencia sintetica", f)
+	check(baseline.creatures[baseline.pet_id].pos == previous_pos, "estrategia de um lugar nao aguardou lugar vazio", f)

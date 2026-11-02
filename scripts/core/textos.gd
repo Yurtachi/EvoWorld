@@ -410,6 +410,7 @@ const CATALOGO := {
 	"payload_invalid": "Dados de salvamento inválidos.",
 	"world_missing": "Mundo ou metadados ausentes.",
 	"schema_invalid": "Os dados do mundo falharam na validação da estrutura.",
+	"spatial_invalid": "A memória espacial (mind.spatial) contém dados inválidos. O arquivo de salvamento foi preservado; tente recuperar uma cópia válida.",
 	"temporary_open_failed": "Não foi possível abrir o salvamento temporário.",
 	"write_failed": "Não foi possível gravar o salvamento.",
 	"message_unknown": "Não foi possível concluir a operação de salvamento ou carregamento.",
@@ -499,7 +500,8 @@ const MENSAGENS := {
 	"Checkpoint checksum does not match.": "checksum_invalid",
 	"Invalid checkpoint payload.": "payload_invalid",
 	"Missing world or metadata.": "world_missing",
-	"World data failed schema validation.": "schema_invalid"
+	"World data failed schema validation.": "schema_invalid",
+	"Invalid spatial memory (mind.spatial); checkpoint preserved.": "spatial_invalid"
 }
 const ERROS_PREFIXO := {
 	"Cannot create save directory: ": "save_directory",

@@ -26,6 +26,7 @@ const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
 const SAVE_VERSION := 16 # Bounded spatial evidence and expectations per pet.
 const SpatialPolicy = preload("res://scripts/spatial/spatial_policy.gd")
+static var validation_error := ""
 const Terminal = preload("res://scripts/terminal/terminal.gd")
 const TerminalAdapter = preload("res://scripts/terminal/terminal_mundo_real.gd")
 const TerminalState = preload("res://scripts/terminal/terminal_estado.gd")
@@ -1530,6 +1531,18 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
 	# Migration must not duplicate unbounded structures or silently discard
 	# hostile data in fields introduced by later versions.
+	validation_error = ""
+	# Diagnose this optional component before generic JSON/schema rejection,
+	# including nonfinite or wrongly typed fields. Never mutate the input or
+	# silently erase a creature's remembered experience to make a save load.
+	if data.get("creatures") is Array and data.creatures.size() <= 10000:
+		var limit := int(data.tick) if Data.integer(data.get("tick")) else 2147483647
+		var bounds := Data.unpack_vector(data.size) if Data.vector(data.get("size")) else Vector2(100000, 100000)
+		for entry in data.creatures:
+			if entry is Dictionary and entry.get("mind") is Dictionary and entry.mind.has("spatial"):
+				if not Mind.Spatial.valid(entry.mind.spatial, limit, bounds) or (Data.integer(data.get("save_version")) and int(data.save_version) < 16):
+					validation_error = "Invalid spatial memory (mind.spatial); checkpoint preserved."
+					return null
 	if not Data.json_data(data):
 		return null
 	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, SAVE_VERSION]:

@@ -128,7 +128,7 @@ func _read(path: String) -> Dictionary:
 		return _error("Invalid checkpoint metadata.")
 	var world := World.from_dict(data.world)
 	if world == null:
-		return _error("World data failed schema validation.")
+		return _error(World.validation_error if not World.validation_error.is_empty() else "World data failed schema validation.")
 	return {"ok": true, "world": world, "metadata": data.metadata, "path": path}
 
 func _decompress(compressed: PackedByteArray, declared_bytes: int) -> PackedByteArray:
