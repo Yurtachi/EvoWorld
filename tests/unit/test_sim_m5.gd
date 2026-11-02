@@ -240,7 +240,7 @@ func _genealogy_and_save_v14(f: Array) -> void:
 
 	# Roundtrip test
 	var dict_v14: Dictionary = w.to_dict()
-	check(dict_v14.get("save_version") == 14, "versao do save nao e 14", f)
+	check(dict_v14.get("save_version") == World.SAVE_VERSION, "versao do save nao e a atual", f)
 	check(dict_v14.has("reproduction_rules"), "save v14 sem reproduction_rules", f)
 
 	var restored = World.from_dict(dict_v14)

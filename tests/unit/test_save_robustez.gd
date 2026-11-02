@@ -335,7 +335,7 @@ func _hostile_order_ttl(f: Array) -> void:
 
 func _new_world_generations(f: Array) -> void:
 	for seed_value in [7421, 9181]:
-		var world := World.new_world(seed_value, {"signal_enabled": true})
+		var world := World.new_ecosystem_world(seed_value, {"signal_enabled": true})
 		for i in 1800: world.step()
 		var deepest := 0
 		for record in world.genealogy.records.values(): deepest = maxi(deepest, record.generation)

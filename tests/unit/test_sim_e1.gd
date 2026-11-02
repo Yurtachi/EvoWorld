@@ -244,8 +244,8 @@ func _q_water(f: Array) -> void:
 		_check(_snapshot(restored) == _snapshot(world), "Continuação Q hídrica divergiu", f)
 
 func _new_world_and_round_trip(f: Array) -> void:
-	var a := World.new_world(9181)
-	var b := World.new_world(9181)
+	var a := World.new_ecosystem_world(9181)
+	var b := World.new_ecosystem_world(9181)
 	_check(a.creatures.size() == 12 and a.water_enabled and a.waters.size() == 3, "Mundo novo não usa 12 organismos/água", f)
 	_check(World.new_world(9181, {"creature_count": 5}).creatures.size() == 5, "Mundo novo ignorou população explícita", f)
 	_check(_snapshot(a) == _snapshot(b), "Inicialização por seed divergiu", f)

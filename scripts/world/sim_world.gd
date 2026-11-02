@@ -16,6 +16,7 @@ const Text = preload("res://scripts/core/textos.gd")
 const Signals = preload("res://scripts/communication/signal_channel.gd")
 const Commands = preload("res://scripts/communication/comandos.gd")
 const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
+const Feeder = preload("res://scripts/environment/feeder.gd")
 const Water = preload("res://scripts/environment/water_rules.gd")
 const Personality = preload("res://scripts/behavior/personality.gd")
 const Ensino = preload("res://scripts/interaction/ensino.gd")
@@ -23,7 +24,7 @@ const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
-const SAVE_VERSION := 14 # Convivencia, vinculo e reproducao voluntaria.
+const SAVE_VERSION := 15 # Pet worlds and finite physical feeders; legacy rules preserved.
 const Terminal = preload("res://scripts/terminal/terminal.gd")
 const TerminalAdapter = preload("res://scripts/terminal/terminal_mundo_real.gd")
 const TerminalState = preload("res://scripts/terminal/terminal_estado.gd")
@@ -34,7 +35,11 @@ var terminals: Array = []
 var terminal_markers: Array = []
 const Books = preload("res://scripts/library/book_catalog.gd")
 const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
-const NEW_WORLD_CREATURE_COUNT := 12
+const NEW_WORLD_CREATURE_COUNT := 1
+const ECOSYSTEM_CREATURE_COUNT := 12
+const PET_DEFAULTS := {"creature_count": NEW_WORLD_CREATURE_COUNT, "reproduction_enabled": false,
+	"food_count": 24, "food_capacity": 48, "food_regrow_interval": 40,
+	"food_regrow_batch": 1, "water_count": 9}
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
 	"reproduction_cooldown": 300, "max_age": 12000, "mutation_rate": 0.3, "mutation_scale": 0.025
@@ -50,6 +55,12 @@ var seed: int = 1
 var size := Vector2(1200.0, 760.0)
 var creatures: Dictionary = {}
 var foods: Array = []
+var feeders: Array = []
+# Empty means historical rules: food_regrow remains the source of truth.
+var _feeding_mode := ""
+var feeding_mode: String:
+	get:
+		return _feeding_mode if not _feeding_mode.is_empty() else ("ecosystem" if food_regrow else "manual")
 var objects: Array = []
 var library: Dictionary = {"version": Books.VERSION, "books": []}
 var pending_questions: Array:
@@ -115,9 +126,42 @@ var _in_step := false
 ## Product entry point. The low-level constructor retains historical experiment defaults.
 static func new_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
 	var initial := config.duplicate(true)
-	initial.merge({"creature_count": NEW_WORLD_CREATURE_COUNT, "water_enabled": true, "water_count": 3, "personality_enabled": true}, false)
+	# Explicit populations retain the historical experiment API. Product callers
+	# use new_pet_world; ecosystem opt-in also has a named preset below.
+	if not config.has("creature_count"):
+		initial.merge(PET_DEFAULTS, false)
+		if not initial.has("feeding_mode"):
+			initial["feeding_mode"] = "ecosystem" if initial.get("food_regrow", true) else "manual"
+	initial.merge({"water_enabled": true, "water_count": 3, "personality_enabled": true}, false)
 	initial["_mind_pet_default"] = not config.has("mind_enabled_ids") and not config.get("mind_all", false)
 	return load("res://scripts/world/sim_world.gd").new(world_seed, initial)
+
+static func new_pet_world(world_seed: int = 1, nome: String = "") -> SimWorld:
+	return new_world(world_seed, {"_pet_name": nome.strip_edges().left(64)})
+
+static func new_ecosystem_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
+	var initial := config.duplicate(true)
+	initial.merge({"creature_count": ECOSYSTEM_CREATURE_COUNT, "reproduction_enabled": true, "food_regrow": true}, false)
+	return new_world(world_seed, initial)
+
+func set_reproduction(enabled: bool) -> void:
+	reproduction_enabled = enabled
+
+## Manual placement remains available in every mode. Only ecosystem regrows;
+## only feeder mode runs dispensers. Switching never grants a meal.
+func set_feeding_mode(mode: String) -> bool:
+	if mode not in ["manual", "feeder", "ecosystem"]: return false
+	_feeding_mode = mode
+	food_regrow = mode == "ecosystem"
+	return true
+
+func pet_snapshot() -> Dictionary:
+	if not creatures.has(pet_id): return {}
+	var pet: Creature = creatures[pet_id]
+	return {"id": pet.id, "name": pet.name, "pos": Data.pack_vector(pet.pos),
+		"energy": pet.energy, "max_energy": pet.max_energy, "hydration": pet.hydration,
+		"age": pet.age, "alive": pet.alive, "mind": pet.mind_snapshot(),
+		"feeding_mode": feeding_mode, "reproduction_enabled": reproduction_enabled}
 
 func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	seed = world_seed
@@ -140,6 +184,8 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	food_capacity = clampi(int(config.get("food_capacity", 100)), 0, 10000)
 	food_regrow_interval = maxi(1, int(config.get("food_regrow_interval", 10)))
 	food_regrow_batch = clampi(int(config.get("food_regrow_batch", 2)), 0, 1000)
+	if config.get("feeding_mode") is String:
+		set_feeding_mode(config.feeding_mode)
 	for key in EVOLUTION_DEFAULTS:
 		set(key, config.get(key, EVOLUTION_DEFAULTS[key]))
 	max_population = clampi(max_population, 1, 10000)
@@ -164,7 +210,8 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 		var food_type: String = ["fruta", "semente", "folha", "cogumelo"][index % 4] if water_enabled else "legacy"
 		place_food(_free_position(3.0), food_type)
 	for index in range(clampi(int(config.get("creature_count", 16)), 0, max_population)):
-		var creature_id := spawn_creature(_free_position(16.0))
+		var creature_name: String = config.get("_pet_name", "") if index == 0 else ""
+		var creature_id := spawn_creature(_free_position(16.0), creature_name)
 		if pet_id == -1:
 			pet_id = creature_id
 
@@ -628,6 +675,36 @@ func place_food(pos: Vector2, tipo: String = "legacy") -> int:
 	foods.append({"id": food_id, "pos": location, "energy": FoodCatalog.PARAMETERS[tipo]["nutrition"], "food_type": tipo})
 	return food_id
 
+func place_feeder(pos: Vector2, cfg: Dictionary = {}) -> int:
+	if not pos.is_finite() or feeders.size() >= Feeder.LIMIT: return -1
+	for key in cfg:
+		if not Feeder.DEFAULTS.has(key): return -1
+	var settings := Feeder.DEFAULTS.duplicate()
+	settings.merge(cfg, true)
+	if not Feeder.valid_config(settings): return -1
+	if pos != _inside(pos, Feeder.RADIUS) or not _clear(pos, Feeder.RADIUS): return -1
+	settings.raio = snappedf(float(settings.raio), 0.000001)
+	for key in ["estoque", "intervalo_ticks", "capacidade_local"]: settings[key] = int(settings[key])
+	settings.merge({"id": ids.take(), "pos": pos, "last_tick": tick})
+	feeders.append(settings)
+	return int(settings.id)
+
+func feeder_refill(feeder_id: int, amount: Variant) -> bool:
+	if not Data.integer(amount, 1) or int(amount) > Feeder.MAX_STOCK: return false
+	for feeder in feeders:
+		if int(feeder.id) == feeder_id:
+			if int(feeder.estoque) + int(amount) > Feeder.MAX_STOCK: return false
+			feeder.estoque = int(feeder.estoque) + int(amount)
+			return true
+	return false
+
+func feeder_set_enabled(feeder_id: int, enabled: bool) -> bool:
+	for feeder in feeders:
+		if int(feeder.id) == feeder_id:
+			feeder.enabled = enabled
+			return true
+	return false
+
 ## Place an offer just beyond ingestion reach; only later physical ingestion has effects.
 func oferecer_alimento(creature_id: int, tipo: String = "fruta") -> int:
 	if not FoodCatalog.valid_type(tipo) or not creatures.has(creature_id) or not creatures[creature_id].alive:
@@ -680,6 +757,8 @@ func place_obstacle(pos: Vector2, radius: float) -> void:
 			return
 	for device in terminals:
 		if device.pos.distance_to(location) < actual_radius + 5.0: return
+	for feeder in feeders:
+		if feeder.pos.distance_to(location) < actual_radius + Feeder.RADIUS: return
 	for marker in terminal_markers:
 		if Data.unpack_vector(marker.pos).distance_to(location) < actual_radius + 1.0: return
 	obstacles.append({"pos": location, "radius": actual_radius})
@@ -708,6 +787,8 @@ func step() -> void:
 		for index in range(mini(food_regrow_batch, food_capacity - foods.size())):
 			var food_type: String = ["fruta", "semente", "folha", "cogumelo"][(tick / food_regrow_interval + index) % 4] if water_enabled else "legacy"
 			place_food(_free_position(3.0), food_type)
+	if feeding_mode == "feeder":
+		for feeder in feeders: Feeder.step(self, feeder)
 
 func _rebuild_spatial() -> void:
 	_food_grid = Grid.new()
@@ -1136,6 +1217,7 @@ func to_dict() -> Dictionary:
 		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch, "water_enabled": water_enabled, "personality_enabled": personality_enabled}
 	saved_config["mind_all"] = mind_all
 	saved_config["mind_enabled_ids"] = mind_enabled_ids.duplicate()
+	if not _feeding_mode.is_empty(): saved_config["feeding_mode"] = feeding_mode
 	for key in EVOLUTION_DEFAULTS:
 		saved_config[key] = get(key)
 	for key in Signals.DEFAULTS:
@@ -1164,12 +1246,18 @@ func to_dict() -> Dictionary:
 		for device in terminals:
 			out.terminals.append({"id": device.id, "pos": Data.pack_vector(device.pos), "books": device.books.duplicate()})
 	if not terminal_markers.is_empty(): out["terminal_markers"] = Data.restore_precision(terminal_markers)
+	if not feeders.is_empty():
+		out["feeders"] = []
+		for feeder in feeders:
+			var saved: Dictionary = feeder.duplicate(true)
+			saved.pos = Data.pack_vector(feeder.pos)
+			out.feeders.append(saved)
 	if reproduction_voluntary or mind_offspring or reproduction_min_familiarity != 0.12 or reproduction_compatibility_threshold != 0.5:
 		out["reproduction_rules"] = {"voluntary": reproduction_voluntary, "min_familiarity": reproduction_min_familiarity, "compatibility_threshold": reproduction_compatibility_threshold, "mind_offspring": mind_offspring}
 	return out
 
 static func _migrate_v12(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [13, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [13, 14, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 12 or data.has("terminals") or data.has("terminal_markers"): return {}
 	if not data.get("creatures") is Array: return {}
 	for c in data.creatures:
@@ -1179,8 +1267,17 @@ static func _migrate_v12(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v13(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [14, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 13 or data.has("reproduction_rules"): return {}
+	var migrated := data.duplicate(true)
+	migrated.save_version = 14
+	return migrated
+
+## No population, RNG, food or reproduction change during migration.
+static func _migrate_v14(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 14 or data.has("feeders"): return {}
+	if not data.get("config") is Dictionary or data.config.has("feeding_mode"): return {}
 	var migrated := data.duplicate(true)
 	migrated.save_version = SAVE_VERSION
 	return migrated
@@ -1393,8 +1490,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, SAVE_VERSION]:
 		return null
+	if int(data.save_version) < 15:
+		if data.has("feeders") or (data.get("config") is Dictionary and data.config.has("feeding_mode")): return null
 	if int(data.save_version) < 13:
 		if data.has("terminals") or data.has("terminal_markers"): return null
 		if data.get("creatures") is Array:
@@ -1442,6 +1541,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	if int(data["save_version"]) == 13:
 		data = _migrate_v13(data)
 		if data.is_empty(): return null
+	if int(data["save_version"]) == 14:
+		data = _migrate_v14(data)
+		if data.is_empty(): return null
+	if not data.get("feeders", []) is Array or data.get("feeders", []).size() > Feeder.LIMIT: return null
 	if not data.get("terminals", []) is Array or data.get("terminals", []).size() > TERMINAL_LIMIT or not data.get("terminal_markers", []) is Array or data.get("terminal_markers", []).size() > 48: return null
 	if not Data.integer(data.get("object_catalog_version"), 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION or not data.get("objects") is Array or data.objects.size() > ObjectCatalog.LIMIT:
 		return null
@@ -1470,6 +1573,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	if not data.get("config") is Dictionary or not data.get("rng_state") is Dictionary:
 		return null
 	var config: Dictionary = data["config"].duplicate()
+	if config.has("feeding_mode"):
+		if not config.feeding_mode is String or config.feeding_mode not in ["manual", "feeder", "ecosystem"]: return null
+		if config.get("food_regrow") != (config.feeding_mode == "ecosystem"): return null
 	if not Signals.valid_config(config) or not Signals.valid_log(data.get("signal_log"), int(data["tick"]), int(data["next_id"]), int(config["signal_count"])):
 		return null
 	if not config.get("reproduction_enabled") is bool:
@@ -1701,6 +1807,15 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if used_id >= int(data["next_id"]):
 			return null
 	if not result._restore_terminals(data, used_ids): return null
+	for raw in data.get("feeders", []):
+		if not Feeder.valid_record(raw, result.tick, int(data.next_id)) or used_ids.has(int(raw.id)): return null
+		var pos := Data.unpack_vector(raw.pos)
+		if pos != result._inside(pos, Feeder.RADIUS) or not result._clear(pos, Feeder.RADIUS): return null
+		used_ids[int(raw.id)] = true
+		var feeder: Dictionary = Data.restore_precision(raw)
+		feeder.pos = pos
+		feeder.raio = snappedf(float(raw.raio), 0.000001)
+		result.feeders.append(feeder)
 	if result.pet_id != -1 and not result.creatures.has(result.pet_id):
 		return null
 	result.events = Data.restore_precision(data["events"])
@@ -1801,7 +1916,7 @@ static func _migrate_v6(data: Dictionary) -> Dictionary:
 
 ## Idempotent migration never activates M1 or invents an acquired experience.
 static func _migrate_v7(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [8, 9, 10, 11, 12, 13, SAVE_VERSION]:
+	if data.get("save_version") in [8, 9, 10, 11, 12, 13, 14, SAVE_VERSION]:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
 		return {}
@@ -1815,7 +1930,7 @@ static func _migrate_v7(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v8(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [9, 10, 11, 12, 13, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [9, 10, 11, 12, 13, 14, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 8 or not data.get("creatures") is Array: return {}
 	# Legacy fixtures may retain empty modern metadata; never discard acquired data.
 	if data.has("objects") and (not data.objects is Array or not data.objects.is_empty()): return {}
@@ -1830,7 +1945,7 @@ static func _migrate_v8(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v9(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [10, 11, 12, 13, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [10, 11, 12, 13, 14, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 9 or not data.get("creatures") is Array: return {}
 	if data.has("boards") and (not data.boards is Array or not data.boards.is_empty()): return {}
 	if data.has("gallery") and (not data.gallery is Array or not data.gallery.is_empty()): return {}
@@ -1841,7 +1956,7 @@ static func _migrate_v9(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v10(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [11, 12, 13, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [11, 12, 13, 14, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 10 or not data.get("creatures") is Array: return {}
 	var migrated := data.duplicate(true)
 	for c in migrated.creatures:
@@ -2204,7 +2319,7 @@ func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest
 	return _move(creature, sensors.obstacles)
 
 static func _migrate_v11(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [12, 13, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [12, 13, 14, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 11 or not data.get("creatures") is Array: return {}
 	if data.has("library"): return {}
 	for c in data.creatures:
