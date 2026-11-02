@@ -23,7 +23,15 @@ const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
-const SAVE_VERSION := 12 # M3c bounded knowledge, library and questions.
+const SAVE_VERSION := 13 # Cooperative physical terminal and individual policy.
+const Terminal = preload("res://scripts/terminal/terminal.gd")
+const TerminalAdapter = preload("res://scripts/terminal/terminal_mundo_real.gd")
+const TerminalState = preload("res://scripts/terminal/terminal_estado.gd")
+const TerminalLearning = preload("res://scripts/mind/terminal_learning.gd")
+const TERMINAL_LIMIT := 16
+const TERMINAL_COST := 0.004
+var terminals: Array = []
+var terminal_markers: Array = []
 const Books = preload("res://scripts/library/book_catalog.gd")
 const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
 const NEW_WORLD_CREATURE_COUNT := 12
@@ -452,6 +460,10 @@ func place_obstacle(pos: Vector2, radius: float) -> void:
 	for food in foods:
 		if food["pos"].distance_to(location) < actual_radius + 3.0:
 			return
+	for device in terminals:
+		if device.pos.distance_to(location) < actual_radius + 5.0: return
+	for marker in terminal_markers:
+		if Data.unpack_vector(marker.pos).distance_to(location) < actual_radius + 1.0: return
 	obstacles.append({"pos": location, "radius": actual_radius})
 
 func step() -> void:
@@ -507,6 +519,12 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 	if not _in_step:
 		_rebuild_spatial()
 	var result := {"foods": [], "creatures": [], "obstacles": [], "hunger": creature.hunger}
+	if not terminals.is_empty():
+		result["terminals"] = []
+		var active_device: int = int(creature.mind.terminal.get("active", {}).get("terminal_id", 0)) if creature.mind != null and not creature.mind.terminal.is_empty() else 0
+		for row in terminals:
+			var remembered: bool = int(row.id) == active_device and creature.pos.distance_to(row.pos) <= creature.genome.vision_range
+			if (_visible(creature, row.pos) or remembered) and not _occluded(creature.pos, row.pos): result.terminals.append(row.duplicate(true))
 	if not objects.is_empty():
 		result["objects"] = []
 		for row in objects:
@@ -587,6 +605,8 @@ func _update_creature(creature: Creature) -> void:
 	var order: Dictionary = comandos.acao_pendente(creature, self)
 	var teaching_active: bool = creature.ensino != null and creature.ensino.running()
 	var mental_goal: String = creature.mind.decide(creature, tick, sensors) if creature.mind != null else ""
+	if creature.mind != null and mental_goal != "usar_terminal" and not creature.mind.terminal.is_empty() and not creature.mind.terminal.active.is_empty():
+		_terminal_finish(creature, "interrompido")
 	var survival := (personality_enabled or teaching_active or creature.mind != null) and (creature.hunger > Commands.FOME_SUSPENDE_ORDEM or (water_enabled and creature.thirst > Water.THIRST_THRESHOLD))
 	var social: Dictionary = Social.decide(self, creature, sensors) if personality_enabled and not survival and creature.mind == null else {}
 	var motive: String = creature.personality.motive(creature.temperament) if personality_enabled and not survival and creature.mind == null else ""
@@ -643,7 +663,7 @@ func _update_creature(creature: Creature) -> void:
 	var cost: float = creature.genome.metabolism * (0.52 + creature.genome.size * 0.022) * TICK_DT
 	if personality_enabled and creature.last_action == "rest":
 		cost *= 0.6
-	if moving:
+	if moving and creature.last_action != "use_terminal":
 		cost += creature.genome.speed * creature.genome.size * 0.0005 * TICK_DT
 	if creature.last_action == "draw_stroke":
 		cost += Atelier.DRAW_ENERGY_COST
@@ -663,6 +683,7 @@ func _update_creature(creature: Creature) -> void:
 		_ensino_finish_tick(creature, teaching_acted)
 
 func _die(creature: Creature, reason: String) -> void:
+	terminal_markers = terminal_markers.filter(func(m): return int(m.owner_id) != creature.id)
 	if creature.ensino != null:
 		creature.ensino.finish(tick, "death", creature.energy, creature.ensino.active.get("final_distance", 0.0))
 	creature.alive = false
@@ -920,7 +941,224 @@ func to_dict() -> Dictionary:
 	if not library.books.is_empty():
 		out["library"] = {"version": Books.VERSION, "books": []}
 		for b in library.books: out.library.books.append({"id": b.id, "book_id": b.book_id, "pos": Data.pack_vector(b.pos)})
+	if not terminals.is_empty():
+		out["terminals"] = []
+		for device in terminals:
+			out.terminals.append({"id": device.id, "pos": Data.pack_vector(device.pos), "books": device.books.duplicate()})
+	if not terminal_markers.is_empty(): out["terminal_markers"] = Data.restore_precision(terminal_markers)
 	return out
+
+static func _migrate_v12(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 12 or data.has("terminals") or data.has("terminal_markers"): return {}
+	if not data.get("creatures") is Array: return {}
+	for c in data.creatures:
+		if not c is Dictionary or (c.get("mind") is Dictionary and c.mind.has("terminal")): return {}
+	var migrated := data.duplicate(true)
+	migrated.save_version = SAVE_VERSION
+	return migrated
+
+func place_terminal(pos: Vector2) -> int:
+	if not pos.is_finite() or terminals.size() >= TERMINAL_LIMIT: return -1
+	var location := _inside(pos, 5.0)
+	if not _clear(location, 5.0): return -1
+	var device_id: int = ids.take()
+	terminals.append({"id": device_id, "pos": location, "books": ["mapa", "livro_desenho", "livro_repeticao"]})
+	return device_id
+
+func _terminal_device(device_id: int) -> Dictionary:
+	for device in terminals:
+		if int(device.id) == device_id: return device
+	return {}
+
+func _terminal_ready(creature: Creature, device_id: int) -> bool:
+	if creature == null or creatures.get(creature.id) != creature or not creature.alive or creature.mind == null: return false
+	if creature.hunger > 0.55 or (water_enabled and creature.thirst > 0.55): return false
+	var device := _terminal_device(device_id)
+	if device.is_empty() or creature.pos.distance_to(device.pos) > Obs.reach(creature) or _occluded(creature.pos, device.pos): return false
+	var s := TerminalLearning.state(creature.mind)
+	return s.enabled and tick >= int(s.refusal_until)
+
+func terminal_snapshot(creature: Variant) -> Dictionary:
+	var actor = creatures.get(creature) if creature is int else creature
+	if actor == null or actor.mind == null: return TerminalLearning.empty()
+	return Data.restore_precision(actor.mind.terminal) if not actor.mind.terminal.is_empty() else TerminalLearning.empty()
+
+func terminal_set_task(creature: Creature, kind: String, target: Vector2i) -> bool:
+	var task := {"kind": kind, "target": [target.x, target.y]}
+	if creature == null or creature.mind == null or not TerminalLearning.valid_task(task): return false
+	var s := TerminalLearning.state(creature.mind)
+	if not s.active.is_empty(): _terminal_finish(creature, "interrompido")
+	s.task = task
+	return true
+
+func terminal_refuse(creature: Creature, duration: int = 180) -> bool:
+	if creature == null or creature.mind == null or duration < 1 or duration > 10000: return false
+	var s := TerminalLearning.state(creature.mind)
+	if not s.active.is_empty(): _terminal_finish(creature, "interrompido")
+	s.refusal_until = tick + duration
+	return true
+
+func terminal_observe(creature: Creature, device_id: int) -> Dictionary:
+	if not _terminal_ready(creature, device_id): return {}
+	var device := _terminal_device(device_id)
+	var seen := sense(creature)
+	var relative: Vector2 = creature.pos - device.pos
+	# Only sensed objects, public physical boundaries and body state.
+	return {"pos": [roundi(relative.x), roundi(relative.y)], "limits": [Data.pack_vector(-device.pos), Data.pack_vector(size - device.pos)],
+		"foods": seen.foods, "obstacles": seen.obstacles, "books": seen.get("books", []), "manuals": device.books.duplicate(), "boards": seen.get("boards", []), "energy": creature.energy, "hydration": creature.hydration}
+
+func terminal_mark(creature: Creature, device_id: int, target: Vector2i) -> bool:
+	if not _terminal_ready(creature, device_id) or absi(target.x) > 64 or absi(target.y) > 64: return false
+	var location: Vector2 = _terminal_device(device_id).pos + Vector2(target)
+	if location != _inside(location, 1.0) or not _clear(location, 1.0): return false
+	# One current marker per creature/device; bounded independently of history.
+	for marker in terminal_markers:
+		if int(marker.owner_id) == creature.id and int(marker.terminal_id) == device_id:
+			marker.pos = Data.pack_vector(location)
+			marker.tick = tick
+			return true
+	if terminal_markers.size() >= 48: terminal_markers.pop_front()
+	terminal_markers.append({"owner_id": creature.id, "terminal_id": device_id, "pos": Data.pack_vector(location), "tick": tick})
+	return true
+
+func terminal_move(creature: Creature, device_id: int, direction: String, units: int) -> bool:
+	if not _terminal_ready(creature, device_id) or units < 1 or units > 8: return false
+	var directions := {"NORTE": Vector2.UP, "SUL": Vector2.DOWN, "LESTE": Vector2.RIGHT, "OESTE": Vector2.LEFT}
+	if not directions.has(direction): return false
+	var delta: Vector2 = directions[direction] * minf(float(units), creature.genome.speed * TICK_DT)
+	var target := creature.pos + delta
+	# Same swept collision and speed cap as ordinary locomotion; never a teleport.
+	if target != _inside(target, creature.genome.size) or _occluded(creature.pos, target, creature.genome.size): return false
+	creature.heading = delta.angle()
+	creature.pos = target
+	creature.energy = snappedf(maxf(0.0, creature.energy - creature.genome.speed * creature.genome.size * 0.0005 * TICK_DT), 0.000001)
+	return true
+
+func terminal_draw(creature: Creature, device_id: int, shape: String) -> bool:
+	if not _terminal_ready(creature, device_id): return false
+	var requested: String = {"LINHA": "linha", "CIRCULO": "circulo", "QUADRADO": "quadrado"}.get(shape, "")
+	if requested.is_empty(): return false
+	for board in boards:
+		if creature.pos.distance_to(board.pos) <= Obs.reach(creature) and not _occluded(creature.pos, board.pos) and board.reference_shape == requested:
+			var drawn := draw_on_board(creature, int(board.id))
+			if drawn: creature.energy = snappedf(maxf(0.0, creature.energy - Atelier.DRAW_ENERGY_COST), 0.000001)
+			return drawn
+	return false
+
+func terminal_read(creature: Creature, device_id: int, book: String) -> bool:
+	if not _terminal_ready(creature, device_id) or book not in _terminal_device(device_id).books: return false
+	# Authored physical manual attached to this device, one bounded page/action.
+	return book in ["mapa", "livro_desenho", "livro_repeticao"]
+
+func terminal_offer_manual(creature: Creature, device_id: int, book: String = "mapa") -> bool:
+	if not _terminal_ready(creature, device_id) or not terminal_read(creature, device_id, book): return false
+	if creature.mind.traits(creature).curiosity < 0.15 and creature.personality != null and creature.personality.boredom < 0.5: return false
+	var s := TerminalLearning.state(creature.mind)
+	if int(s.last_tick) == tick: return false
+	s.last_tick = tick
+	var known = TerminalState.from_dict(s.state)
+	if book == "mapa":
+		for command in TerminalState.HELP:
+			if known.discover(command, "manual"): break
+	elif book == "livro_desenho": known.discover("DESENHAR", "livro")
+	else: known.discover("REPETIR", "livro")
+	s.state = known.to_dict()
+	creature.energy = snappedf(maxf(0.0, creature.energy - TERMINAL_COST), 0.000001)
+	creature.last_action = "read_terminal_manual"
+	return true
+
+func terminal_start(creature: Creature, device_id: int, program: String) -> bool:
+	if not _terminal_ready(creature, device_id): return false
+	var s := TerminalLearning.state(creature.mind)
+	if not s.active.is_empty(): return false
+	var lines := TerminalLearning.instructions(program, s.state)
+	if lines.is_empty():
+		var known = TerminalState.from_dict(s.state)
+		Terminal.new().execute(program, null, known, tick, 8)
+		# The standalone module permits 256-character program keys; the global
+		# checkpoint format permits 128. Keep opaque error history, but do not
+		# retain an unexecutable long key that could invalidate the whole save.
+		for remembered in known.tabela.keys():
+			if remembered.length() > 128: known.tabela.erase(remembered)
+		s.state = known.to_dict()
+		return false
+	s.active = {"program": program, "instructions": lines, "index": 0, "terminal_id": device_id, "started": tick, "origin": Data.pack_vector(creature.pos)}
+	return true
+
+func _terminal_achieved(creature: Creature, device_id: int) -> bool:
+	var s := TerminalLearning.state(creature.mind)
+	if s.task.kind == "desenhar":
+		return creature.atelier != null and creature.atelier.artifacts.any(func(a): return int(a.created_tick) >= int(s.active.started) and a.target_shape == "linha")
+	var location: Vector2 = _terminal_device(device_id).pos + Vector2(float(s.task.target[0]), float(s.task.target[1]))
+	return creature.pos.distance_to(location) <= 1.5 and creature.pos.distance_to(Data.unpack_vector(s.active.origin)) > 0.01 and terminal_markers.any(func(m): return int(m.owner_id) == creature.id and int(m.terminal_id) == device_id and int(m.tick) >= int(s.active.started) and Data.unpack_vector(m.pos).distance_to(location) < 0.01)
+
+func _terminal_finish(creature: Creature, error: String = "") -> void:
+	var s := TerminalLearning.state(creature.mind)
+	if s.active.is_empty(): return
+	var success := error.is_empty() and _terminal_achieved(creature, int(s.active.terminal_id))
+	TerminalLearning.feedback(s, s.active.program, success, error if not error.is_empty() else ("" if success else "objetivo"), tick, creature.mind.memory_enabled)
+	s.active = {}
+	s.cooldown = tick + 2
+
+func terminal_step(creature: Creature, device_id: int) -> bool:
+	if creature == null or creature.mind == null: return false
+	var s := TerminalLearning.state(creature.mind)
+	if int(s.last_tick) == tick: return false
+	if not _terminal_ready(creature, device_id):
+		_terminal_finish(creature, "interrompido")
+		return false
+	if s.active.is_empty() and (tick < int(s.cooldown) or not terminal_start(creature, device_id, TerminalLearning.choose(s))): return false
+	if int(s.active.terminal_id) != device_id: return false
+	if tick - int(s.active.started) >= 40:
+		_terminal_finish(creature, "tempo")
+		return false
+	s.last_tick = tick
+	var adapter := TerminalAdapter.new(self, creature, device_id)
+	var known = TerminalState.from_dict(s.state)
+	var result := Terminal.new().execute(s.active.instructions[int(s.active.index)], adapter, known, tick, 1)
+	s.state = known.to_dict()
+	creature.energy = snappedf(maxf(0.0, creature.energy - TERMINAL_COST), 0.000001)
+	creature.last_action = "use_terminal"
+	if not result.ok:
+		_terminal_finish(creature, "recusado")
+	else:
+		s.active.index += 1
+		if int(s.active.index) >= s.active.instructions.size() or _terminal_achieved(creature, device_id): _terminal_finish(creature)
+	return adapter.moved
+
+func _restore_terminals(data: Dictionary, used_ids: Dictionary) -> bool:
+	for raw in data.get("terminals", []):
+		if not raw is Dictionary or raw.size() != 3 or not Data.integer(raw.get("id"), 1) or int(raw.id) >= int(data.next_id) or used_ids.has(int(raw.id)) or not Data.vector(raw.get("pos")) or not raw.get("books") is Array or raw.books.size() > 3: return false
+		var books_seen: Dictionary = {}
+		for book in raw.books:
+			if book not in ["mapa", "livro_desenho", "livro_repeticao"] or books_seen.has(book): return false
+			books_seen[book] = true
+		var pos := Data.unpack_vector(raw.pos)
+		if pos != _inside(pos, 5.0) or not _clear(pos, 5.0): return false
+		used_ids[int(raw.id)] = true
+		terminals.append({"id": int(raw.id), "pos": pos, "books": raw.books.duplicate()})
+	var marker_ids: Dictionary = {}
+	for m in data.get("terminal_markers", []):
+		if not m is Dictionary or m.size() != 4 or not Data.integer(m.get("owner_id"), 1) or not creatures.has(int(m.owner_id)) or not Data.integer(m.get("terminal_id"), 1) or _terminal_device(int(m.terminal_id)).is_empty() or not Data.vector(m.get("pos")) or not Data.integer(m.get("tick")) or int(m.tick) > tick: return false
+		var k := str(int(m.owner_id)) + ":" + str(int(m.terminal_id))
+		if marker_ids.has(k): return false
+		marker_ids[k] = true
+		var pos := Data.unpack_vector(m.pos)
+		var delta: Vector2 = pos - _terminal_device(int(m.terminal_id)).pos
+		# Reconstruct the actual float32 operation used by terminal_mark. Exact
+		# integer subtraction fails at exponent boundaries for valid fractional bases.
+		var offset := Vector2i(roundi(delta.x), roundi(delta.y))
+		var expected: Vector2 = _terminal_device(int(m.terminal_id)).pos + Vector2(offset)
+		if absi(offset.x) > 64 or absi(offset.y) > 64 or pos != expected or pos != _inside(pos, 1.0) or not _clear(pos, 1.0): return false
+		terminal_markers.append(Data.restore_precision(m))
+	for c in creatures.values():
+		if c.mind == null or c.mind.terminal.is_empty(): continue
+		if not TerminalLearning.valid(c.mind.terminal, tick): return false
+		var a: Dictionary = c.mind.terminal.active
+		if not a.is_empty():
+			if _terminal_device(int(a.terminal_id)).is_empty() or Data.unpack_vector(a.origin) != _inside(Data.unpack_vector(a.origin), c.genome.size): return false
+	return true
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
@@ -928,8 +1166,13 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, SAVE_VERSION]:
 		return null
+	if int(data.save_version) < 13:
+		if data.has("terminals") or data.has("terminal_markers"): return null
+		if data.get("creatures") is Array:
+			for c in data.creatures:
+				if c is Dictionary and c.get("mind") is Dictionary and (c.mind.has("terminal") or c.mind.get("objetivo_atual") == "usar_terminal"): return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
 		if data.is_empty():
@@ -966,6 +1209,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	if int(data["save_version"]) == 11:
 		data = _migrate_v11(data)
 		if data.is_empty(): return null
+	if int(data["save_version"]) == 12:
+		data = _migrate_v12(data)
+		if data.is_empty(): return null
+	if not data.get("terminals", []) is Array or data.get("terminals", []).size() > TERMINAL_LIMIT or not data.get("terminal_markers", []) is Array or data.get("terminal_markers", []).size() > 48: return null
 	if not Data.integer(data.get("object_catalog_version"), 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION or not data.get("objects") is Array or data.objects.size() > ObjectCatalog.LIMIT:
 		return null
 	if (data.has("boards") and not data.get("boards") is Array) or (data.has("gallery") and not data.get("gallery") is Array):
@@ -1211,9 +1458,12 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			var canonical: Dictionary = Data.restore_precision(art)
 			if artifact_registry.has(aid) and artifact_registry[aid] != canonical: return null
 			artifact_registry[aid] = canonical
+	# New physical devices share the same global identity namespace as drawings.
+	for artifact_id in artifact_registry: used_ids[artifact_id] = true
 	for used_id in used_ids:
 		if used_id >= int(data["next_id"]):
 			return null
+	if not result._restore_terminals(data, used_ids): return null
 	if result.pet_id != -1 and not result.creatures.has(result.pet_id):
 		return null
 	result.events = Data.restore_precision(data["events"])
@@ -1308,7 +1558,7 @@ static func _migrate_v6(data: Dictionary) -> Dictionary:
 
 ## Idempotent migration never activates M1 or invents an acquired experience.
 static func _migrate_v7(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [8, 9, 10, 11, SAVE_VERSION]:
+	if data.get("save_version") in [8, 9, 10, 11, 12, SAVE_VERSION]:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
 		return {}
@@ -1322,7 +1572,7 @@ static func _migrate_v7(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v8(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [9, 10, 11, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [9, 10, 11, 12, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 8 or not data.get("creatures") is Array: return {}
 	# Legacy fixtures may retain empty modern metadata; never discard acquired data.
 	if data.has("objects") and (not data.objects is Array or not data.objects.is_empty()): return {}
@@ -1337,7 +1587,7 @@ static func _migrate_v8(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v9(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [10, 11, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [10, 11, 12, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 9 or not data.get("creatures") is Array: return {}
 	if data.has("boards") and (not data.boards is Array or not data.boards.is_empty()): return {}
 	if data.has("gallery") and (not data.gallery is Array or not data.gallery.is_empty()): return {}
@@ -1348,7 +1598,7 @@ static func _migrate_v9(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v10(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [11, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [11, 12, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 10 or not data.get("creatures") is Array: return {}
 	var migrated := data.duplicate(true)
 	for c in migrated.creatures:
@@ -1613,6 +1863,15 @@ func _social_action(creature: Creature, sensors: Dictionary, decision: Dictionar
 func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest: Dictionary, distance: float) -> bool:
 	creature.last_reason = "mind." + goal
 	match goal:
+		"usar_terminal":
+			var selected := TerminalLearning.candidate(creature.mind, creature, sensors, tick)
+			for device in sensors.get("terminals", []):
+				if int(device.id) != int(selected.id): continue
+				if creature.pos.distance_to(device.pos) <= Obs.reach(creature): return terminal_step(creature, int(device.id))
+				creature.heading = (device.pos - creature.pos).angle()
+				creature.last_action = "seek_terminal"
+				return _move(creature, sensors.obstacles)
+			return false
 		"ler":
 			var selected: Dictionary = Mind.Reading.candidate(creature.mind, creature, sensors)
 			for b in sensors.get("books", []):
@@ -1684,14 +1943,14 @@ func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest
 	return _move(creature, sensors.obstacles)
 
 static func _migrate_v11(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [12, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 11 or not data.get("creatures") is Array: return {}
 	if data.has("library"): return {}
 	for c in data.creatures:
 		if not c is Dictionary: return {}
 		if c.has("mind") and (not c.mind is Dictionary or c.mind.has("knowledge")): return {}
 	var migrated := data.duplicate(true)
-	migrated["save_version"] = SAVE_VERSION
+	migrated["save_version"] = 12
 	return migrated
 
 func place_book(pos: Vector2, book_id: String) -> int:

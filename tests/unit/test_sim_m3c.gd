@@ -54,7 +54,7 @@ func run() -> Array:
 	var legacy: Dictionary = Fixture.new().studio(140011).to_dict()
 	legacy.save_version = 11
 	var migrated = World.from_dict(legacy)
-	check(migrated != null and migrated.to_dict().save_version == 12 and migrated.creatures[migrated.pet_id].mind.knowledge.is_empty(), "migracao v11 inventou conhecimento", f)
+	check(migrated != null and migrated.to_dict().save_version == World.SAVE_VERSION and migrated.creatures[migrated.pet_id].mind.knowledge.is_empty(), "migracao v11 inventou conhecimento", f)
 	check(World._migrate_v11(World._migrate_v11(legacy)) == World._migrate_v11(legacy), "migracao v11 nao idempotente", f)
 	legacy.creatures[0].mind.knowledge = K.empty()
 	check(World.from_dict(legacy) == null, "schema antigo aceitou conhecimento futuro", f)

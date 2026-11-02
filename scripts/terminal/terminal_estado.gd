@@ -16,7 +16,7 @@ var sucessos := 0
 func discover(command: String, source: String) -> bool:
 	if conhecidos.has(command):
 		return false
-	var allowed := (source == "ajuda" and command in HELP) or (source == "livro" and command in ["DESENHAR", "REPETIR"]) or (source == "pratica" and command == "REPETIR" and sucessos >= 3)
+	var allowed := (source in ["ajuda", "manual"] and command in HELP) or (source == "livro" and command in ["DESENHAR", "REPETIR"]) or (source == "pratica" and command == "REPETIR" and sucessos >= 3)
 	if not allowed:
 		return false
 	conhecidos[command] = source
@@ -90,7 +90,7 @@ static func valid(data: Variant) -> bool:
 		if command in ["OLHAR", "AJUDA"]:
 			if source != "inicial": return false
 		elif command in HELP:
-			if source != "ajuda": return false
+			if source not in ["ajuda", "manual"]: return false
 		elif command == "DESENHAR":
 			if source != "livro": return false
 		elif source != "livro" and not (source == "pratica" and data.sucessos >= 3):
