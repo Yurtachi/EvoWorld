@@ -52,7 +52,10 @@ const P1_UI := {
 	"spatial.explore": "Parece explorar para encontrar recursos em outros lugares.",
 	"spatial.inspect": "Parece verificar se o recurso continua no lugar lembrado.",
 	"spatial.failure": "Não encontrou o recurso; a expectativa sobre este lugar diminuiu.",
-	"spatial.visible": "Percebe um recurso ao alcance da visão."
+	"spatial.visible": "Percebe um recurso ao alcance da visão.",
+	"spatial.blocked": "Lembra de ter encontrado um bloqueio físico nesta posição.",
+	"spatial.replan": "Parece replanejar uma nova rota após detectar bloqueio.",
+	"spatial.route_success": "Lembra de uma rota que funcionou com sucesso."
 }
 
 const M4B_UI := {

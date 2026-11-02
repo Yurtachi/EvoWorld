@@ -17,7 +17,7 @@ const LOG_LIMIT := 48
 const MEMORY_LIMIT := 32
 const MEMORY_TTL := 2400
 const MEMORY_KINDS := ["contact", "food", "water", "blocked", "toxic"]
-const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar", "mind.iniciativa.ler", "mind.iniciativa.terminal", "spatial.expected", "spatial.explore", "spatial.inspect", "spatial.failure", "spatial.visible"]
+const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar", "mind.iniciativa.ler", "mind.iniciativa.terminal", "spatial.expected", "spatial.explore", "spatial.inspect", "spatial.failure", "spatial.visible", "spatial.blocked", "spatial.replan", "spatial.route_success"]
 var affect = Affect.new()
 var affect_enabled := true
 var memory_enabled := true
@@ -59,7 +59,7 @@ func set_goal(goal: String, tick: int, reason: String) -> void:
 
 func decide(creature, tick: int, sensors: Dictionary) -> String:
 	if not spatial.is_empty() and memory_enabled:
-		Spatial.observe(spatial, sensors, tick)
+		Spatial.observe(spatial, sensors, tick, creature)
 	Knowledge.maintain(self, tick)
 	var goal := Motivation.choose(creature, self, tick, sensors)
 	Knowledge.gap(self, creature, sensors, tick)
@@ -114,6 +114,8 @@ func consequence(creature, tick: int, kind: String, value: float, source: int = 
 				affect.change(tick, "receio", 0.25, "toxic_exposure", t)
 		"blocked":
 			blocked_ticks = mini(10000, blocked_ticks + 1)
+			if not spatial.is_empty() and memory_enabled and Spatial.has_planning(spatial):
+				Spatial.record_block(spatial, creature, tick)
 			if blocked_ticks >= 2:
 				if blocked_ticks % 12 == 2:
 					remember(tick, kind, -0.6, 0.6)
@@ -205,7 +207,9 @@ static func from_dict(data: Variant, max_tick: int = 2147483647):
 		return null
 	var previous := -1
 	for row in data["mind_log"]:
-		if not row is Dictionary or row.size() != 4 or not Data.integer(row.get("tick")) or int(row["tick"]) < previous or int(row["tick"]) > max_tick or row.get("objetivo") not in Motivation.GOALS or row.get("motivo") not in REASONS or not valid_scores(row.get("pontuacoes")):
+		if not row is Dictionary or (row.size() != 4 and row.size() != 5) or not Data.integer(row.get("tick")) or int(row["tick"]) < previous or int(row["tick"]) > max_tick or (row.get("objetivo") not in Motivation.GOALS and row.get("objetivo") != "") or row.get("motivo") not in REASONS or not valid_scores(row.get("pontuacoes")):
+			return null
+		if row.size() == 5 and (not row.has("bloqueio") or not row.bloqueio is Array or row.bloqueio.size() != 2 or not Data.integer(row.bloqueio[0]) or not Data.integer(row.bloqueio[1])):
 			return null
 		previous = int(row["tick"])
 	previous = -1

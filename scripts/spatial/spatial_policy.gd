@@ -1,11 +1,10 @@
 extends RefCounted
 ## Receives body, sensors and learned state; never truth or a world handle.
 const Memory = preload("res://scripts/spatial/spatial_memory.gd")
+const Planner = preload("res://scripts/spatial/spatial_planner.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
 
 static func survey_mask(creature, s: Dictionary, sensors: Dictionary, target: Vector2) -> int:
-	# Seventeen samples of the remembered area, seen through the same range/FOV
-	# and currently perceived occluders; no world handle or resource truth.
 	var mask: int = s.scan_mask
 	var sensed: Dictionary = sensors.get("spatial_survey", {})
 	if sensed.get("id", "") == s.objetivo_atual and sensed.has("mask"):
@@ -34,11 +33,15 @@ static func inspected_fraction(mask: int) -> float:
 	return count / 17.0
 
 static func heading(creature, s: Dictionary, target: Vector2, tick: int) -> float:
-	# Preserve physical collision avoidance long enough to pass an obstacle.
-	# Re-aiming at the same target every tick would undo the world's safe turn.
-	if creature.mind.blocked_ticks >= 2 and int(s.detour_until) <= tick:
+	if creature.mind != null and creature.mind.blocked_ticks >= 2 and int(s.detour_until) <= tick:
 		s.detour_until = tick + 30
 	if tick < int(s.detour_until): return creature.heading
+	if Memory.has_planning(s):
+		var plan: Array = s.get("plano_atual", [])
+		var plan_idx: int = int(s.get("plano_indice", 0))
+		if not plan.is_empty() and plan_idx < plan.size():
+			var wp: Vector2 = Data.unpack_vector(plan[plan_idx])
+			return (wp - creature.pos).angle()
 	return (target - creature.pos).angle()
 
 static func sweep(s: Dictionary, pos: Vector2, vision: float, size: Vector2) -> Vector2:
@@ -72,13 +75,14 @@ static func choose(creature, s: Dictionary, sensors: Dictionary, resource: Strin
 			s.arrival_tick = -1
 			if Memory.revised(s): s.scan_mask = 0
 			s.buscas = mini(2147483647, int(s.buscas) + 1)
+			s.plano_atual = []
+			s.plano_indice = 0
 		var pos := Data.unpack_vector(row.pos)
 		if creature.pos.distance_to(pos) <= creature.genome.size + 5.0:
 			if int(s.arrival_tick) < 0:
 				s.arrival_tick = tick
 				if Memory.revised(s): s.scan_mask = 0
 			if Memory.revised(s): s.scan_mask = survey_mask(creature, s, sensors, pos)
-			# Turn through a full circle before interpreting absence as evidence.
 			if tick - int(s.arrival_tick) < 16:
 				s.motivo = "spatial.inspect"
 				return {"scan": true, "heading": creature.heading + TAU / 16.0}
@@ -92,16 +96,43 @@ static func choose(creature, s: Dictionary, sensors: Dictionary, resource: Strin
 				s.motivo = "spatial.failure"
 				s.objetivo_atual = ""
 				s.arrival_tick = -1
+				s.plano_atual = []
+				s.plano_indice = 0
 				return {"scan": true, "heading": creature.heading}
 		else:
-			s.motivo = "spatial.expected"
+			if Memory.has_planning(s):
+				Memory.step_journey(s, creature)
+				var plan: Array = s.get("plano_atual", [])
+				var plan_idx: int = int(s.get("plano_indice", 0))
+				var was_empty: bool = plan.is_empty()
+				if was_empty or plan_idx >= plan.size():
+					var waypoints := Planner.plan_path(creature.pos, pos, s, size)
+					s.plano_atual = []
+					for wp in waypoints:
+						s.plano_atual.append(Data.pack_vector(wp))
+					s.plano_indice = 0
+					plan = s.plano_atual
+					plan_idx = 0
+					if not was_empty:
+						s.motivo = "spatial.replan"
+					else:
+						s.motivo = "spatial.expected"
+				else:
+					s.motivo = "spatial.expected"
+				
+				if not plan.is_empty() and plan_idx < plan.size():
+					var current_target: Vector2 = Data.unpack_vector(plan[plan_idx])
+					if creature.pos.distance_to(current_target) <= maxf(16.0, creature.genome.size * 1.5):
+						s.plano_indice = plan_idx + 1
+			else:
+				s.motivo = "spatial.expected"
 			return {"scan": false, "target": pos}
 	s.objetivo_atual = ""
 	s.arrival_tick = -1
+	s.plano_atual = []
+	s.plano_indice = 0
 	s.motivo = "spatial.explore"
 	if Memory.revised(s) and s.enabled and retrieve:
-		# Exploration should leave a recently inspected empty neighborhood,
-		# rather than immediately wandering back through the same empty area.
 		for avoided in s.lugares:
 			if avoided.recurso != resource or int(avoided.retry_tick) <= tick: continue
 			if int(avoided.consecutivas) == 0: continue

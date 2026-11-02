@@ -24,7 +24,8 @@ const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
-const SAVE_VERSION := 16 # Bounded spatial evidence and expectations per pet.
+const SAVE_VERSION := 17 # Typed obstacles, local spatial map, and A* route planning.
+const ObstacleCatalog = preload("res://scripts/environment/obstacle_catalog.gd")
 const SpatialPolicy = preload("res://scripts/spatial/spatial_policy.gd")
 static var validation_error := ""
 const Terminal = preload("res://scripts/terminal/terminal.gd")
@@ -141,6 +142,7 @@ static func new_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
 		result.creatures[result.pet_id].enable_spatial_memory()
 		if result.creatures[result.pet_id].mind != null:
 			Mind.Spatial.enable_revision(result.creatures[result.pet_id].mind.spatial)
+			result.creatures[result.pet_id].mind.spatial["bounds"] = [result.size.x, result.size.y]
 	return result
 
 static func new_pet_world(world_seed: int = 1, nome: String = "") -> SimWorld:
@@ -154,6 +156,7 @@ static func new_ecosystem_world(world_seed: int = 1, config: Dictionary = {}) ->
 		if creature.mind != null:
 			creature.enable_spatial_memory()
 			Mind.Spatial.enable_revision(creature.mind.spatial)
+			creature.mind.spatial["bounds"] = [result.size.x, result.size.y]
 	return result
 
 func set_reproduction(enabled: bool) -> void:
@@ -756,7 +759,19 @@ func place_water(pos: Vector2, radius: float = 30.0) -> int:
 	waters.append({"id": water_id, "pos": pos, "radius": snappedf(radius, 0.000001)})
 	return water_id
 
-func place_obstacle(pos: Vector2, radius: float) -> void:
+func place_obstacle(pos: Vector2, tipo_or_radius: Variant = "pedra", tamanho: float = -1.0) -> void:
+	if not pos.is_finite():
+		return
+	var tipo: String = "pedra"
+	var radius: float = 24.0
+	if tipo_or_radius is float or tipo_or_radius is int:
+		radius = float(tipo_or_radius)
+		tipo = "pedra"
+	elif tipo_or_radius is String:
+		tipo = str(tipo_or_radius)
+		radius = tamanho if tamanho > 0.0 else 24.0
+	if not ObstacleCatalog.valid_type(tipo):
+		tipo = "pedra"
 	if not pos.is_finite() or not is_finite(radius) or radius <= 0.0:
 		return
 	var actual_radius := snappedf(clampf(radius, 1.0, minf(size.x, size.y) * 0.45), 0.000001)
@@ -773,7 +788,15 @@ func place_obstacle(pos: Vector2, radius: float) -> void:
 		if feeder.pos.distance_to(location) < actual_radius + Feeder.RADIUS: return
 	for marker in terminal_markers:
 		if Data.unpack_vector(marker.pos).distance_to(location) < actual_radius + 1.0: return
-	obstacles.append({"pos": location, "radius": actual_radius})
+	var props := ObstacleCatalog.properties(tipo)
+	obstacles.append({
+		"pos": location,
+		"radius": actual_radius,
+		"tipo": tipo,
+		"modificavel": props.modificavel,
+		"material": props.material,
+		"dureza": props.dureza
+	})
 
 func step() -> void:
 	_rebuild_spatial()
@@ -882,6 +905,8 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 		var obstacle: Dictionary = obstacles[index]
 		if _visible(creature, obstacle["pos"]):
 			result["obstacles"].append(obstacle.duplicate())
+	if _has_spatial(creature) and Mind.Spatial.has_planning(creature.mind.spatial):
+		creature.mind.spatial["bounds"] = [size.x, size.y]
 	if _has_spatial(creature) and Mind.Spatial.revised(creature.mind.spatial):
 		result["spatial_survey"] = _sense_spatial_area(creature)
 	return result
@@ -1066,6 +1091,18 @@ func _apply_action(creature: Creature, sensors: Dictionary, action: int) -> bool
 		creature.last_reason = "brain.blocked"
 		if creature.mind != null:
 			creature.mind.consequence(creature, tick, "blocked", 1.0)
+			if _has_spatial(creature) and Mind.Spatial.has_planning(creature.mind.spatial):
+				var cell_size: float = float(creature.mind.spatial.get("cell_size", 40.0))
+				var gx := floori(target.x / cell_size)
+				var gy := floori(target.y / cell_size)
+				creature.mind.mind_log.append({
+					"tick": tick,
+					"objetivo": creature.mind.objetivo_atual,
+					"pontuacoes": creature.mind.pontuacoes.duplicate(true),
+					"motivo": "spatial.blocked",
+					"bloqueio": [gx, gy]
+				})
+				if creature.mind.mind_log.size() > Mind.LOG_LIMIT: creature.mind.mind_log.pop_front()
 		return false
 	creature.pos = target
 	return true
@@ -1179,6 +1216,18 @@ func _move(creature: Creature, visible_obstacles: Array) -> bool:
 		creature.last_reason = "Physical boundary contact; turning"
 		if creature.mind != null:
 			creature.mind.consequence(creature, tick, "blocked", 1.0)
+			if _has_spatial(creature) and Mind.Spatial.has_planning(creature.mind.spatial):
+				var cell_size: float = float(creature.mind.spatial.get("cell_size", 40.0))
+				var gx := floori(target.x / cell_size)
+				var gy := floori(target.y / cell_size)
+				creature.mind.mind_log.append({
+					"tick": tick,
+					"objetivo": creature.mind.objetivo_atual,
+					"pontuacoes": creature.mind.pontuacoes.duplicate(true),
+					"motivo": "spatial.blocked",
+					"bloqueio": [gx, gy]
+				})
+				if creature.mind.mind_log.size() > Mind.LOG_LIMIT: creature.mind.mind_log.pop_front()
 		return false
 	creature.pos = target
 	return true
@@ -1242,7 +1291,15 @@ func to_dict() -> Dictionary:
 		saved_foods.append({"id": food["id"], "pos": Data.pack_vector(food["pos"]), "energy": food["energy"], "food_type": food["food_type"]})
 	var saved_obstacles: Array = []
 	for obstacle in obstacles:
-		saved_obstacles.append({"pos": Data.pack_vector(obstacle["pos"]), "radius": obstacle["radius"]})
+		var item: Dictionary = {"pos": Data.pack_vector(obstacle["pos"]), "radius": obstacle["radius"]}
+		var tipo: String = str(obstacle.get("tipo", "pedra"))
+		if tipo != "pedra" or obstacle.get("material", "rocha") != "rocha" or obstacle.get("dureza", 8.0) != 8.0 or obstacle.get("modificavel", false) != false:
+			var props := ObstacleCatalog.properties(tipo)
+			item["tipo"] = tipo
+			item["modificavel"] = bool(obstacle.get("modificavel", props.modificavel))
+			item["material"] = str(obstacle.get("material", props.material))
+			item["dureza"] = float(obstacle.get("dureza", props.dureza))
+		saved_obstacles.append(item)
 	var saved_waters: Array = []
 	var saved_objects: Array = []
 	for row in objects:
@@ -1293,7 +1350,7 @@ func to_dict() -> Dictionary:
 	return out
 
 static func _migrate_v12(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [13, 14, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [13, 14, 15, 16, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 12 or data.has("terminals") or data.has("terminal_markers"): return {}
 	if not data.get("creatures") is Array: return {}
 	for c in data.creatures:
@@ -1303,7 +1360,7 @@ static func _migrate_v12(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v13(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [14, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [14, 15, 16, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 13 or data.has("reproduction_rules"): return {}
 	var migrated := data.duplicate(true)
 	migrated.save_version = 14
@@ -1311,7 +1368,7 @@ static func _migrate_v13(data: Dictionary) -> Dictionary:
 
 ## No population, RNG, food or reproduction change during migration.
 static func _migrate_v14(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [15, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [15, 16, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 14 or data.has("feeders"): return {}
 	if not data.get("config") is Dictionary or data.config.has("feeding_mode"): return {}
 	var migrated := data.duplicate(true)
@@ -1319,8 +1376,15 @@ static func _migrate_v14(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v15(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [16, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 15: return {}
+	var migrated := data.duplicate(true)
+	migrated.save_version = 16
+	return migrated
+
+static func _migrate_v16(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 16: return {}
 	var migrated := data.duplicate(true)
 	migrated.save_version = SAVE_VERSION
 	return migrated
@@ -1545,7 +1609,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 					return null
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, SAVE_VERSION]:
 		return null
 	if int(data.save_version) < 16 and data.get("creatures") is Array:
 		for entry in data.creatures:
@@ -1604,6 +1668,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if data.is_empty(): return null
 	if int(data["save_version"]) == 15:
 		data = _migrate_v15(data)
+		if data.is_empty(): return null
+	if int(data["save_version"]) == 16:
+		data = _migrate_v16(data)
 		if data.is_empty(): return null
 	if not data.get("feeders", []) is Array or data.get("feeders", []).size() > Feeder.LIMIT: return null
 	if not data.get("terminals", []) is Array or data.get("terminals", []).size() > TERMINAL_LIMIT or not data.get("terminal_markers", []) is Array or data.get("terminal_markers", []).size() > 48: return null
@@ -1694,7 +1761,21 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		var pos := Data.unpack_vector(obstacle["pos"])
 		if radius <= 0.0 or radius > minf(saved_size.x, saved_size.y) * 0.45 or pos != result._inside(pos, radius):
 			return null
-		result.obstacles.append({"pos": pos, "radius": radius})
+		var tipo: String = str(obstacle.get("tipo", "pedra"))
+		if not ObstacleCatalog.valid_type(tipo):
+			tipo = "pedra"
+		var props := ObstacleCatalog.properties(tipo)
+		var modificavel: bool = bool(obstacle.get("modificavel", props.modificavel))
+		var material: String = str(obstacle.get("material", props.material))
+		var dureza: float = float(obstacle.get("dureza", props.dureza))
+		result.obstacles.append({
+			"pos": pos,
+			"radius": radius,
+			"tipo": tipo,
+			"modificavel": modificavel,
+			"material": material,
+			"dureza": dureza
+		})
 	for entry in data["creatures"]:
 		if not entry is Dictionary:
 			return null
@@ -2056,6 +2137,15 @@ func _has_spatial(creature: Creature) -> bool:
 func _spatial_ingestion(creature: Creature, resource: String, position: Vector2, gain: float) -> void:
 	if not _has_spatial(creature) or not creature.mind.memory_enabled: return
 	Mind.Spatial.evidence(creature.mind.spatial, resource, position, tick, true, gain, "interagido")
+	if Mind.Spatial.has_planning(creature.mind.spatial):
+		Mind.Spatial.record_route_success(creature.mind.spatial, resource, tick)
+		creature.mind.mind_log.append({
+			"tick": tick,
+			"objetivo": creature.mind.objetivo_atual,
+			"pontuacoes": creature.mind.pontuacoes.duplicate(true),
+			"motivo": "spatial.route_success"
+		})
+		if creature.mind.mind_log.size() > Mind.LOG_LIMIT: creature.mind.mind_log.pop_front()
 	creature.mind.spatial.objetivo_atual = ""
 	creature.mind.spatial.arrival_tick = -1
 
