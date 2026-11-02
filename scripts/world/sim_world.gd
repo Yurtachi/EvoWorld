@@ -22,7 +22,8 @@ const Ensino = preload("res://scripts/interaction/ensino.gd")
 const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
-const SAVE_VERSION := 9 # M2 physical objects and bounded acquired knowledge.
+const Atelier = preload("res://scripts/atelier/atelier.gd")
+const SAVE_VERSION := 10 # M3 atelier boards, stroke-3 drawings, gallery and copying skill.
 const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
@@ -41,6 +42,14 @@ var size := Vector2(1200.0, 760.0)
 var creatures: Dictionary = {}
 var foods: Array = []
 var objects: Array = []
+var boards: Array = []
+var gallery: Array = []
+var galeria: Array:
+	get:
+		return Data.restore_precision(gallery)
+var quadros: Array:
+	get:
+		return Data.restore_precision(boards)
 var obstacles: Array = []
 var waters: Array = []
 var water_enabled := false
@@ -286,6 +295,72 @@ func interact_object(creature: Creature, object_id: int) -> bool:
 			creature.mind.affect.change(tick, state, float(params.surprise) * 0.4, "object_contact", creature.mind.traits(creature))
 		creature.last_action = "investigate_object"
 		return true
+	return draw_on_board(creature, object_id)
+
+func place_board(pos: Vector2) -> int:
+	if not pos.is_finite() or boards.size() >= Atelier.BOARD_LIMIT:
+		return -1
+	var location := _inside(pos, Atelier.BOARD_RADIUS)
+	if not _clear(location, Atelier.BOARD_RADIUS):
+		return -1
+	var board_id: int = ids.take()
+	boards.append(Atelier.make_board(board_id, location, tick))
+	return board_id
+
+func demonstrar_forma(board_ref: Variant, forma: String, params: Dictionary = {}) -> bool:
+	var target_id := -1
+	if board_ref is Dictionary and Data.integer(board_ref.get("id"), 1):
+		target_id = int(board_ref.id)
+	elif Data.integer(board_ref, 1):
+		target_id = int(board_ref)
+	if target_id < 1:
+		return false
+	for board in boards:
+		if int(board.id) != target_id:
+			continue
+		if not Atelier.demonstrate_shape(board, forma, tick, params):
+			return false
+		if board_ref is Dictionary and board_ref != board:
+			board_ref.merge(board, true)
+		for creature in creatures.values():
+			if creature.mind != null and not creature.mind.objects.is_empty():
+				var s: Dictionary = Mind.ObjectMemory.state(creature.mind)
+				var key := str(target_id)
+				s.cooldowns.erase(key)
+				if s.entries.has(key):
+					s.entries[key].retry_tick = 0
+		return true
+	return false
+
+func draw_on_board(creature: Creature, board_id: int) -> bool:
+	if not creature.alive:
+		return false
+	for board in boards:
+		if int(board.id) != board_id:
+			continue
+		if creature.pos.distance_to(board.pos) > Obs.reach(creature) or _occluded(creature.pos, board.pos):
+			return false
+		if creature.atelier == null:
+			creature.atelier = Atelier.new()
+		var res: Dictionary = creature.atelier.step_drawing(self, creature, board)
+		creature.last_action = "draw_stroke"
+		if creature.mind != null:
+			var evidence := {"energy": snappedf(-Atelier.DRAW_ENERGY_COST, 0.000001), "hydration": 0.0, "toxicity": 0.0, "surprise": 0.25}
+			Mind.ObjectMemory.interacted(creature.mind, Atelier.board_appearance(board), tick, evidence)
+			var s: Dictionary = Mind.ObjectMemory.state(creature.mind)
+			var key := str(board_id)
+			if bool(res.get("completed", false)):
+				s.cooldowns[key] = tick + 36
+				if s.entries.has(key):
+					s.entries[key].retry_tick = tick + 36
+				if creature.mind.affect_enabled:
+					creature.mind.affect.change(tick, "satisfacao", 0.12, "drawing_completed", creature.mind.traits(creature))
+					creature.mind.affect.change(tick, "entusiasmo", 0.08, "drawing_completed", creature.mind.traits(creature))
+			else:
+				s.cooldowns.erase(key)
+				if s.entries.has(key):
+					s.entries[key].retry_tick = 0
+		return true
 	return false
 
 func place_food(pos: Vector2, tipo: String = "legacy") -> int:
@@ -408,6 +483,13 @@ func sense(creature: Creature, include_creatures: bool = true) -> Dictionary:
 		for row in objects:
 			if _visible(creature, row.pos) and not _occluded(creature.pos, row.pos):
 				result.objects.append(ObjectCatalog.appearance(row))
+	if not boards.is_empty():
+		result["boards"] = []
+		var remembered: Dictionary = creature.mind.objects.get("entries", {}) if creature.mind != null and creature.mind.memory_enabled else {}
+		for row in boards:
+			var in_range := creature.pos.distance_to(row.pos) <= creature.genome.vision_range
+			if in_range and not _occluded(creature.pos, row.pos) and (_visible(creature, row.pos) or remembered.has(str(row.id))):
+				result.boards.append(Atelier.board_appearance(row))
 	result["signal"] = creature.last_signal.duplicate(true) if signal_enabled and not creature.last_signal.is_empty() and tick - int(creature.last_signal["tick"]) <= signal_ttl else {}
 	result["action_count"] = Actions.SIGNAL_FIRST + signal_count if signal_enabled else Actions.SIGNAL_FIRST
 	if water_enabled:
@@ -530,6 +612,8 @@ func _update_creature(creature: Creature) -> void:
 		cost *= 0.6
 	if moving:
 		cost += creature.genome.speed * creature.genome.size * 0.0005 * TICK_DT
+	if creature.last_action == "draw_stroke":
+		cost += Atelier.DRAW_ENERGY_COST
 	if water_enabled:
 		creature.hydration = snappedf(clampf(creature.hydration - Water.LOSS_PER_SECOND * creature.genome.metabolism * TICK_DT, 0.0, Water.CAPACITY), 0.000001)
 		if creature.hydration <= 0.0:
@@ -784,7 +868,7 @@ func to_dict() -> Dictionary:
 		saved_config[key] = get(key)
 	for key in Signals.DEFAULTS:
 		saved_config[key] = get(key)
-	return {
+	var out := {
 		"save_version": SAVE_VERSION, "world_seed": str(seed), "tick": tick,
 		"size": Data.pack_vector(size), "pet_id": pet_id, "next_id": ids.next_id,
 		"rng_state": rng.to_dict(), "creatures": saved_creatures, "foods": saved_foods,
@@ -792,6 +876,15 @@ func to_dict() -> Dictionary:
 		"config": saved_config, "genealogy": genealogy.to_array(),
 		"signal_log": Data.restore_precision(signal_log), "commands": comandos.to_dict(self)
 	}
+	if not boards.is_empty() or not gallery.is_empty():
+		var saved_boards: Array = []
+		for b in boards:
+			var b_copy: Dictionary = Data.restore_precision(b)
+			b_copy["pos"] = Data.pack_vector(b.pos)
+			saved_boards.append(b_copy)
+		out["boards"] = saved_boards
+		out["gallery"] = Data.restore_precision(gallery)
+	return out
 
 static func from_dict(data: Dictionary) -> SimWorld:
 	# Reject invalid input, returning null rather than creating a partial world.
@@ -799,7 +892,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -828,7 +921,16 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	if int(data["save_version"]) == 8:
 		data = _migrate_v8(data)
 		if data.is_empty(): return null
+	if int(data["save_version"]) == 9:
+		data = _migrate_v9(data)
+		if data.is_empty(): return null
 	if not Data.integer(data.get("object_catalog_version"), 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION or not data.get("objects") is Array or data.objects.size() > ObjectCatalog.LIMIT:
+		return null
+	if (data.has("boards") and not data.get("boards") is Array) or (data.has("gallery") and not data.get("gallery") is Array):
+		return null
+	var raw_boards: Array = data.get("boards", [])
+	var raw_gallery: Array = data.get("gallery", [])
+	if raw_boards.size() > Atelier.BOARD_LIMIT or raw_gallery.size() > Atelier.GALLERY_LIMIT:
 		return null
 	if not Data.integer_text(data.get("world_seed")):
 		return null
@@ -921,6 +1023,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 				var target := Data.unpack_vector(creature.ensino.active.target)
 				if not Commands._alvo_valido(target, result):
 					return null
+		if creature.atelier != null:
+			if Atelier.from_dict(entry["atelier"], result.tick, int(data["next_id"])) == null:
+				return null
 		if result.personality_enabled:
 			if creature.personality == null or Personality.from_dict(entry.get("personality"), result.tick) == null:
 				return null
@@ -1001,7 +1106,33 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if pos != result._inside(pos, 5.0) or not result._clear(pos, 5.0): return null
 		used_ids[int(row.id)] = true
 		result.objects.append({"id": int(row.id), "pos": pos, "tipo": row.tipo})
+	var board_ids: Dictionary = {}
+	for board in raw_boards:
+		if not Atelier.valid_board(board, result.tick, int(data["next_id"])) or used_ids.has(int(board.id)):
+			return null
+		var b_pos := Data.unpack_vector(board.pos)
+		if b_pos != result._inside(b_pos, Atelier.BOARD_RADIUS) or not result._clear(b_pos, Atelier.BOARD_RADIUS):
+			return null
+		if int(board.owner_id) != 0 and not ancestry.records.has(int(board.owner_id)):
+			return null
+		used_ids[int(board.id)] = true
+		board_ids[int(board.id)] = true
+		var b_copy: Dictionary = Data.restore_precision(board)
+		b_copy["pos"] = b_pos
+		result.boards.append(b_copy)
+	for board in result.boards:
+		for art in board.artifacts:
+			if int(art.board_id) != int(board.id) or used_ids.has(int(art.id)) or not ancestry.records.has(int(art.owner_id)):
+				return null
+	for art in raw_gallery:
+		if not Atelier.valid_artifact(art, result.tick, int(data["next_id"])) or used_ids.has(int(art.id)) or not ancestry.records.has(int(art.owner_id)) or not board_ids.has(int(art.board_id)):
+			return null
+		result.gallery.append(Data.restore_precision(art))
 	for creature in result.creatures.values():
+		if creature.atelier != null:
+			for art in creature.atelier.artifacts:
+				if used_ids.has(int(art.id)) or int(art.owner_id) != creature.id:
+					return null
 		if creature.mind != null and not creature.mind.objects.is_empty():
 			if int(creature.mind.objects.target) >= int(data.next_id): return null
 			for key in creature.mind.objects.entries:
@@ -1077,7 +1208,7 @@ static func _migrate_v3(data: Dictionary) -> Dictionary:
 
 ## Old worlds retain identical decisions, physiological rules and RNG consumption.
 static func _migrate_v4(data: Dictionary) -> Dictionary:
-	if Data.integer(data.get("save_version")) and int(data["save_version"]) == SAVE_VERSION:
+	if Data.integer(data.get("save_version")) and int(data["save_version"]) >= 5:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary:
 		return {}
@@ -1088,7 +1219,7 @@ static func _migrate_v4(data: Dictionary) -> Dictionary:
 
 ## Teaching is opt-in; no invented experience, RNG draws or Q updates on migration.
 static func _migrate_v5(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION:
+	if Data.integer(data.get("save_version")) and int(data["save_version"]) >= 6:
 		return data.duplicate(true)
 	var migrated := data.duplicate(true)
 	migrated["save_version"] = 6
@@ -1103,7 +1234,7 @@ static func _migrate_v6(data: Dictionary) -> Dictionary:
 
 ## Idempotent migration never activates M1 or invents an acquired experience.
 static func _migrate_v7(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [8, SAVE_VERSION]:
+	if data.get("save_version") in [8, 9, SAVE_VERSION]:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
 		return {}
@@ -1117,7 +1248,7 @@ static func _migrate_v7(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v8(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [9, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 8 or not data.get("creatures") is Array: return {}
 	# Legacy fixtures may retain empty modern metadata; never discard acquired data.
 	if data.has("objects") and (not data.objects is Array or not data.objects.is_empty()): return {}
@@ -1128,6 +1259,17 @@ static func _migrate_v8(data: Dictionary) -> Dictionary:
 	var migrated := data.duplicate(true)
 	migrated["objects"] = []
 	migrated["object_catalog_version"] = ObjectCatalog.VERSION
+	migrated["save_version"] = 9
+	return migrated
+
+static func _migrate_v9(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 9 or not data.get("creatures") is Array: return {}
+	if data.has("boards") and (not data.boards is Array or not data.boards.is_empty()): return {}
+	if data.has("gallery") and (not data.gallery is Array or not data.gallery.is_empty()): return {}
+	for c in data.creatures:
+		if not c is Dictionary or c.has("atelier"): return {}
+	var migrated := data.duplicate(true)
 	migrated["save_version"] = SAVE_VERSION
 	return migrated
 
@@ -1393,6 +1535,18 @@ func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest
 					return false
 				creature.heading = (row.pos - creature.pos).angle()
 				creature.last_action = "seek_object"
+				return _move(creature, sensors.obstacles)
+			creature.last_action = "rest"
+			return false
+		"desenhar":
+			var board_target: int = Mind.ObjectMemory.state(creature.mind).target
+			for row in sensors.get("boards", []):
+				if int(row.id) != board_target: continue
+				if creature.pos.distance_to(row.pos) <= Obs.reach(creature):
+					draw_on_board(creature, board_target)
+					return false
+				creature.heading = (row.pos - creature.pos).angle()
+				creature.last_action = "seek_board"
 				return _move(creature, sensors.obstacles)
 			creature.last_action = "rest"
 			return false

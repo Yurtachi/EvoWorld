@@ -9,10 +9,12 @@ const MEMORY_LIMIT := 16
 const Personality = preload("res://scripts/behavior/personality.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Ensino = preload("res://scripts/interaction/ensino.gd")
+const Atelier = preload("res://scripts/atelier/atelier.gd")
 
 var mind = null
 var personality = null
 var ensino = null
+var atelier = null
 var personality_water_enabled := false
 var temperament: Dictionary:
 	get:
@@ -27,6 +29,9 @@ func mind_snapshot() -> Dictionary:
 	if mind != null:
 		return mind.snapshot(base)
 	return {"afetos": Mind.new().empty_affect(), "objetivo_atual": "", "motivo": "mind.disabled", "ultimos_logs": [], "expressao": base, "cause_log": [], "pontuacoes": {}, "affect_enabled": false, "memory_enabled": false}
+
+func atelier_snapshot() -> Dictionary:
+	return atelier.snapshot() if atelier != null else Atelier.empty_snapshot()
 
 
 var id: int = 0
@@ -71,6 +76,8 @@ func to_dict() -> Dictionary:
 		result["personality"] = personality.to_dict()
 	if ensino != null:
 		result["ensino"] = ensino.to_dict()
+	if atelier != null:
+		result["atelier"] = atelier.to_dict()
 	# Optional key: heuristic creatures keep the original snapshot layout.
 	if brain != null:
 		result["brain"] = brain.to_dict()
@@ -122,6 +129,11 @@ static func from_dict(data: Dictionary) -> SimCreature:
 		saved_teaching = Ensino.from_dict(data["ensino"])
 		if saved_teaching == null:
 			return null
+	var saved_atelier = null
+	if data.has("atelier"):
+		saved_atelier = Atelier.from_dict(data["atelier"])
+		if saved_atelier == null:
+			return null
 	if data.has("personality"):
 		saved_personality = Personality.from_dict(data["personality"])
 		if saved_personality == null or genes.temperament.is_empty():
@@ -130,6 +142,7 @@ static func from_dict(data: Dictionary) -> SimCreature:
 	result.mind = saved_mind
 	result.personality = saved_personality
 	result.ensino = saved_teaching
+	result.atelier = saved_atelier
 	result.brain = saved_brain
 	result.id = int(data["id"])
 	result.name = data["name"]

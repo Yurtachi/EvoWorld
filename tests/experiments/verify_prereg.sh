@@ -48,4 +48,8 @@ verify M1 c8e9e91159a088558774e353e870a8b47802beea \
 verify M2 f1a6349 \
     tests/experiments/m2_curiosity_preregistro.md tests/experiments/m2_curiosity_eval.gd \
     reports/M2_curiosidade_eval.json preregister_sha256
-python tests/experiments/m2_curiosity_verify.py "$revision"
+python tests/experiments/m2_curiosity_verify.py 49350ea
+verify M3 c9a4e31 \
+    tests/experiments/m3_atelier_preregistro.md tests/experiments/m3_atelier_eval.gd \
+    reports/M3_atelie_eval.json preregister_sha256
+python tests/experiments/m3_atelier_verify.py "$revision"
