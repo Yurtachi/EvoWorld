@@ -53,3 +53,7 @@ verify M3 c9a4e31 \
     tests/experiments/m3_atelier_preregistro.md tests/experiments/m3_atelier_eval.gd \
     reports/M3_atelie_eval.json preregister_sha256
 python tests/experiments/m3_atelier_verify.py "$revision"
+verify M3b 9460b1e \
+    tests/experiments/m3b_copia_preregistro.md tests/experiments/m3b_copia_eval.gd \
+    reports/M3b_copia_eval.json preregister_sha256
+python tests/experiments/m3b_copia_verify.py "$revision"
