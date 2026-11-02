@@ -1,0 +1,27 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+P1 holdout seed=271401 rows=18
+P1 holdout seed=271402 rows=36
+P1 holdout seed=271403 rows=54
+P1 holdout seed=271404 rows=72
+P1 holdout seed=271405 rows=90
+P1 holdout seed=271406 rows=108
+P1 holdout seed=271407 rows=126
+P1 holdout seed=271408 rows=144
+P1 holdout seed=271409 rows=162
+P1 holdout seed=271410 rows=180
+P1 holdout seed=271411 rows=198
+P1 holdout seed=271412 rows=216
+P1 holdout seed=271413 rows=234
+P1 holdout seed=271414 rows=252
+P1 holdout seed=271415 rows=270
+P1 holdout seed=271416 rows=288
+P1 holdout seed=271417 rows=306
+P1 holdout seed=271418 rows=324
+P1 holdout seed=271419 rows=342
+P1 holdout seed=271420 rows=360
+P1 holdout seed=271421 rows=378
+P1 holdout seed=271422 rows=396
+P1 holdout seed=271423 rows=414
+P1 holdout seed=271424 rows=432
+P1 written res://tests/experiments/p1_holdout.json errors=0
