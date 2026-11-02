@@ -13,6 +13,7 @@ var show_pointer := false
 var show_sensors := false
 var terrain := PackedVector2Array()
 var command_target := Vector2.ZERO
+var show_command_target := false
 var grass_texture: Texture2D
 var food_texture: Texture2D
 var rock_texture: Texture2D
@@ -88,12 +89,13 @@ func _draw() -> void:
 		if not overlaps:
 			visible_names[id] = rect
 			_name_tag(creature)
-	if Rect2(Vector2.ZERO, world.size).has_point(command_target):
+	if show_command_target and Rect2(Vector2.ZERO, world.size).has_point(command_target):
 		draw_arc(command_target, 10, 0, TAU, 24, Color("8fd5dd"), 1.5, true)
 		draw_line(command_target - Vector2(14, 0), command_target + Vector2(14, 0), Color("8fd5dd"), 1, true)
 		draw_line(command_target - Vector2(0, 14), command_target + Vector2(0, 14), Color("8fd5dd"), 1, true)
 	_draw_teaching()
 	_draw_social()
+	_draw_mind_marker()
 	if show_pointer and tool != "select" and Rect2(Vector2.ZERO, world.size).has_point(pointer):
 		var radius := 30.0 if tool == "water" else (24.0 if tool == "obstacle" else (13.0 if tool == "creature" else 7.0))
 		draw_circle(pointer, radius, Color(0.96, 0.91, 0.68, 0.18))
@@ -143,8 +145,7 @@ func _label_rect(creature) -> Rect2:
 	var zoom: float = maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
 	var font := ThemeDB.fallback_font
 	var text := Texto.nome_criatura(creature.name)
-	var font_size := int(ceilf(12 / zoom))
-	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x / zoom
 	return Rect2(creature.pos + Vector2(-width * 0.5, creature.genome.size + 5 / zoom), Vector2(width, 16 / zoom))
 
 func label_hit(creature, pos: Vector2) -> bool:
@@ -159,9 +160,11 @@ func _name_tag(creature) -> void:
 	var baseline := rect.position + Vector2(0, 12 / zoom)
 	var color := Color("ffebad") if creature.id == selected_id else Color("edf4df")
 	var text := Texto.nome_criatura(creature.name)
-	var font_size := int(ceilf(12 / zoom))
-	draw_string_outline(ThemeDB.fallback_font, baseline, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, int(ceilf(3 / zoom)), Color("17372b"))
-	draw_string(ThemeDB.fallback_font, baseline, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+	# Render at a constant screen font size, including when the pet is enlarged.
+	draw_set_transform(baseline, 0, Vector2.ONE / zoom)
+	draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 3, Color("17372b"))
+	draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, color)
+	draw_set_transform(Vector2.ZERO)
 	# A indicação persiste dois segundos de simulação após bebida confirmada.
 	for index in range(world.events.size() - 1, -1, -1):
 		var event: Dictionary = world.events[index]
@@ -204,6 +207,12 @@ func _creature(creature) -> void:
 	# Tick time freezes the sway when paused; no random or cosmetic emotion state.
 	var sway := sin(float(world.tick) * (0.18 + arousal * 0.4) + creature.id) * arousal * 0.12 if enabled else 0.0
 	var posture := Vector2(1.15 + valence * 0.12, 0.88 - valence * 0.08)
+	var dominant := Texto.mente_dominante(creature.mind_snapshot()) if creature.mind != null else {"key": "", "value": 0.0}
+	var intensity: float = dominant.value
+	if dominant.key in ["frustracao", "receio", "saturacao_social"]:
+		posture += Vector2(0.10, -0.12) * intensity
+	elif dominant.key in ["entusiasmo", "satisfacao"]:
+		posture += Vector2(-0.08, 0.12) * intensity
 	var selected: bool = creature.id == selected_id
 	if selected:
 		draw_arc(pos, radius + 6, 0, TAU, 48, Color("f3e2aa"), 2, true)
@@ -213,6 +222,7 @@ func _creature(creature) -> void:
 	draw_circle(Vector2.ZERO, radius + 1, Color(0.12, 0.22, 0.18, 0.4))
 	draw_set_transform(pos, creature.heading + sway, posture)
 	var color := Color.from_hsv(creature.genome.hue, 0.44, clampf(0.88 + valence * 0.16, 0.65, 1.0))
+	color = color.lerp(mind_color(str(dominant.key)), intensity * 0.28)
 	# A faster genome has a longer visible tail; body radius is the size gene.
 	var tail: float = 4.0 + creature.genome.speed * 0.11
 	draw_colored_polygon(PackedVector2Array([Vector2(-radius + 2, -radius * 0.45),
@@ -269,3 +279,31 @@ func _draw_teaching() -> void:
 		if point.is_finite():
 			draw_dashed_line(creature.pos, point, color, 2 / zoom, 8 / zoom, true)
 		draw_string(ThemeDB.fallback_font, creature.pos + Vector2(-30, -30) / zoom, Texto.texto("te_route"), HORIZONTAL_ALIGNMENT_LEFT, -1, int(12 / zoom), color)
+
+static func mind_color(key: String) -> Color:
+	return {"frustracao": Color("f3ad78"), "receio": Color("cec1ef"), "solidao": Color("a9d7ee"), "saturacao_social": Color("d6b7e8"), "entusiasmo": Color("ffe4a2"), "satisfacao": Color("cce6aa"), "tranquilidade": Color("b9e4d1")}.get(key, Color("edf4df"))
+
+func _draw_mind_marker() -> void:
+	var creature = world.creatures.get(selected_id)
+	if creature == null or creature.mind == null:
+		return
+	var dominant := Texto.mente_dominante(creature.mind_snapshot())
+	var intensity: float = dominant.value
+	var zoom: float = maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	if intensity <= 0.01 or zoom < 0.15:
+		return
+	var color := mind_color(str(dominant.key))
+	color.a = 0.3 + intensity * 0.7
+	# A single bounded indicator, proportional to the real dominant score.
+	var radius: float = creature.genome.size + 10 / zoom
+	draw_arc(creature.pos, radius, -PI * 0.95, -PI * 0.95 + PI * 0.9 * intensity, 24, color, (1 + intensity * 2) / zoom, true)
+	var point: Vector2 = creature.pos + Vector2(0, -radius - 8 / zoom)
+	var unit: float = (2 + intensity * 3) / zoom
+	if dominant.key in ["solidao", "saturacao_social"]:
+		var gap: float = unit * (1.2 if dominant.key == "solidao" else 2.4)
+		for side in [-1, 1]:
+			draw_circle(point + Vector2(side * gap, 0), unit, color)
+	elif dominant.key in ["frustracao", "receio"]:
+		draw_polyline(PackedVector2Array([point + Vector2(-unit, -unit), point + Vector2(unit, 0), point + Vector2(-unit, unit)]), color, 2 / zoom, true)
+	else:
+		draw_circle(point, unit, color)

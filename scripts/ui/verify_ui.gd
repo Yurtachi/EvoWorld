@@ -240,6 +240,7 @@ func _verify() -> void:
 	await _verify_e2(main, folder)
 	await _verify_e3(main, folder)
 	await _verify_e4(main, folder)
+	await _verify_m1(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
 	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog]:
 		dialog.popup_centered()
@@ -667,3 +668,90 @@ func _verify_e1(main, folder: String) -> void:
 	_expect(main.fps_chart.samples.size() > 0, "mini gráfico amostra quadros reais")
 	for button in main.food_buttons.values():
 		_expect(button.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "quatro alimentos cabem na janela mínima")
+
+func _verify_m1(main, folder: String) -> void:
+	main.initial_population = 12
+	main.create_world("M1", "Mel", 81002)
+	var pet = main.world.creatures[main.world.pet_id]
+	_expect(main.caregiver_scroll.visible and not main.lab_scroll.visible and main.care_button.text == "Convivência", "M1 convivência padrão e separada do laboratório")
+	_expect(main.follow and main.camera.zoom.x >= 2, "M1 pet em destaque e acompanhado")
+	_expect(main.world.mind_enabled_ids == [pet.id] and main.mind_enable.visible == false, "M1 só pet ativo por padrão")
+	var before: Dictionary = main.world.to_dict()
+	main._refresh()
+	main.lab.observe(main.world, pet.id, true)
+	_expect(main.world.to_dict() == before, "M1 leitura de UI e laboratório não altera o mundo")
+	var ids: Array = main.world.creatures.keys()
+	main.roster.item_selected.emit(1)
+	main._refresh()
+	var other = main.world.creatures[ids[1]]
+	_expect(main.selected_id == other.id and main.follow and other.mind == null, "M1 seguir organismo não ativa mente")
+	_expect(main.mind_emotion.text == "Sem mente ativa" and main.mind_enable.visible and main.mind_cost.text.contains("CPU"), "M1 ausência de mente e custo explícitos")
+	var pos: Vector2 = other.pos
+	var energy: float = other.energy
+	main.mind_enable.pressed.emit()
+	_expect(other.mind != null and other.pos == pos and other.energy == energy, "M1 ativação usa API sem alterar corpo")
+	main.lab_button.pressed.emit()
+	_expect(main.lab_scroll.visible and main.roster.visible and main.lab.affect_switch.button_pressed, "M1 laboratório e seletor acessíveis")
+	main.lab.affect_switch.button_pressed = false
+	main.lab.memory_switch.button_pressed = false
+	_expect(not other.mind.affect_enabled and not other.mind.memory_enabled, "M1 ablações da seleção pela UI real")
+	_expect(pet.mind.affect_enabled and pet.mind.memory_enabled, "M1 ablação preserva outra criatura")
+	main._refresh()
+	_expect(main.mind_emotion.text == Texto.texto("m1_affect_off") and main.lab.mind_values.text.contains("históricos"), "M1 afeto desligado não apresenta histórico como expressão ativa")
+	main.selected_id = pet.id
+	main._refresh()
+	main.lab.observe(main.world, pet.id, true)
+	main.lab.affect_switch.button_pressed = false
+	main.lab.memory_switch.button_pressed = false
+	_expect(not pet.mind.affect_enabled and not pet.mind.memory_enabled, "M1 permite ablação no pet")
+	main.store.save_world(main.world, "m1", {"name": "M1"})
+	main._load("m1")
+	pet = main.world.creatures[main.world.pet_id]
+	_expect(not pet.mind.affect_enabled and not pet.mind.memory_enabled, "M1 ablações persistem no save real")
+	main.lab.observe(main.world, pet.id, true)
+	main.lab.affect_switch.button_pressed = true
+	main.lab.memory_switch.button_pressed = true
+	var count: int = main.world.creatures.size()
+	var selected: int = main.selected_id
+	pos = pet.pos
+	main._present_companion()
+	_expect(main.world.creatures.size() == count + 1 and main.selected_id == selected and pet.pos == pos, "M1 companhia física preserva seleção e corpo")
+	main.world.place_obstacle(pet.pos + Vector2(60, 0), 24)
+	main._clear_nearby_rocks()
+	_expect(main.world.obstacles.all(func(o): return pet.pos.distance_to(o.pos) > 120 + o.radius), "M1 retira rochas locais para observar recuperação")
+	# Isolated physical fixture: trapped body produces real blocked-motion causes.
+	main.world = World.new_world(81002, {"creature_count": 1, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false})
+	main.selected_id = main.world.pet_id
+	pet = main.world.creatures[main.selected_id]
+	for index in range(12):
+		main.world.place_obstacle(pet.pos + Vector2.from_angle(index * TAU / 12) * (pet.genome.size + 25), 24)
+	for index in range(35): main.world.step()
+	main._reset_session()
+	main.view.set_world(main.world)
+	main._refresh()
+	main._show_lab(true)
+	_expect(main.mind_emotion.text.contains("frustrado") and main.mind_reason.text.contains("bloqueado"), "M1 frustração e motivo derivam de bloqueio físico")
+	_expect(main.lab.mind_causes.text.contains("Passo") and main.lab.mind_scores.text.contains("Parece") and main.lab.mind_logs.text.contains("Passo"), "M1 causas, scores e mind_log traduzidos")
+	for goal in ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto"]:
+		_expect(Texto.razao("mind." + goal) != Texto.texto("reason_unknown"), "M1 razão traduzida: " + goal)
+	main._show_lab(false)
+	main.tutorial_dialog.popup_centered()
+	for index in range(5):
+		main.tutorial_step = index
+		main._tutorial_move(0)
+		_expect(main.tutorial_text.text.contains("min") and not main.tutorial_text.text.contains(Texto.texto("text_unknown")), "M1 roteiro cobre etapa " + str(index))
+	await process_frame
+	await process_frame
+	_expect(main.tutorial_dialog.size.x <= 1100 and main.tutorial_dialog.size.y < 680, "M1 tutorial cabe na janela mínima")
+	main.tutorial_dialog.hide()
+	await process_frame
+	await process_frame
+	for label in [main.mind_emotion, main.mind_desire, main.mind_reason]:
+		_expect(label.size.x <= main.caregiver_scroll.size.x, "M1 texto quebra linhas na largura mínima")
+	main.selected_id = -1
+	main._refresh()
+	main.lab.observe(main.world, -1, true)
+	_expect(main.mind_desire.text == Texto.texto("m1_no_selection") and main.lab.mind_scores.text.is_empty(), "M1 seleção ausente limpa dados antigos")
+	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var path := folder.path_join("m1.json" + suffix)
+		if FileAccess.file_exists(path): DirAccess.remove_absolute(path)

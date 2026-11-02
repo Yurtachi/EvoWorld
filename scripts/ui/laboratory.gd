@@ -27,9 +27,35 @@ var signal_controls: VBoxContainer
 var _world
 var _last_tick := -1
 var _last_selection := -2
+var mind_summary: Label
+var mind_values: Label
+var mind_scores: Label
+var mind_causes: Label
+var mind_logs: Label
+var affect_switch: CheckButton
+var memory_switch: CheckButton
 
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_heading("m1_lab")
+	_text(Texto.texto("m1_note"))
+	mind_summary = _text("")
+	for code in ["m1_affect_switch", "m1_memory_switch"]:
+		var button := CheckButton.new()
+		button.text = Texto.texto(code)
+		add_child(button)
+		button.toggled.connect(_ablate.bind(code == "m1_affect_switch"))
+		if code == "m1_affect_switch": affect_switch = button
+		else: memory_switch = button
+	_text(Texto.texto("m1_ablation"))
+	_heading("m1_affects")
+	mind_values = _text("")
+	_heading("m1_scores")
+	mind_scores = _text("")
+	_heading("m1_causes")
+	mind_causes = _text("")
+	_heading("m1_logs")
+	mind_logs = _text("")
 	_text(Texto.texto("lab_intro"))
 	summary = _text("")
 	_heading("lab_chart")
@@ -100,6 +126,7 @@ func observe(world, selected_id: int, force: bool = false) -> void:
 	_last_selection = selected_id
 	if not is_visible_in_tree() and not force:
 		return
+	_observe_mind(world.creatures.get(selected_id))
 	var births := 0
 	var deaths := 0
 	var max_generation := 0
@@ -209,3 +236,51 @@ func _heading(code: String) -> void:
 	add_child(HSeparator.new())
 	var label := _text(Texto.texto(code))
 	label.add_theme_color_override("font_color", Color("dbe8a5"))
+
+func _ablate(enabled: bool, affect: bool) -> void:
+	if _world == null:
+		return
+	var creature = _world.creatures.get(_last_selection)
+	if creature == null or creature.mind == null:
+		return
+	if affect: creature.mind.affect_enabled = enabled
+	else: creature.mind.memory_enabled = enabled
+	intervention.emit()
+	observe(_world, _last_selection, true)
+
+func _observe_mind(creature) -> void:
+	var active: bool = creature != null and creature.mind != null
+	for button in [affect_switch, memory_switch]:
+		button.disabled = not active
+		button.set_pressed_no_signal(false)
+	for label in [mind_values, mind_scores, mind_causes, mind_logs]:
+		label.text = ""
+	if not active:
+		mind_summary.text = Texto.texto("m1_disabled")
+		return
+	var snapshot: Dictionary = creature.mind_snapshot()
+	affect_switch.set_pressed_no_signal(snapshot.affect_enabled)
+	memory_switch.set_pressed_no_signal(snapshot.memory_enabled)
+	mind_summary.text = Texto.mente_desejo(snapshot.objetivo_atual) + "\n" + Texto.mente_motivo(snapshot.motivo)
+	var rows: Array[String] = []
+	if not snapshot.affect_enabled:
+		rows.append(Texto.texto("m1_history_off"))
+	for key in snapshot.afetos:
+		rows.append(Texto.texto("m1_value", [Texto.texto("m1_name_" + key), Texto.numero(snapshot.afetos[key], 3)]))
+	mind_values.text = "\n".join(rows)
+	rows.clear()
+	for goal in snapshot.pontuacoes:
+		rows.append(Texto.texto("m1_value", [Texto.mente_desejo(goal), Texto.numero(snapshot.pontuacoes[goal], 3)]))
+	mind_scores.text = "\n".join(rows) if not rows.is_empty() else Texto.texto("m1_wait")
+	rows.clear()
+	var causes: Array = snapshot.cause_log
+	for index in range(causes.size() - 1, maxi(-1, causes.size() - 7), -1):
+		var item: Dictionary = causes[index]
+		rows.append(Texto.texto("m1_cause_row", [item.tick, Texto.texto("m1_name_" + item.estado), Texto.numero(item.delta, 3), Texto.texto("m1_cause_" + item.causa)]))
+	mind_causes.text = "\n\n".join(rows) if not rows.is_empty() else Texto.texto("m1_cause_empty")
+	rows.clear()
+	var logs: Array = snapshot.ultimos_logs
+	for index in range(logs.size() - 1, maxi(-1, logs.size() - 7), -1):
+		var item: Dictionary = logs[index]
+		rows.append(Texto.texto("m1_log_row", [item.tick, Texto.mente_desejo(item.objetivo), Texto.mente_motivo(item.motivo)]))
+	mind_logs.text = "\n\n".join(rows) if not rows.is_empty() else Texto.texto("m1_wait")

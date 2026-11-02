@@ -96,6 +96,15 @@ var settings_path := "user://ui-settings.cfg"
 var _lab_elapsed := 0.0
 var _capture_mode := false
 var _world_dirty := false
+var mind_emotion: Label
+var mind_desire: Label
+var mind_reason: Label
+var mind_enable: Button
+var mind_cost: Label
+var mind_intensity: ProgressBar
+var tutorial_step := 0
+var tutorial_text: Label
+var tutorial_dialog: AcceptDialog
 @onready var view = $WorldView
 @onready var camera: Camera2D = $Camera2D
 
@@ -113,6 +122,7 @@ func _ready() -> void:
 	_build_chat()
 	_build_settings()
 	_build_help()
+	_build_tutorial()
 	_build_expand()
 	_set_speed(speed)
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
@@ -149,6 +159,8 @@ func create_world(garden_name: String, creature_name: String, world_seed: int) -
 	view.set_world(world)
 	_set_tool("select")
 	_fit_world()
+	_show_lab(false)
+	_focus_selected()
 	_refresh()
 	_notify(Texto.texto("welcome", [creature_name]))
 
@@ -214,6 +226,15 @@ func _build_ui() -> void:
 		button.toggle_mode = true
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	care_button.button_pressed = true
+	roster = OptionButton.new()
+	roster.fit_to_longest_item = false
+	roster.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	roster.item_selected.connect(func(index):
+		selected_id = roster.get_item_id(index)
+		_focus_selected()
+		_refresh()
+		lab.observe(world, selected_id, true))
+	side_column.add_child(roster)
 	var scroll := ScrollContainer.new()
 	caregiver_scroll = scroll
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -250,17 +271,34 @@ func _build_ui() -> void:
 	identity.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	mode_note = _label(inspector, "", 12, Color("d4d6ab"))
 	mode_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	roster = OptionButton.new()
-	roster.fit_to_longest_item = false
-	roster.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	roster.item_selected.connect(func(index):
-		selected_id = roster.get_item_id(index)
-		follow = false
-		_refresh())
-	inspector.add_child(roster)
+	mode_note.hide()
+	_label(inspector, Texto.texto("m1_state"), 12, Color("bccc98"))
+	mind_emotion = _wrapped(inspector, "")
+	mind_emotion.add_theme_font_size_override("font_size", 20)
+	mind_intensity = ProgressBar.new()
+	mind_intensity.custom_minimum_size.y = 5
+	mind_intensity.show_percentage = false
+	inspector.add_child(mind_intensity)
+	_label(inspector, Texto.texto("m1_desire"), 12, Color("bccc98"))
+	mind_desire = _wrapped(inspector, "")
+	mind_desire.add_theme_font_size_override("font_size", 20)
+	var bubble := PanelContainer.new()
+	bubble.add_theme_stylebox_override("panel", GardenTheme.panel(Color("354e42"), 10, 10))
+	inspector.add_child(bubble)
+	mind_reason = _wrapped(bubble, "")
+	mind_cost = _wrapped(inspector, Texto.texto("m1_cost"))
+	mind_enable = _button(inspector, Texto.texto("m1_enable"), _enable_selected_mind)
+	_wrapped(inspector, Texto.texto("m1_note"))
+	_button(inspector, Texto.texto("m1_tutorial"), func(): tutorial_dialog.popup_centered())
+	offer_button = _button(inspector, Texto.texto("offer"), _offer_food)
+	_separator(inspector)
+	_label(inspector, Texto.texto("m1_observe"), 12, Color("bccc98"))
+	_button(inspector, Texto.texto("m1_companion"), _present_companion)
+	_button(inspector, Texto.texto("m1_obstacle"), _set_tool.bind("obstacle"))
+	_button(inspector, Texto.texto("m1_clear"), _clear_nearby_rocks)
+	_wrapped(inspector, Texto.texto("m1_observe_note"))
 	personality_inspector = PersonalityInspector.new()
 	_button(inspector, Texto.texto("chat_open"), func(): chat_dialog.popup_centered())
-	inspector.add_child(personality_inspector)
 	var attention := _button(inspector, Texto.texto("tool_attention"), _set_tool.bind("attention"))
 	attention.tooltip_text = Texto.texto("attention_help")
 	attention.toggle_mode = true
@@ -280,7 +318,6 @@ func _build_ui() -> void:
 	food_profile = _wrapped(inspector, "")
 	food_warning = _wrapped(inspector, Texto.texto("food_warning"))
 	food_warning.add_theme_color_override("font_color", Color("ffd19c"))
-	offer_button = _button(inspector, Texto.texto("offer"), _offer_food)
 	_label(inspector, Texto.texto("receipt_title"), 12, Color("bccc98"))
 	receipts = _wrapped(inspector, Texto.texto("receipt_empty"))
 	_separator(inspector)
@@ -305,6 +342,10 @@ func _build_ui() -> void:
 	var filler := Control.new()
 	filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	inspector.add_child(filler)
+	var details := _button(inspector, Texto.texto("m1_details"), func(): personality_inspector.visible = not personality_inspector.visible)
+	details.toggle_mode = true
+	inspector.add_child(personality_inspector)
+	personality_inspector.hide()
 	_separator(inspector)
 	var bottom := _panel(ui, Vector4(20, -205, -SIDEBAR - 36, -20), Vector4(0, 1, 1, 1))
 	var bottom_col := VBoxContainer.new()
@@ -390,12 +431,13 @@ func _confirm_new_world() -> void:
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
-	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible:
+	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible):
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
 			command_target = get_global_mouse_position().clamp(Vector2.ZERO, world.size)
 			view.command_target = command_target
+			view.show_command_target = true
 			_world_dirty = true
 			_notify(Texto.texto("target_set"))
 			return
@@ -414,7 +456,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible:
+	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -436,7 +478,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible:
+	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible):
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -488,6 +530,7 @@ func _apply_tool(pos: Vector2) -> void:
 	_world_dirty = true
 
 func _refresh() -> void:
+	_refresh_mind()
 	teaching.observe(world, selected_id)
 	view.teaching_snapshot = teaching.snapshot
 	view.teaching_target = teaching.target if teaching.selected_skill() == "ir_ate_local" else Vector2.INF
@@ -560,6 +603,8 @@ func _toggle_pause() -> void:
 
 func _toggle_follow() -> void:
 	follow = not follow and world.creatures.has(selected_id)
+	if follow:
+		_focus_selected()
 
 func _find_pet() -> void:
 	if world.creatures.has(world.pet_id):
@@ -619,12 +664,14 @@ func _reset_session() -> void:
 		if property.name == "comandos" and world.get("comandos") != null:
 			comandos = world.get("comandos")
 	command_target = world.creatures[world.pet_id].pos if world.creatures.has(world.pet_id) else world.size * 0.5
+	view.show_command_target = false
 	# O alvo de seguir restaurado deve sobreviver ao primeiro quadro da UI.
 	if comandos.has_method("to_dict"):
 		var state: Dictionary = comandos.to_dict(world)
 		var order: Dictionary = state.get("order", {})
 		if order.get("target") is Array and order.target.size() == 2:
 			command_target = Vector2(float(order.target[0]), float(order.target[1]))
+			view.show_command_target = true
 	view.command_target = command_target
 	autosave_elapsed = 0
 	autosave_tick = world.tick
@@ -818,7 +865,11 @@ func _read_settings() -> void:
 
 func _build_help() -> void:
 	help_dialog = _window("help_title", Vector2i(650, 570))
-	_wrapped(_window_column(help_dialog), Texto.texto("social_help") + "\n\n" + Texto.texto("help_body"))
+	var column := _window_column(help_dialog)
+	_button(column, Texto.texto("m1_tutorial"), func():
+		help_dialog.hide()
+		tutorial_dialog.popup_centered())
+	_wrapped(column, Texto.texto("social_help") + "\n\n" + Texto.texto("help_body"))
 
 func _population_field(parent: Node) -> SpinBox:
 	var field := SpinBox.new()
@@ -934,6 +985,10 @@ func _capture_demo(path: String) -> void:
 			return
 	if state.begins_with("e3-"):
 		await _capture_e3(state, path)
+		get_tree().quit()
+		return
+	if state.begins_with("m1-"):
+		await _capture_m1(state, path)
 		get_tree().quit()
 		return
 	if state.begins_with("e4-"):
@@ -1370,6 +1425,8 @@ func _benchmark_fps(path: String) -> void:
 	intervals.sort()
 	var p95: float = intervals[int((intervals.size() - 1) * 0.95)] * 1000
 	var result := {"initial_population": initial_population, "final_population": world.creatures.size(), "frames": intervals.size(), "seconds": elapsed, "mean_fps": mean, "p95_frame_ms": p95, "godot": Engine.get_version_info().string, "adapter": RenderingServer.get_video_adapter_name(), "display": DisplayServer.get_name(), "window": [get_window().size.x, get_window().size.y], "speed": speed, "tick": world.tick}
+	result["active_minds"] = world.mind_enabled_ids.size()
+	result["pet_mind_active"] = world.creatures.has(world.pet_id) and world.creatures[world.pet_id].mind != null
 	var output := FileAccess.open(path.get_basename() + ".json", FileAccess.WRITE)
 	if output != null:
 		output.store_string(JSON.stringify(result, "\t"))
@@ -1500,5 +1557,138 @@ func _capture_e3(state: String, path: String) -> void:
 		teaching.reset_button.pressed.emit()
 	var warmup := Time.get_ticks_msec() + 1200
 	while Time.get_ticks_msec() < warmup:
+		await get_tree().process_frame
+	await capture_screenshot(path)
+
+func _focus_selected() -> void:
+	if world != null and world.creatures.has(selected_id):
+		camera.zoom = Vector2.ONE * 2.2
+		camera.position = world.creatures[selected_id].pos + _camera_bias()
+		follow = true
+
+func _refresh_mind() -> void:
+	var creature = world.creatures.get(selected_id)
+	var active: bool = creature != null and creature.mind != null
+	mind_enable.visible = creature != null and not active
+	mind_cost.visible = creature != null and not active
+	mind_intensity.visible = active
+	if not active:
+		mind_emotion.text = Texto.texto("m1_disabled")
+		mind_desire.text = Texto.texto("m1_no_selection" if creature == null else "m1_disabled")
+		mind_reason.text = Texto.texto("m1_no_selection" if creature == null else "m1_inactive_reason")
+		return
+	var snapshot: Dictionary = creature.mind_snapshot()
+	var dominant := Texto.mente_dominante(snapshot)
+	mind_emotion.text = Texto.texto("m1_affect_" + str(dominant.key)) if dominant.value > 0.01 else Texto.texto("m1_quiet" if snapshot.affect_enabled else "m1_affect_off")
+	mind_intensity.value = float(dominant.value) * 100
+	mind_desire.text = Texto.mente_desejo(str(snapshot.get("objetivo_atual", "")))
+	mind_reason.text = Texto.mente_causa(snapshot) if dominant.value > 0.01 else Texto.mente_motivo(str(snapshot.motivo))
+
+func _enable_selected_mind() -> void:
+	if world.enable_mind(selected_id):
+		_world_dirty = true
+		_notify(Texto.texto("m1_enabled"))
+		_refresh()
+		lab.observe(world, selected_id, true)
+
+func _present_companion() -> void:
+	var creature = world.creatures.get(selected_id)
+	if creature == null or world.creatures.size() >= world.max_population:
+		_notify(Texto.texto("m1_companion_fail"))
+		return
+	# Spawn through the simulator; never move a body or set its response.
+	for radius in [40.0, 60.0, 85.0]:
+		for index in range(12):
+			var pos: Vector2 = creature.pos + Vector2.from_angle(index * TAU / 12) * radius
+			# _spawn may relocate a blocked point; validate the largest possible body
+			# first so a presentation near the selection really stays nearby.
+			if not Rect2(Vector2(16, 16), world.size - Vector2(32, 32)).has_point(pos) or not world._clear(pos, 16):
+				continue
+			var occupied := false
+			for body in world.creatures.values():
+				if body.pos.distance_to(pos) < body.genome.size + 16:
+					occupied = true
+			if occupied:
+				continue
+			if world.spawn_creature(pos, Texto.NOMES_INICIAIS[world.creatures.size() % Texto.NOMES_INICIAIS.size()]) >= 0:
+				_world_dirty = true
+				_notify(Texto.texto("m1_companion_ok"), 10)
+				_refresh()
+				return
+	_notify(Texto.texto("m1_companion_fail"))
+
+func _clear_nearby_rocks() -> void:
+	var creature = world.creatures.get(selected_id)
+	if creature == null:
+		return
+	var removed := 0
+	for obstacle in world.obstacles.duplicate():
+		if creature.pos.distance_to(obstacle.pos) <= 120 + float(obstacle.radius):
+			world.obstacles.erase(obstacle)
+			removed += 1
+	if removed > 0:
+		world._rebuild_spatial()
+		_world_dirty = true
+	_notify(Texto.texto("m1_cleared", [removed]), 10)
+
+func _build_tutorial() -> void:
+	tutorial_dialog = _window("m1_tutorial", Vector2i(570, 360))
+	var column := _window_column(tutorial_dialog)
+	tutorial_text = _wrapped(column, "")
+	tutorial_text.add_theme_font_size_override("font_size", 18)
+	var row := HBoxContainer.new()
+	column.add_child(row)
+	_button(row, Texto.texto("m1_previous"), _tutorial_move.bind(-1))
+	_button(row, Texto.texto("m1_next"), _tutorial_move.bind(1))
+	_tutorial_move(0)
+
+func _tutorial_move(direction: int) -> void:
+	tutorial_step = clampi(tutorial_step + direction, 0, 4)
+	tutorial_text.text = Texto.texto("m1_tutorial_step", [tutorial_step + 1, Texto.texto("m1_tutorial_" + str(tutorial_step))])
+
+func _capture_m1(state: String, path: String) -> void:
+	# Explicit inspection fixture with physical consequences; never normal gameplay.
+	world = World.new_world(81002, {"creature_count": 1, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false})
+	selected_id = world.pet_id
+	var creature = world.creatures[selected_id]
+	creature.name = Texto.texto("pet_default")
+	_reset_session()
+	view.set_world(world)
+	_show_lab(false)
+	if state == "m1-frustration" or state.begins_with("m1-lab"):
+		# A ring leaves no forward escape; the simulator decides and checks collisions.
+		for index in range(12):
+			world.place_obstacle(creature.pos + Vector2.from_angle(index * TAU / 12) * (creature.genome.size + 25), 24)
+		for index in range(35):
+			world.step()
+	else:
+		for index in range(70):
+			world.step()
+	if state == "m1-companion":
+		_present_companion()
+		for index in range(20):
+			world.step()
+	if state == "m1-other":
+		_present_companion()
+		selected_id = world.creatures.keys().back()
+	_focus_selected()
+	_refresh()
+	if state.begins_with("m1-lab"):
+		_show_lab(true)
+	if state == "m1-tutorial":
+		tutorial_dialog.popup_centered()
+	_notify(Texto.texto("m1_demo"), 20)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if state == "m1-lab-causes":
+		lab_scroll.scroll_vertical = int(lab.mind_causes.position.y) - 40
+	if state == "m1-lab-log":
+		lab_scroll.scroll_vertical = int(lab.mind_logs.position.y) - 40
+	if state == "m1-lab-scores":
+		lab_scroll.scroll_vertical = int(lab.mind_scores.position.y) - 40
+	if state == "m1-tools":
+		caregiver_scroll.scroll_vertical = int(offer_button.position.y) - 40
+	var until := Time.get_ticks_msec() + 800
+	while Time.get_ticks_msec() < until:
 		await get_tree().process_frame
 	await capture_screenshot(path)
