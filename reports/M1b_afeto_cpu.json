@@ -1,0 +1,115 @@
+{
+	"godot": {
+		"build": "official",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (official)",
+		"timestamp": 0
+	},
+	"measured_ticks": 400,
+	"pet_budget_pass": true,
+	"rows": [
+		{
+			"mean_ms_tick": 1.6868225000000001,
+			"minds_final": 0,
+			"p95_ms_tick": 2.671,
+			"population_final": 12,
+			"population_initial": 12,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 2.047132499999999,
+			"minds_final": 1,
+			"p95_ms_tick": 3.034,
+			"population_final": 12,
+			"population_initial": 12,
+			"scope": "pet"
+		},
+		{
+			"mean_ms_tick": 3.6343574999999992,
+			"minds_final": 12,
+			"p95_ms_tick": 6.203,
+			"population_final": 12,
+			"population_initial": 12,
+			"scope": "all"
+		},
+		{
+			"mean_ms_tick": 4.9713949999999985,
+			"minds_final": 0,
+			"p95_ms_tick": 7.73,
+			"population_final": 30,
+			"population_initial": 30,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 5.153325000000006,
+			"minds_final": 1,
+			"p95_ms_tick": 8.287,
+			"population_final": 30,
+			"population_initial": 30,
+			"scope": "pet"
+		},
+		{
+			"mean_ms_tick": 12.504440000000011,
+			"minds_final": 30,
+			"p95_ms_tick": 17.595,
+			"population_final": 30,
+			"population_initial": 30,
+			"scope": "all"
+		},
+		{
+			"mean_ms_tick": 10.424300000000002,
+			"minds_final": 0,
+			"p95_ms_tick": 15.358,
+			"population_final": 60,
+			"population_initial": 60,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 10.383802500000003,
+			"minds_final": 1,
+			"p95_ms_tick": 14.96,
+			"population_final": 60,
+			"population_initial": 60,
+			"scope": "pet"
+		},
+		{
+			"mean_ms_tick": 23.25528249999999,
+			"minds_final": 60,
+			"p95_ms_tick": 37.388,
+			"population_final": 60,
+			"population_initial": 60,
+			"scope": "all"
+		},
+		{
+			"mean_ms_tick": 22.467795,
+			"minds_final": 0,
+			"p95_ms_tick": 30.756,
+			"population_final": 100,
+			"population_initial": 100,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 20.88452000000001,
+			"minds_final": 1,
+			"p95_ms_tick": 29.393,
+			"population_final": 100,
+			"population_initial": 100,
+			"scope": "pet"
+		},
+		{
+			"mean_ms_tick": 51.40716999999998,
+			"minds_final": 100,
+			"p95_ms_tick": 70.825,
+			"population_final": 100,
+			"population_initial": 100,
+			"scope": "all"
+		}
+	],
+	"seed": 93604,
+	"warmup": 100
+}

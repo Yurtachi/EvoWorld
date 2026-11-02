@@ -1,0 +1,5227 @@
+{
+	"frozen_files_sha256": {
+		"scripts/mind/affect.gd": "2ff824d7c42ffb2200f4d55531c93b368f5e1926d0df570b5dc27ad5c96fb3e0",
+		"scripts/mind/creature_mind.gd": "aa433b63f998aeb385a0a4d5eab5255c094ed729aaaacca67a5ddbea3feb30d1",
+		"scripts/mind/motivation.gd": "29fb2dfbd86b6a7d4eb083ee3c4d4d744cecdb1e0056a3fa42f6b145c7f3e2db",
+		"tests/experiments/m2_affect_eval.gd": "01a95e1f7f78040af6d8b06e469d15c7dcf47ff8a73e57aa8f3d3052f30cce01"
+	},
+	"partition": "TRAIN",
+	"preregister_sha256": "375b6cdc194ec5eea5d65e422dd6799ba9b224ab62079852bc65a565917fbad7",
+	"seed_start": 93601,
+	"seeds": 4,
+	"status": "completed",
+	"summary": {
+		"persistence_all": true,
+		"scientific_status": "PASS",
+		"stationary_peer_all": true,
+		"x1": {
+			"criteria": {
+				"affect_ablation": true,
+				"affect_magnitude": true,
+				"affect_specificity": true,
+				"fixed_control": true,
+				"memory_ablation": true,
+				"memory_magnitude": true,
+				"memory_specificity": true,
+				"neither_control": true,
+				"random_control": true
+			},
+			"fixed": {
+				"affect_effect": 0.0,
+				"affect_positive": 0,
+				"memory_effect": 0.0,
+				"memory_positive": 0
+			},
+			"full": {
+				"affect_effect": 0.48611111111111105,
+				"affect_positive": 4,
+				"memory_effect": 0.4861111111111111,
+				"memory_positive": 4
+			},
+			"neither": {
+				"affect_effect": 0.0,
+				"affect_positive": 0,
+				"memory_effect": 0.0,
+				"memory_positive": 0
+			},
+			"no_affect": {
+				"affect_effect": -4.85722573273506e-17,
+				"affect_positive": 0,
+				"memory_effect": 0.9722222222222223,
+				"memory_positive": 4
+			},
+			"no_memory": {
+				"affect_effect": 0.701388888888889,
+				"affect_positive": 4,
+				"memory_effect": 0.0,
+				"memory_positive": 0
+			},
+			"random": {
+				"affect_effect": 0.0,
+				"affect_positive": 0,
+				"memory_effect": 0.0,
+				"memory_positive": 0
+			}
+		},
+		"x2": {
+			"criteria": {
+				"affect_ablation": true,
+				"memory_specificity": true,
+				"recovery": true,
+				"shortening": true
+			},
+			"full": {
+				"at_least_four": 4,
+				"recovery": 4,
+				"shortening_ticks": 12.0
+			},
+			"neither": {
+				"at_least_four": 0,
+				"recovery": 0,
+				"shortening_ticks": 0.0
+			},
+			"no_affect": {
+				"at_least_four": 0,
+				"recovery": 0,
+				"shortening_ticks": 0.0
+			},
+			"no_memory": {
+				"at_least_four": 4,
+				"recovery": 4,
+				"shortening_ticks": 12.0
+			}
+		}
+	},
+	"x1": [
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "full",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 23,
+				"social_avoid": 13
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 13,
+				"explorar": 23
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 23,
+				"social_contact": 13
+			},
+			"arm": "no_memory",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"buscar_companhia": 13,
+				"explorar": 23
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 23,
+				"social_contact": 13
+			},
+			"arm": "no_memory",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"buscar_companhia": 13,
+				"explorar": 23
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"rest": 12
+			},
+			"arm": "random",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"beber": 13,
+				"brincar": 11,
+				"descansar": 12
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"rest": 12
+			},
+			"arm": "random",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"beber": 13,
+				"brincar": 11,
+				"descansar": 12
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"rest": 12
+			},
+			"arm": "random",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"beber": 13,
+				"brincar": 11,
+				"descansar": 12
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"rest": 12
+			},
+			"arm": "random",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"beber": 13,
+				"brincar": 11,
+				"descansar": 12
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93601,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "full",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 19,
+				"rest": 2,
+				"social_avoid": 15
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 15,
+				"descansar": 2,
+				"explorar": 19
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_contact": 12
+			},
+			"arm": "no_memory",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"buscar_companhia": 12,
+				"explorar": 24
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_contact": 12
+			},
+			"arm": "no_memory",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"buscar_companhia": 12,
+				"explorar": 24
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 11,
+				"buscar_privacidade": 12,
+				"explorar": 13
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 11,
+				"buscar_privacidade": 12,
+				"explorar": 13
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 11,
+				"buscar_privacidade": 12,
+				"explorar": 13
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 11,
+				"buscar_privacidade": 12,
+				"explorar": 13
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 36
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"explorar": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93602,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "full",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 18,
+				"social_avoid": 18
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 18,
+				"explorar": 18
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 23,
+				"social_contact": 13
+			},
+			"arm": "no_memory",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"buscar_companhia": 13,
+				"explorar": 23
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 23,
+				"social_contact": 13
+			},
+			"arm": "no_memory",
+			"contact": 0.7222222222222222,
+			"goals": {
+				"buscar_companhia": 13,
+				"explorar": 23
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 19,
+				"social_avoid": 17
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 13,
+				"buscar_privacidade": 23
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 19,
+				"social_avoid": 17
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 13,
+				"buscar_privacidade": 23
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 19,
+				"social_avoid": 17
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 13,
+				"buscar_privacidade": 23
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 19,
+				"social_avoid": 17
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 13,
+				"buscar_privacidade": 23
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 35,
+				"rest": 1
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 1,
+				"explorar": 35
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93603,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 1,
+				"social_contact": 35
+			},
+			"arm": "full",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 35,
+				"explorar": 1
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 20,
+				"rest": 1,
+				"social_avoid": 15
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 15,
+				"descansar": 1,
+				"explorar": 20
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "full",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_contact": 36
+			},
+			"arm": "no_affect",
+			"contact": 1.0,
+			"goals": {
+				"buscar_companhia": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_affect",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 23,
+				"social_contact": 13
+			},
+			"arm": "no_memory",
+			"contact": 0.75,
+			"goals": {
+				"buscar_companhia": 13,
+				"explorar": 23
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 23,
+				"social_contact": 13
+			},
+			"arm": "no_memory",
+			"contact": 0.75,
+			"goals": {
+				"buscar_companhia": 13,
+				"explorar": 23
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"social_avoid": 36
+			},
+			"arm": "no_memory",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"buscar_privacidade": 36
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "neither",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 12,
+				"buscar_privacidade": 12,
+				"comer": 12
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 12,
+				"buscar_privacidade": 12,
+				"comer": 12
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 12,
+				"buscar_privacidade": 12,
+				"comer": 12
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 24,
+				"social_avoid": 12
+			},
+			"arm": "random",
+			"contact": 0.027777777777777776,
+			"goals": {
+				"brincar": 12,
+				"buscar_privacidade": 12,
+				"comer": 12
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0,
+				"solidao": 0.336264,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "lonely"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": 0.5
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": 0.5
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "positive",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		},
+		{
+			"acquired_affect": {
+				"entusiasmo": 0.303967,
+				"frustracao": 0,
+				"receio": 0,
+				"satisfacao": 0,
+				"saturacao_social": 0.483851,
+				"solidao": 0,
+				"tranquilidade": 0.455949
+			},
+			"acquired_episodes": [
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 40,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 70,
+					"valence": -0.7999999999999999
+				},
+				{
+					"importance": 0.8999999999999999,
+					"kind": "contact",
+					"source": 4,
+					"tick": 100,
+					"valence": -0.7999999999999999
+				}
+			],
+			"actions": {
+				"explore": 34,
+				"rest": 2
+			},
+			"arm": "fixed",
+			"contact": 0.3888888888888889,
+			"goals": {
+				"descansar": 2,
+				"explorar": 34
+			},
+			"memory": "negative",
+			"peer_displacement": 0.0,
+			"persistence_exact": true,
+			"seed": 93604,
+			"state": "saturated"
+		}
+	],
+	"x2": [
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "full",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93601,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "full",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93601,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93601,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93601,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_memory",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93601,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_memory",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93601,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93601,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93601,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "full",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93602,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "full",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93602,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93602,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93602,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_memory",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93602,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_memory",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93602,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93602,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93602,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"rest": 12
+			},
+			"arm": "full",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93603,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "full",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93603,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93603,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93603,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"rest": 12
+			},
+			"arm": "no_memory",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93603,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_memory",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93603,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93603,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93603,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "full",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93604,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "full",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93604,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93604,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_affect",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93604,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_memory",
+			"first_switch": 0,
+			"peak": 0.5692499999999999,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 10,
+			"retained": 0,
+			"seed": 93604,
+			"state": "blocked",
+			"switch_observed": true
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "no_memory",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93604,
+			"state": "neutral",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.5692499999999999,
+			"recovered": 0.5692499999999999,
+			"recovery_pass": false,
+			"rejected": 10,
+			"retained": 12,
+			"seed": 93604,
+			"state": "blocked",
+			"switch_observed": false
+		},
+		{
+			"actions": {
+				"avoid_obstacle": 1,
+				"explore": 11
+			},
+			"arm": "neither",
+			"first_switch": 12,
+			"peak": 0.0,
+			"recovered": 0.0,
+			"recovery_pass": true,
+			"rejected": 0,
+			"retained": 12,
+			"seed": 93604,
+			"state": "neutral",
+			"switch_observed": false
+		}
+	]
+}
