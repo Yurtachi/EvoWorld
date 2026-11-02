@@ -19,7 +19,9 @@ var grass_texture: Texture2D
 var food_texture: Texture2D
 var rock_texture: Texture2D
 var visible_names: Dictionary = {}
+const AtelierCanvas = preload("res://scripts/ui/atelier_canvas.gd")
 var object_styles: Dictionary = {}
+var demo_preview_strokes: Array = []
 
 func set_world(value: World) -> void:
 	world = value
@@ -67,6 +69,8 @@ func _draw() -> void:
 		FoodShapes.draw(self, food.pos, food.get("food_type", "legacy"))
 	for row in world.objects:
 		_draw_object(ObjectCatalog.appearance(row))
+	for board in world.boards:
+		_draw_board(board)
 	for creature in world.creatures.values():
 		if creature.id == selected_id and show_sensors:
 			_sensor(creature)
@@ -104,6 +108,8 @@ func _draw() -> void:
 		var radius := 30.0 if tool == "water" else (24.0 if tool == "obstacle" else (13.0 if tool == "creature" else 7.0))
 		draw_circle(pointer, radius, Color(0.96, 0.91, 0.68, 0.18))
 		draw_arc(pointer, radius, 0, TAU, 40, Color("f1dfab"), 1.5, true)
+		if tool in ["board", "demo"]:
+			_draw_board_preview(pointer)
 
 func _water(pos: Vector2, radius: float) -> void:
 	draw_circle(pos, radius + 3, Color("aecfc2"))
@@ -142,6 +148,60 @@ func _capsule_style(color: Color) -> StyleBoxFlat:
 	style.set_corner_radius_all(6)
 	object_styles[color] = style
 	return style
+
+
+func _draw_board(board: Dictionary) -> void:
+	var pos: Vector2 = board.pos
+	# Easel legs and drop shadow around the physical board position.
+	draw_rect(Rect2(pos - Vector2(18, 16), Vector2(38, 38)), Color(0.04, 0.12, 0.09, 0.48))
+	draw_line(pos + Vector2(0, -22), pos + Vector2(0, -17), Color("6e5031"), 3.0, true)
+	draw_line(pos + Vector2(-10, 17), pos + Vector2(-13, 22), Color("6e5031"), 2.5, true)
+	draw_line(pos + Vector2(10, 17), pos + Vector2(13, 22), Color("6e5031"), 2.5, true)
+	var frame := Rect2(pos - Vector2(18, 18), Vector2(36, 36))
+	draw_rect(frame, Color("c89d66"))
+	draw_rect(frame, Color("17372b"), false, 1.8)
+	var canvas := Rect2(pos - Vector2(15, 15), Vector2(30, 30))
+	draw_rect(canvas, Color("142b23"))
+	draw_rect(canvas, Color("48685a"), false, 1.0)
+	draw_line(Vector2(pos.x - 14, pos.y), Vector2(pos.x + 14, pos.y), Color(0.75, 0.86, 0.78, 0.12), 1.0)
+	draw_line(Vector2(pos.x, pos.y - 14), Vector2(pos.x, pos.y + 14), Color(0.75, 0.86, 0.78, 0.12), 1.0)
+	var plot := canvas.grow(-1.5)
+	var active_strokes: Array = board.get("active_strokes", [])
+	var drawn: Array = active_strokes
+	if drawn.is_empty() and not board.get("artifacts", []).is_empty():
+		drawn = board.artifacts.back().get("strokes", [])
+	var projected := AtelierCanvas.project_board_strokes(drawn, board.get("reference_strokes", []), plot, false)
+	for pts in projected.ref:
+		draw_polyline(pts, Color(0.42, 0.84, 0.95, 0.35), 2.8, true)
+		draw_polyline(pts, Color("7ad7f0"), 1.4, true)
+		for p in pts:
+			draw_circle(p, 1.2, Color("c4f4ff"))
+	for pts in projected.strokes:
+		draw_polyline(pts, Color("0b1914"), 3.0, true)
+		draw_polyline(pts, Color("ffe596"), 1.8, true)
+	if not active_strokes.is_empty() and projected.last_pt.is_finite():
+		draw_circle(projected.last_pt, 2.4, Color("17372b"))
+		draw_circle(projected.last_pt, 1.5, Color("ff9e64"))
+	var zoom := maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	if zoom >= 0.65:
+		var ref_shape := str(board.get("reference_shape", ""))
+		var text := Texto.texto("m3_board_tag_ref", [int(board.id), Texto.texto("shape_" + ref_shape)]) if not ref_shape.is_empty() else Texto.texto("m3_board_tag", [int(board.id)])
+		var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+		draw_set_transform(pos + Vector2(-width / 2.0 / zoom, -22.0), 0.0, Vector2.ONE / zoom)
+		draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, 4, Color("17372b"))
+		draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("fff2d1"))
+		draw_set_transform(Vector2.ZERO)
+
+func _draw_board_preview(pos: Vector2) -> void:
+	var frame := Rect2(pos - Vector2(16, 16), Vector2(32, 32))
+	draw_rect(frame, Color(0.20, 0.34, 0.28, 0.45))
+	draw_rect(frame, Color("f1dfab"), false, 1.5)
+	if tool == "demo":
+		var plot := frame.grow(-2.0)
+		var projected := AtelierCanvas.project_board_strokes([], demo_preview_strokes, plot, false)
+		for pts in projected.ref:
+			draw_polyline(pts, Color("7ad7f0"), 1.6, true)
+
 
 func social_marker(creature) -> Dictionary:
 	var recent := false

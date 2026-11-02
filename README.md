@@ -33,11 +33,15 @@ O seletor acima dos modos permite acompanhar qualquer organismo sem ativar sua m
 
 Em **Diante dos objetos**, a Convivência mostra interesse, cautela ou habituação a partir da percepção atual e do conhecimento individual. A linha **Ação física** distingue aproximação de investigação por contato. A UI não move o corpo nem atribui um objetivo. As frases são interpretações de estados simulados; uma memória adversa pode generalizar para outras cápsulas da mesma categoria visual.
 
-**Primeiros 20 minutos**, disponível na Convivência e na Ajuda, oferece cinco etapas manuais: adotar (0–3 min), alimentar (3–7), apresentar companhia (7–11), apresentar um objeto novo e esperar sem comandar (11–15), observar eventual privacidade e salvar (15–20). Os tempos são um roteiro, sem aceleração automática ou promessa de que um desejo específico aparecerá.
+**Primeiros 25 minutos**, disponível na Convivência e na Ajuda, oferece seis etapas manuais: adotar (0–3 min), alimentar (3–7), apresentar companhia (7–11), apresentar um objeto novo e esperar sem comandar (11–15), observar eventual privacidade (15–20) e experimentar o ateliê e quadro de desenho (20–25). Os tempos são um roteiro, sem aceleração automática ou promessa de que um desejo específico aparecerá.
 
 O **Laboratório** separado abre com os sete afetos, pontuações da última decisão, seis mudanças recentes de `cause_log` e seis trocas de `mind_log`, traduzidos. Os controles **Afeto M1 ativo** e **Memória M1 ativa** atuam apenas na seleção, inclusive no pet; não apagam o histórico, e as funções legadas permanecem independentes. A tela marca valores afetivos históricos quando a modulação está desligada. O resultado de X1 não demonstrou eliminar a diferença social desligando afeto; veja os limites em [reports/M1_mind.md](reports/M1_mind.md). Capturas novas, validação e FPS gráfico estão em [reports/M1_ui.md](reports/M1_ui.md).
 
 No M2, o Laboratório também mostra até seis memórias recentes de objetos e as categorias consolidadas: fonte **observado/interagido**, confiança, validade, novidade, familiaridade, hipótese e evidência de contato com variações físicas. Ver um objeto não ensina suas consequências. A validade da observação e o prazo da evidência são separados. **Memória M1 ativa** controla também a memória M2; **Curiosidade por objetos ativa** retira ou restaura o termo de curiosidade da escolha. O aviso explica que essas ablações alteram escolhas futuras, conservam registros históricos e persistem no save. Motivos `mind.iniciativa.*` aparecem traduzidos nas trocas de desejo. Veja [reports/M2_ui.md](reports/M2_ui.md) para evidências da UI e [reports/M2_curiosidade.md](reports/M2_curiosidade.md) para o ensaio controlado e seus limites.
+
+No M3, o **Quadro** de desenho pode ser colocado no mapa pela barra inferior ou pelo painel de Convivência (`world.place_board`), criando um cavalete físico com tela 64×64. A ferramenta **Demonstrar** abre diálogo para definir a forma de referência (**Linha**, **Círculo** ou **Quadrado**), escala (0,45 a 1,60) e translação de centro no quadro (10 a 54), com visualização imediata da guia ciano na tela de prévia. As criaturas realizam rabiscos exploratórios livres na ausência de guia e calibram traços seguindo a referência por ações primitivas reais da caneta (`move_pen`, `pen_down`, `pen_up`, `segment`), com renderização em tempo real dos segmentos e da ponta da caneta no mundo e no painel. A **Galeria de criações** preserva miniaturas dos traços vetorizados, título, dono, passo e distância de Chamfer.
+
+No **Laboratório**, a seção do ateliê exibe a curva de erro Chamfer por forma (`AtelierChart`), o histórico de tentativas com distinção honesta entre **demonstrado**, **praticado** e **aprendeu**, e o aviso explícito de limites auditados: o sistema calibra o traço seguindo os pontos da referência visível a cada passo e **ainda não copia de memória** (auditoria X4 = PARTIAL). Controles de ablação permitem desligar o aprendizado de calibração ou escolher políticas alternativas (**treinável**, **congelada**, **sem treino naive descalibrado**, **aleatória**). Todos os dados persistem no save v10. Veja [reports/M3_ui.md](reports/M3_ui.md) para evidências da UI e capturas novas.
 
 Ao abrir, escolha os nomes do jardim e do companheiro, uma semente inteira de 0 a 2147483647 e a população inicial de 1 a 100. O padrão é **Jardim de Musgo**, **Mel** e **12 organismos, com três regiões de água e personalidade ativa**. Os fundadores recebem nomes do catálogo brasileiro (Mel, Bento, Tica, Juca, Lola, Zeca, Nina, Dora, Caju, Bia, Chico e Lia); o nome escolhido para o companheiro prevalece. Essa criação usa `SimWorld.new_world`; o seletor explícito continua prevalecendo e carregar saves mantém população e nomes gravados. A semente recria condições iniciais; as intervenções do jogador mudam a trajetória. Criar um jardim substitui o mundo não salvo; **Continuar explorando** mantém o mundo aberto.
 
@@ -169,6 +173,24 @@ godot --path . -- --fps-benchmark=12 "--capture=$m2Reports/M2-fps-12.png"
 Também existem `m2-memory`, `m2-cautious`, `m2-lab`, `m2-ablation`, `m2-catalog` e `m2-tutorial`. São cenários explícitos de inspeção da cena real, seed 81102, um pet com perfil curioso, visão de 360° e reservas iniciais altas. O objeto é colocado a 24 unidades; aproximação e investigação vêm exclusivamente de `world.step()`. Para habituação e histórico aversivo, oito contatos físicos prévios são espaçados por 181 passos de relógio, com reservas restauradas antes de cada aquisição; esse preparo não representa vida livre. As capturas pausam nos estados observados, não executam avaliadores científicos nem escrevem saves pessoais.
 
 O benchmark atual apresenta **três objetos**, conserva **12 criaturas** e mede **mente só no pet** na cena de jogo a 1×. Salva JSON ao lado do PNG, com população, objetos, mentes ativas, janela, adaptador, média e p95. A medição exige modo gráfico e não demonstra eficácia comportamental.
+
+## M3: reproduzir capturas e FPS com ateliê
+
+Use um caminho absoluto para as capturas:
+
+```powershell
+$m3Reports = (Resolve-Path reports).Path.Replace('\', '/')
+godot --path . -- "--capture=$m3Reports/M3-scribble.png" --capture-state=m3-scribble --capture-minimum
+godot --path . -- "--capture=$m3Reports/M3-demo.png" --capture-state=m3-demo --capture-minimum
+godot --path . -- "--capture=$m3Reports/M3-drawing.png" --capture-state=m3-drawing --capture-minimum
+godot --path . -- "--capture=$m3Reports/M3-gallery.png" --capture-state=m3-gallery --capture-minimum
+godot --path . -- "--capture=$m3Reports/M3-lab-curve.png" --capture-state=m3-lab-curve --capture-minimum
+godot --path . -- "--capture=$m3Reports/M3-ablation.png" --capture-state=m3-ablation --capture-minimum
+godot --path . -- "--capture=$m3Reports/M3-tutorial.png" --capture-state=m3-tutorial --capture-minimum
+godot --path . -- --fps-benchmark=12 "--capture=$m3Reports/M3-fps-12.png" --capture-minimum
+```
+
+As capturas M3 usam a cena real de jogo com seed de fixture 81203, pet curioso e reservas elevadas para isolar o comportamento artístico de urgências vitais. O benchmark gráfico registra 12 criaturas, 1 quadro com desenho ativo e 3 objetos, gerando `reports/M3-fps-12.json` e `reports/M3-fps-12.png`. Evidências detalhadas, validação e auditoria dos limites em [reports/M3_ui.md](reports/M3_ui.md).
 
 ## E1: capturas e mini gráfico de quadros/s
 
