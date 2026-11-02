@@ -72,3 +72,10 @@ if git cat-file -e "$revision:reports/M4b_terminal_eval.json" 2>/dev/null; then
         reports/M4b_terminal_eval.json preregister_sha256
     python tests/experiments/m4b_terminal_verify.py "$revision"
 fi
+
+if git cat-file -e "$revision:reports/M5_convivencia_eval.json" 2>/dev/null; then
+    verify M5 ffe9e14 \
+        tests/experiments/m5_convivencia_preregistro.md tests/experiments/m5_convivencia_eval.gd \
+        reports/M5_convivencia_eval.json preregister_sha256
+    python tests/experiments/m5_convivencia_verify.py "$revision"
+fi

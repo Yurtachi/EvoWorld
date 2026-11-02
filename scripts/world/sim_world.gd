@@ -23,7 +23,7 @@ const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
-const SAVE_VERSION := 13 # Cooperative physical terminal and individual policy.
+const SAVE_VERSION := 14 # Convivencia, vinculo e reproducao voluntaria.
 const Terminal = preload("res://scripts/terminal/terminal.gd")
 const TerminalAdapter = preload("res://scripts/terminal/terminal_mundo_real.gd")
 const TerminalState = preload("res://scripts/terminal/terminal_estado.gd")
@@ -83,6 +83,10 @@ var reproduction_enabled := true
 var max_population := 150
 var min_reproduction_age := 300
 var reproduction_cooldown := 300
+var reproduction_voluntary := false
+var reproduction_min_familiarity := 0.12
+var reproduction_compatibility_threshold := 0.5
+var mind_offspring := false
 var max_age := 12000
 var mutation_rate := 0.3
 var mutation_scale := 0.025
@@ -147,6 +151,10 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	water_enabled = config.get("water_enabled", false) == true
 	personality_enabled = config.get("personality_enabled", false) == true
 	mind_all = config.get("mind_all", false) == true
+	reproduction_voluntary = config.get("reproduction_voluntary", false) == true
+	reproduction_min_familiarity = clampf(float(config.get("reproduction_min_familiarity", 0.12)), 0.0, 1.0)
+	reproduction_compatibility_threshold = clampf(float(config.get("reproduction_compatibility_threshold", 0.5)), 0.0, 1.0)
+	mind_offspring = config.get("mind_offspring", false) == true
 	for index in range(clampi(int(config.get("water_count", 0)), 0, Water.MAX_REGIONS)):
 		var radius := minf(rng.between(18.0, 48.0), minf(size.x, size.y) * 0.2)
 		place_water(_random_position(radius), radius)
@@ -228,7 +236,7 @@ func _spawn(pos: Vector2, creature_name: String, genes: Genes, initial_energy: f
 	creature.max_energy = snappedf(80.0 + genes.size * 2.0, 0.000001)
 	creature.energy = snappedf(creature.max_energy * 0.8, 0.000001) if initial_energy < 0.0 else initial_energy
 	creatures[creature.id] = creature
-	if mind_all:
+	if mind_all or mind_offspring:
 		enable_mind(creature.id)
 	genealogy.register(creature, tick, mutations)
 	if _in_step:
@@ -236,14 +244,203 @@ func _spawn(pos: Vector2, creature_name: String, genes: Genes, initial_energy: f
 	_record({"type": "spawn", "creature_id": creature.id, "name": creature.name})
 	return creature.id
 
+func can_reproduce(creature_id: int, partner_id: int = -1) -> Dictionary:
+	var res := {
+		"allowed": false,
+		"reason": "",
+		"partner_id": partner_id,
+		"consent_self": false,
+		"consent_partner": false,
+		"compatibility": 0.0
+	}
+	if not reproduction_enabled:
+		res.reason = "reproduction_disabled"
+		return res
+	if not creatures.has(creature_id):
+		res.reason = "invalid_creature"
+		return res
+	if creatures.size() >= max_population:
+		res.reason = "population_limit"
+		return res
+	if genealogy.records.size() >= Genealogy.MAX_RECORDS:
+		res.reason = "genealogy_limit"
+		return res
+	var parent: Creature = creatures[creature_id]
+	if not parent.alive:
+		res.reason = "parent_dead"
+		return res
+	if parent.age < min_reproduction_age:
+		res.reason = "parent_too_young"
+		return res
+	if parent.age >= max_age:
+		res.reason = "parent_too_old"
+		return res
+	if parent.reproduction_cooldown > 0:
+		res.reason = "parent_cooldown"
+		return res
+	if parent.energy < parent.max_energy * REPRODUCTION_ENERGY_FRACTION:
+		res.reason = "insufficient_energy"
+		return res
+
+	if not reproduction_voluntary and partner_id == -1:
+		res.allowed = true
+		res.reason = "legacy_eligible"
+		res.consent_self = true
+		res.compatibility = 1.0
+		return res
+
+	if parent.hunger > 0.55:
+		res.reason = "parent_critical_hunger"
+		return res
+	if water_enabled and parent.thirst > 0.55:
+		res.reason = "parent_critical_thirst"
+		return res
+
+	var partner: Creature = null
+	if partner_id != -1:
+		if not creatures.has(partner_id):
+			res.reason = "invalid_partner"
+			return res
+		partner = creatures[partner_id]
+	else:
+		var best_familiarity := -1.0
+		var best_cand: Creature = null
+		for other in creatures.values():
+			if other.id == parent.id or not other.alive:
+				continue
+			var dist: float = parent.pos.distance_to(other.pos)
+			if dist > parent.genome.size + other.genome.size + 24.0 or _occluded(parent.pos, other.pos):
+				continue
+			var fam := 0.0
+			if parent.personality != null:
+				var bond: Dictionary = parent.personality.bonds.get(str(other.id), {})
+				fam = float(bond.get("familiarity", 0.0))
+			if fam > best_familiarity:
+				best_familiarity = fam
+				best_cand = other
+		if best_cand == null:
+			res.reason = "no_partner_nearby"
+			return res
+		partner = best_cand
+		res.partner_id = partner.id
+
+	if partner == null or not partner.alive or partner.id == parent.id:
+		res.reason = "partner_invalid"
+		return res
+
+	if partner.age < min_reproduction_age:
+		res.reason = "partner_too_young"
+		return res
+	if partner.age >= max_age:
+		res.reason = "partner_too_old"
+		return res
+	if partner.reproduction_cooldown > 0:
+		res.reason = "partner_cooldown"
+		return res
+	if partner.energy < partner.max_energy * 0.35:
+		res.reason = "partner_low_energy"
+		return res
+	if partner.hunger > 0.55:
+		res.reason = "partner_critical_hunger"
+		return res
+	if water_enabled and partner.thirst > 0.55:
+		res.reason = "partner_critical_thirst"
+		return res
+
+	var fam_self := 0.0
+	var val_self := 0.0
+	if parent.personality != null:
+		var b_self: Dictionary = parent.personality.bonds.get(str(partner.id), {})
+		fam_self = float(b_self.get("familiarity", 0.0))
+		val_self = float(b_self.get("valence", 0.0))
+
+	var fam_part := 0.0
+	var val_part := 0.0
+	if partner.personality != null:
+		var b_part: Dictionary = partner.personality.bonds.get(str(parent.id), {})
+		fam_part = float(b_part.get("familiarity", 0.0))
+		val_part = float(b_part.get("valence", 0.0))
+
+	if fam_self < reproduction_min_familiarity:
+		res.reason = "self_unfamiliar_with_partner"
+		return res
+	if val_self < -0.2:
+		res.reason = "self_aversion_to_partner"
+		return res
+	if fam_part < reproduction_min_familiarity:
+		res.reason = "partner_unfamiliar_with_self"
+		return res
+	if val_part < -0.2:
+		res.reason = "partner_aversion_to_self"
+		return res
+
+	if parent.mind != null and parent.mind.affect_enabled:
+		var a = parent.mind.affect.values
+		if float(a.frustracao) >= 0.45:
+			res.reason = "self_affect_frustrated"
+			return res
+		if float(a.receio) >= 0.40:
+			res.reason = "self_affect_fear"
+			return res
+		if float(a.saturacao_social) >= 0.60:
+			res.reason = "self_affect_saturated"
+			return res
+	if partner.mind != null and partner.mind.affect_enabled:
+		var a = partner.mind.affect.values
+		if float(a.frustracao) >= 0.45:
+			res.reason = "partner_affect_frustrated"
+			return res
+		if float(a.receio) >= 0.40:
+			res.reason = "partner_affect_fear"
+			return res
+		if float(a.saturacao_social) >= 0.60:
+			res.reason = "partner_affect_saturated"
+			return res
+
+	var size_diff: float = absf(parent.genome.size - partner.genome.size)
+	var compat: float = clampf(1.0 - size_diff / 10.0, 0.0, 1.0)
+	res.compatibility = compat
+	if compat < reproduction_compatibility_threshold:
+		res.reason = "incompatible_genomes"
+		return res
+
+	res.allowed = true
+	res.reason = "consent_granted"
+	res.consent_self = true
+	res.consent_partner = true
+	return res
+
 ## Returns the newborn ID, or -1 without charging energy when ineligible.
-func reproduce(creature_id: int) -> int:
-	if not reproduction_enabled or not creatures.has(creature_id) or creatures.size() >= max_population or genealogy.records.size() >= Genealogy.MAX_RECORDS:
+func reproduce(creature_id: int, partner_id: int = -1) -> int:
+	if not reproduction_voluntary and partner_id == -1:
+		if not reproduction_enabled or not creatures.has(creature_id) or creatures.size() >= max_population or genealogy.records.size() >= Genealogy.MAX_RECORDS:
+			return -1
+		var parent: Creature = creatures[creature_id]
+		if not parent.alive or parent.age < min_reproduction_age or parent.age >= max_age or parent.reproduction_cooldown > 0 or parent.energy < parent.max_energy * REPRODUCTION_ENERGY_FRACTION:
+			return -1
+		var inherited: Dictionary = Inheritance.inherit(parent.genome, parent.id, rng, mutation_rate, mutation_scale)
+		var genes: Genes = inherited["genome"]
+		var child_capacity := snappedf(80.0 + genes.size * 2.0, 0.000001)
+		var transferred := snappedf(minf(parent.max_energy * OFFSPRING_ENERGY_FRACTION, child_capacity), 0.000001)
+		var position := parent.pos + Vector2.from_angle(rng.between(-PI, PI)) * (parent.genome.size + genes.size + 2.0)
+		var child_id := _spawn(position, "", genes, transferred, inherited["mutations"])
+		if child_id == -1:
+			return -1
+		parent.energy = snappedf(parent.energy - transferred, 0.000001)
+		parent.reproduction_cooldown = reproduction_cooldown
+		_record({"type": "birth", "creature_id": child_id, "parent_id": parent.id, "generation": genes.generation, "energy": transferred})
+		creatures[child_id].remember(events.back())
+		for mutation in inherited["mutations"]:
+			_record({"type": "mutation", "creature_id": child_id, "parent_id": parent.id, "gene": mutation["gene"], "delta": mutation["delta"]})
+		return child_id
+
+	var check: Dictionary = can_reproduce(creature_id, partner_id)
+	if not check.allowed:
 		return -1
 	var parent: Creature = creatures[creature_id]
-	if not parent.alive or parent.age < min_reproduction_age or parent.age >= max_age or parent.reproduction_cooldown > 0 or parent.energy < parent.max_energy * REPRODUCTION_ENERGY_FRACTION:
-		return -1
-	var inherited: Dictionary = Inheritance.inherit(parent.genome, parent.id, rng, mutation_rate, mutation_scale)
+	var partner: Creature = creatures[check.partner_id] if check.partner_id != -1 and creatures.has(check.partner_id) else null
+	var partner_pass_id: int = partner.id if partner != null else -1
+	var inherited: Dictionary = Inheritance.inherit(parent.genome, parent.id, rng, mutation_rate, mutation_scale, partner_pass_id)
 	var genes: Genes = inherited["genome"]
 	var child_capacity := snappedf(80.0 + genes.size * 2.0, 0.000001)
 	var transferred := snappedf(minf(parent.max_energy * OFFSPRING_ENERGY_FRACTION, child_capacity), 0.000001)
@@ -253,6 +450,27 @@ func reproduce(creature_id: int) -> int:
 		return -1
 	parent.energy = snappedf(parent.energy - transferred, 0.000001)
 	parent.reproduction_cooldown = reproduction_cooldown
+	if partner != null:
+		partner.reproduction_cooldown = maxi(partner.reproduction_cooldown, int(reproduction_cooldown * 0.5))
+
+	var child: Creature = creatures[child_id]
+	if child.personality != null:
+		child.personality.episodes.clear()
+		child.personality.bonds.clear()
+		child.personality.preferences.clear()
+		child.personality.conditioning.clear()
+		child.personality.habituation.clear()
+	if child.mind != null:
+		child.mind.experiences.clear()
+		child.mind.knowledge.clear()
+		child.mind.terminal.clear()
+		child.mind.mind_log.clear()
+		child.mind.objects.clear()
+		child.mind.affect.cause_log.clear()
+	if child.atelier != null:
+		child.atelier.drawings.clear()
+		child.atelier.cooldowns.clear()
+
 	_record({"type": "birth", "creature_id": child_id, "parent_id": parent.id, "generation": genes.generation, "energy": transferred})
 	creatures[child_id].remember(events.back())
 	for mutation in inherited["mutations"]:
@@ -946,14 +1164,23 @@ func to_dict() -> Dictionary:
 		for device in terminals:
 			out.terminals.append({"id": device.id, "pos": Data.pack_vector(device.pos), "books": device.books.duplicate()})
 	if not terminal_markers.is_empty(): out["terminal_markers"] = Data.restore_precision(terminal_markers)
+	if reproduction_voluntary or mind_offspring or reproduction_min_familiarity != 0.12 or reproduction_compatibility_threshold != 0.5:
+		out["reproduction_rules"] = {"voluntary": reproduction_voluntary, "min_familiarity": reproduction_min_familiarity, "compatibility_threshold": reproduction_compatibility_threshold, "mind_offspring": mind_offspring}
 	return out
 
 static func _migrate_v12(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [13, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 12 or data.has("terminals") or data.has("terminal_markers"): return {}
 	if not data.get("creatures") is Array: return {}
 	for c in data.creatures:
 		if not c is Dictionary or (c.get("mind") is Dictionary and c.mind.has("terminal")): return {}
+	var migrated := data.duplicate(true)
+	migrated.save_version = 13
+	return migrated
+
+static func _migrate_v13(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 13 or data.has("reproduction_rules"): return {}
 	var migrated := data.duplicate(true)
 	migrated.save_version = SAVE_VERSION
 	return migrated
@@ -1166,7 +1393,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, SAVE_VERSION]:
 		return null
 	if int(data.save_version) < 13:
 		if data.has("terminals") or data.has("terminal_markers"): return null
@@ -1212,6 +1439,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	if int(data["save_version"]) == 12:
 		data = _migrate_v12(data)
 		if data.is_empty(): return null
+	if int(data["save_version"]) == 13:
+		data = _migrate_v13(data)
+		if data.is_empty(): return null
 	if not data.get("terminals", []) is Array or data.get("terminals", []).size() > TERMINAL_LIMIT or not data.get("terminal_markers", []) is Array or data.get("terminal_markers", []).size() > 48: return null
 	if not Data.integer(data.get("object_catalog_version"), 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION or not data.get("objects") is Array or data.objects.size() > ObjectCatalog.LIMIT:
 		return null
@@ -1221,6 +1451,13 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	var raw_gallery: Array = data.get("gallery", [])
 	if raw_boards.size() > Atelier.BOARD_LIMIT or raw_gallery.size() > Atelier.GALLERY_LIMIT:
 		return null
+	if int(data.save_version) < 14 and data.has("reproduction_rules"): return null
+	if data.has("reproduction_rules"):
+		var rr = data["reproduction_rules"]
+		if not rr is Dictionary or rr.size() != 4: return null
+		if not rr.get("voluntary") is bool or not rr.get("mind_offspring") is bool: return null
+		if not Data.number(rr.get("min_familiarity")) or float(rr.min_familiarity) < 0.0 or float(rr.min_familiarity) > 1.0: return null
+		if not Data.number(rr.get("compatibility_threshold")) or float(rr.compatibility_threshold) < 0.0 or float(rr.compatibility_threshold) > 1.0: return null
 	if not Data.integer_text(data.get("world_seed")):
 		return null
 	if not Data.integer(data.get("tick")) or not Data.integer(data.get("next_id"), 1) or not Data.integer(data.get("pet_id"), -1):
@@ -1472,6 +1709,12 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	result.signal_log = Data.restore_precision(data["signal_log"])
 	if not result.comandos.restore(data.get("commands"), result):
 		return null
+	if data.has("reproduction_rules"):
+		var rr: Dictionary = data["reproduction_rules"]
+		result.reproduction_voluntary = bool(rr["voluntary"])
+		result.mind_offspring = bool(rr["mind_offspring"])
+		result.reproduction_min_familiarity = float(rr["min_familiarity"])
+		result.reproduction_compatibility_threshold = float(rr["compatibility_threshold"])
 	return result
 
 ## v1 had no reproductive history: reconstruct the surviving founders only.
@@ -1558,7 +1801,7 @@ static func _migrate_v6(data: Dictionary) -> Dictionary:
 
 ## Idempotent migration never activates M1 or invents an acquired experience.
 static func _migrate_v7(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [8, 9, 10, 11, 12, SAVE_VERSION]:
+	if data.get("save_version") in [8, 9, 10, 11, 12, 13, SAVE_VERSION]:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
 		return {}
@@ -1572,7 +1815,7 @@ static func _migrate_v7(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v8(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [9, 10, 11, 12, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [9, 10, 11, 12, 13, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 8 or not data.get("creatures") is Array: return {}
 	# Legacy fixtures may retain empty modern metadata; never discard acquired data.
 	if data.has("objects") and (not data.objects is Array or not data.objects.is_empty()): return {}
@@ -1587,7 +1830,7 @@ static func _migrate_v8(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v9(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [10, 11, 12, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [10, 11, 12, 13, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 9 or not data.get("creatures") is Array: return {}
 	if data.has("boards") and (not data.boards is Array or not data.boards.is_empty()): return {}
 	if data.has("gallery") and (not data.gallery is Array or not data.gallery.is_empty()): return {}
@@ -1598,7 +1841,7 @@ static func _migrate_v9(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v10(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [11, 12, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [11, 12, 13, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 10 or not data.get("creatures") is Array: return {}
 	var migrated := data.duplicate(true)
 	for c in migrated.creatures:
@@ -1916,17 +2159,35 @@ func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest
 			creature.last_action = "rest"
 			return false
 		"buscar_companhia", "buscar_privacidade":
+			var social_dec: Dictionary = Social.decide(self, creature, sensors) if creature.personality != null else {}
+			if not social_dec.is_empty():
+				if goal == "buscar_companhia" and social_dec.action in ["social_follow", "social_approach", "social_share"]:
+					return _social_action(creature, sensors, social_dec)
+				elif goal == "buscar_privacidade" and social_dec.action in ["social_avoid", "social_compete"]:
+					return _social_action(creature, sensors, social_dec)
 			var nearest: Dictionary = {}
-			var best := INF
+			var best := -INF if goal == "buscar_companhia" else INF
 			for row in sensors.get("creatures", []):
-				var d: float = creature.pos.distance_to(row.pos)
-				if d < best:
-					best = d
-					nearest = row
+				var other: Creature = creatures.get(int(row.id))
+				if other == null or not other.alive: continue
+				var d: float = creature.pos.distance_to(other.pos)
+				var bond: Dictionary = creature.personality.bonds.get(str(other.id), {}) if creature.personality != null else {}
+				var fam: float = float(bond.get("familiarity", 0.0))
+				var val: float = float(bond.get("valence", 0.0))
+				if goal == "buscar_companhia":
+					var score: float = (1.0 + val * 0.5 + fam * 0.5) / maxf(1.0, d)
+					if score > best:
+						best = score
+						nearest = row
+				else:
+					var threat: float = d / (1.0 + maxf(0.0, -val) * 0.5)
+					if threat < best:
+						best = threat
+						nearest = row
 			if not nearest.is_empty():
 				var other: Creature = creatures[int(nearest.id)]
 				if goal == "buscar_companhia":
-					if best <= creature.genome.size + other.genome.size + 8.0:
+					if creature.pos.distance_to(other.pos) <= creature.genome.size + other.genome.size + 8.0:
 						creature.last_action = "social_contact"
 						return false
 					creature.heading = (other.pos - creature.pos).angle()
@@ -1943,7 +2204,7 @@ func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest
 	return _move(creature, sensors.obstacles)
 
 static func _migrate_v11(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [12, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [12, 13, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 11 or not data.get("creatures") is Array: return {}
 	if data.has("library"): return {}
 	for c in data.creatures:

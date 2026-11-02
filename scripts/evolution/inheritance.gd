@@ -1,11 +1,11 @@
 extends RefCounted
-## Asexual inheritance. Mutation parameters are fractions of each gene's range.
+## Asexual/voluntary inheritance. Mutation parameters are fractions of each gene's range.
 const Genes = preload("res://scripts/creature/genome.gd")
 
-static func inherit(parent: Genes, parent_id: int, rng, rate: float, scale: float) -> Dictionary:
+static func inherit(parent: Genes, parent_id: int, rng, rate: float, scale: float, partner_id: int = -1) -> Dictionary:
 	var child := Genes.from_dict(parent.to_dict())
 	child.id = 0
-	child.parents = [parent_id]
+	child.parents = [parent_id] if partner_id <= 0 else [parent_id, partner_id]
 	child.generation = parent.generation + 1
 	var mutations: Array = []
 	for gene in Genes.BOUNDS:
