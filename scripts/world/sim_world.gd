@@ -1397,7 +1397,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		result.objects.append({"id": int(row.id), "pos": pos, "tipo": row.tipo})
 	if data.has("library"):
 		var lib = data.library
-		if not lib is Dictionary or lib.size() != 2 or lib.get("version") != Books.VERSION or not Data.integer(lib.get("version"), 1) or not lib.get("books") is Array or lib.books.size() > Books.LIMIT: return null
+		if not lib is Dictionary or lib.size() != 2 or not Data.integer(lib.get("version"), 1) or int(lib.get("version")) != Books.VERSION or not lib.get("books") is Array or lib.books.size() > Books.LIMIT: return null
 		for b in lib.books:
 			if not b is Dictionary or b.size() != 3 or not Data.integer(b.get("id"), 1) or used_ids.has(int(b.id)) or not Books.BOOKS.has(b.get("book_id", "")) or not Data.vector(b.get("pos")): return null
 			var pos := Data.unpack_vector(b.pos)
