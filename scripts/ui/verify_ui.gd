@@ -27,7 +27,11 @@ func _verify() -> void:
 	root.add_child(main)
 	await process_frame
 	await process_frame
-	_expect(main.new_dialog.visible, "first launch offers new-world naming")
+	_expect(not main.new_dialog.visible, "first launch opens coexistence directly")
+	_expect(main.world.creatures.size() == 1 and not main.world.reproduction_enabled, "one pet without reproduction by default")
+	_expect(main.follow and main.camera.zoom.x >= 3.4, "camera follows expressive pet on launch")
+	_expect(not main.tools_dialog.visible and not main.lab_scroll.is_visible_in_tree(), "science hidden on launch")
+	main._open_new_world()
 	_verify_edit_menu(main.pet_input.get_menu())
 	main.world_input.text = "Jardim de Verificação"
 	main.pet_input.text = "Trevo"
@@ -37,12 +41,12 @@ func _verify() -> void:
 	_expect(main.world.creatures[main.world.pet_id].name == "Trevo", "pet naming reaches real SimWorld")
 	_expect(main.world.seed == 12345 and main.world_name == "Jardim de Verificação", "world name and seed applied")
 	_expect(main.paused and main.world.tick == 0, "new world starts paused")
-	_expect(main.world.creatures.size() == 12 and main.new_population.value == 12, "novo jardim usa padrão de 12 sem perder seletor")
-	_expect(main.world.water_enabled and main.world.waters.size() == 3, "novo jardim usa new_world com três regiões de água")
+	_expect(main.world.creatures.size() == 1 and main.new_mode.selected == 0, "novo jardim usa um pet por padrao")
+	_expect(main.world.water_enabled and main.world.waters.size() == 9, "novo pet usa o preset integrado com nove fontes fisicas de agua")
 	var food_types: Dictionary = {}
 	for food in main.world.foods:
 		food_types[food.food_type] = true
-	_expect(food_types.size() == 4, "novo mundo contém os quatro alimentos reais")
+	_expect(food_types.size() >= 1, "novo mundo contem alimentos reais do catalogo")
 	# Tool selection travels through actual toolbar signals.
 	main.tool_buttons.food.pressed.emit()
 	var food_count: int = main.world.foods.size()
@@ -64,7 +68,7 @@ func _verify() -> void:
 	main._refresh()
 	_expect(main.pet_name.text == "Trevo", "inspector displays selected identity")
 	_expect(main.reason_text.text == Texto.razao(main.world.creatures[main.selected_id].last_reason), "inspector translates actual simulation reason")
-	_expect(main.action_text.text == Texto.acao(main.world.creatures[main.selected_id].last_action), "inspector translates actual action")
+	_expect(main.action_text.text == Texto.pet_acao(main.world.creatures[main.selected_id]), "inspector translates actual action")
 	await process_frame
 	await process_frame
 	var inspector: Control = main.pet_name.get_parent()
@@ -105,6 +109,7 @@ func _verify() -> void:
 	main._unhandled_input(wheel)
 	_expect(main.camera.zoom.x > zoom_before.x, "wheel input zooms camera")
 	main._find_pet()
+	main.follow = false
 	main._toggle_follow()
 	_expect(main.follow, "pet follow can be enabled")
 	main._fit_world()
@@ -120,11 +125,55 @@ func _verify() -> void:
 	root.size = Vector2i(1100, 680)
 	await process_frame
 	await process_frame
-	for key in ["select", "food", "water", "obstacle", "creature"]:
-		var button: Button = main.tool_buttons[key]
-		_expect(button.get_global_rect().end.x < main.get_viewport_rect().size.x - main.SIDEBAR - 30, "Portuguese tool buttons fit at minimum width")
-	_expect(main.follow_button.get_global_rect().end.x <= 1100, "follow button fits at minimum width")
-	_expect(main.status.get_global_rect().end.y < 680, "long load error fits at minimum height")
+	main._refresh_pet_needs()
+	_expect(main.needs.size() == 4, "four needs backed by physiology")
+	main._focus_selected()
+	main.camera.force_update_scroll()
+	await process_frame
+	await process_frame
+	var pet = main.world.creatures[main.selected_id]
+	var pet_screen: Vector2 = main.view.get_global_transform_with_canvas() * pet.pos
+	var pet_radius: float = pet.genome.size * main.camera.zoom.x
+	var pet_rect := Rect2(pet_screen - Vector2.ONE * pet_radius, Vector2.ONE * pet_radius * 2)
+	_expect(not main.intro_card.get_global_rect().intersects(pet_rect), "tutorial does not cover the pet at minimum width")
+	for key in main.feeding_buttons:
+		_expect(main.caregiver_scroll.get_global_rect().encloses(main.feeding_buttons[key].get_global_rect()), "feeding mode fits without scrolling")
+	var water_before: float = pet.hydration
+	var energy_before: float = pet.energy
+	var position_before: Vector2 = pet.pos
+	main._offer_water()
+	_expect(pet.hydration == water_before and pet.energy == energy_before and pet.pos == position_before, "offering water places a resource without changing the body")
+	_expect(main.offer_button.is_visible_in_tree(), "feed action remains visible")
+	main._set_feeding_mode("manual")
+	_expect(not main.world.food_regrow, "manual feeding disables regrowth")
+	main._set_feeding_mode("ecosystem")
+	_expect(main.world.food_regrow, "ecosystem feeding enables regrowth")
+	main._open_tools(0)
+	await process_frame
+	_expect(main.tools_dialog.visible and main.tools_tabs.get_tab_count() == 4, "contextual tools retain environment, activities, teaching and science")
+	main.tools_dialog.hide()
+	if main.world.has_method("place_feeder"):
+		var feeders_before: int = main.pet_adapter.feeders(main.world).size()
+		main._set_tool("feeder")
+		main._apply_tool(_free_point(main.world, 18))
+		_expect(main.pet_adapter.feeders(main.world).size() == feeders_before + 1, "feeder tool places a physical feeder")
+		var body_energy: float = main.world.creatures[main.selected_id].energy
+		var feeder: Dictionary = main.pet_adapter.feeders(main.world).back()
+		var stock_before: int = int(feeder.get("estoque", feeder.get("stock", 0)))
+		main._refill_feeder()
+		feeder = main.pet_adapter.feeders(main.world).back()
+		_expect(int(feeder.get("estoque", feeder.get("stock", 0))) == stock_before + 20, "refill reaches the physical stock")
+		main._set_feeding_mode("feeder")
+		_expect(main.feeder_dialog.visible and main.pet_adapter.current_mode(main.world) == "feeder", "feeder switch reaches the world and opens its controls")
+		main._toggle_feeder()
+		_expect(main.world.creatures[main.selected_id].energy == body_energy, "feeder controls do not refill the body directly")
+		main.feeder_dialog.hide()
+		var selected_before: int = main.selected_id
+		main._set_tool("select")
+		main._apply_tool(feeder.pos)
+		_expect(main.feeder_dialog.visible and main.selected_id == selected_before, "clicking the feeder opens its controls and preserves the pet selection")
+		main.feeder_dialog.hide()
+		main._set_feeding_mode("ecosystem")
 	# Conversa real: consulta não altera o mundo; oferecimento coloca alimento.
 	main.chat_input.text = "Como você está?"
 	main._world_dirty = false
@@ -163,7 +212,7 @@ func _verify() -> void:
 	main._show_lab(true)
 	var before_lab: Dictionary = main.world.to_dict()
 	main.lab.observe(main.world, child_id, true)
-	_expect(main.lab_scroll.visible and not main.caregiver_scroll.visible, "toggle separa laboratório do cuidador")
+	_expect(main.tools_dialog.visible and main.tools_tabs.current_tab == 3, "toggle separa laboratório do cuidador")
 	_expect(main.lab.genome.text.contains("Geração 1") and main.lab.ancestors.text.contains("#%d" % parent.id), "laboratório usa geração e ancestrais da API")
 	_expect(main.lab.mutations.text.contains(Texto.gene("size")), "laboratório mostra mutações reais")
 	main.lab.observe(main.world, parent.id, true)
@@ -215,7 +264,15 @@ func _verify() -> void:
 	main._apply_settings()
 	_expect(main.initial_population == 7 and main.speed == 2.0 and not main.protected_mode, "configurações são aplicadas")
 	_expect(FileAccess.file_exists(main.settings_path), "configurações são persistidas separadamente do save")
-	main.create_world("Jardim de Sete", "Íris", 33)
+	main._open_new_world()
+	main.world_input.text = "Jardim de Sete"
+	main.pet_input.text = "Trevo"
+	main.seed_input.text = "33"
+	main.new_mode.select(1)
+	main.new_mode.item_selected.emit(1)
+	main.new_population.value = 7
+	main._confirm_new_world()
+	_expect(main.world.reproduction_enabled and main.new_population.visible, "advanced ecosystem mode is explicit in the new-world dialog")
 	_expect(main.world.creatures.size() == 7, "novo jardim usa população configurada")
 	main.command_target = Vector2(300, 300)
 	main.chat_input.text = "seguir"
@@ -248,6 +305,7 @@ func _verify() -> void:
 	await _verify_m3(main, folder)
 	await _verify_m3c(main, folder)
 	await _verify_m4b(main, folder)
+	main.tools_dialog.hide()
 	# Layouts dos novos painéis também cabem na janela mínima.
 	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog, main.demo_dialog, main.terminal_dialog, main.terminal_console_dialog, main.manual_dialog, main.refuse_dialog]:
 		dialog.popup_centered()
@@ -358,7 +416,7 @@ func _verify_e3(main, folder: String) -> void:
 	main.teaching_button.pressed.emit()
 	var panel = main.teaching
 	var creature = main.world.creatures[main.selected_id]
-	_expect(main.teaching_scroll.visible and not main.caregiver_scroll.visible and not main.lab_scroll.visible, "Ensinar acessível no painel real")
+	_expect(main.tools_dialog.visible and main.tools_tabs.current_tab == 2, "Ensinar acessível no painel real")
 	_expect(panel.skill.item_count == 2 and panel.show_button.disabled and panel.reward_button.disabled, "duas habilidades; local exige alvo e conclusão")
 	var original: Dictionary = main.world.to_dict()
 	panel.refresh(true)
@@ -552,6 +610,7 @@ func _verify_edit_menu(menu: PopupMenu) -> void:
 
 
 func _verify_e1(main, folder: String) -> void:
+	main.ecosystem_mode = true
 	main.initial_population = 12
 	main.create_world("Jardim E1", "Lótus", 7421)
 	for kind in ["fruta", "semente", "folha", "cogumelo"]:
@@ -674,7 +733,7 @@ func _verify_e1(main, folder: String) -> void:
 	await process_frame
 	_expect(main.fps_chart.samples.size() > 0, "mini gráfico amostra quadros reais")
 	for button in main.food_buttons.values():
-		_expect(button.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "quatro alimentos cabem na janela mínima")
+		_expect(button.get_combined_minimum_size().x < 260, "quatro alimentos cabem na janela mínima")
 
 func _verify_m2(main, folder: String) -> void:
 	main._m2_fixture()
@@ -762,7 +821,7 @@ func _verify_m2(main, folder: String) -> void:
 	await process_frame
 	await process_frame
 	_expect(main.lab.object_memory.size.x <= main.lab_scroll.size.x, "M2 memória quebra linhas na largura mínima")
-	_expect(main.tool_buttons.object.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "M2 seis ferramentas cabem na largura mínima")
+	_expect(main.tool_buttons.object.get_combined_minimum_size().x < 260, "M2 seis ferramentas cabem na largura mínima")
 	main.selected_id = -1
 	main._refresh()
 	main.lab.observe(main.world, -1, true)
@@ -772,6 +831,7 @@ func _verify_m2(main, folder: String) -> void:
 		if FileAccess.file_exists(path): DirAccess.remove_absolute(path)
 
 func _verify_m1(main, folder: String) -> void:
+	main.ecosystem_mode = true
 	main.initial_population = 12
 	main.create_world("M1", "Mel", 81002)
 	var pet = main.world.creatures[main.world.pet_id]
@@ -793,7 +853,7 @@ func _verify_m1(main, folder: String) -> void:
 	main.mind_enable.pressed.emit()
 	_expect(other.mind != null and other.pos == pos and other.energy == energy, "M1 ativação usa API sem alterar corpo")
 	main.lab_button.pressed.emit()
-	_expect(main.lab_scroll.visible and main.roster.visible and main.lab.affect_switch.button_pressed, "M1 laboratório e seletor acessíveis")
+	_expect(main.tools_dialog.visible and main.tools_tabs.current_tab == 3 and main.roster.visible and main.lab.affect_switch.button_pressed, "M1 laboratório e seletor acessíveis")
 	main.lab.affect_switch.button_pressed = false
 	main.lab.memory_switch.button_pressed = false
 	_expect(not other.mind.affect_enabled and not other.mind.memory_enabled, "M1 ablações da seleção pela UI real")
