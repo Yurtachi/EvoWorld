@@ -246,6 +246,7 @@ func _verify() -> void:
 	await _verify_m1(main, folder)
 	await _verify_m2(main, folder)
 	await _verify_m3(main, folder)
+	await _verify_m3c(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
 	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog, main.demo_dialog]:
 		dialog.popup_centered()
@@ -857,6 +858,87 @@ func _verify_m1(main, folder: String) -> void:
 		if FileAccess.file_exists(path): DirAccess.remove_absolute(path)
 
 
+func _verify_m3c(main, folder: String) -> void:
+	main._m3c_fixture()
+	var c = main.world.creatures[main.selected_id]
+	main.tool_buttons.book.pressed.emit()
+	_expect(main.book_dialog.visible and main.book_choice.item_count == 3, "M3c catálogo acessível pelo botão Livro")
+	var tick: int = main.world.tick
+	var space := InputEventKey.new()
+	space.pressed = true
+	space.keycode = KEY_SPACE
+	main._input(space)
+	main._process(0.2)
+	_expect(main.paused and main.world.tick == tick, "M3c catálogo suspende atalhos")
+	main.book_choice.select(2)
+	main._confirm_book()
+	main._apply_tool(c.pos + Vector2(42, 0))
+	_expect(main.world.library.books.size() == 1 and main.world.library.books[0].book_id == "guia_enganoso", "M3c coloca o livro escolhido pela API real")
+	var approached := false
+	var reading := false
+	for i in range(90):
+		main.world.step()
+		main._refresh()
+		approached = approached or c.last_action == "seek_book" and main.reading_text.text.contains("aproximando")
+		reading = reading or c.last_action == "read_book" and main.reading_text.text.contains("página 1/1")
+		if not c.knowledge_snapshot().get("facts", []).is_empty(): break
+	_expect(approached and reading, "M3c aproximação e página vêm de passos reais")
+	main._open_knowledge()
+	_expect(main.knowledge_text.text.contains("FONTE: livro") and main.knowledge_text.text.contains("CONFIANÇA") and main.knowledge_text.text.contains("validade até") and main.knowledge_text.text.contains("HIPÓTESE"), "M3c fato do livro tem proveniência, confiança, validade e estatuto")
+	main.knowledge_dialog.hide()
+	_expect(not main.knowledge_text.text.contains("perdeu credibilidade"), "M3c arredondamento de 0,80 não inventa contradição")
+	var object_id: int = main.world.place_object(c.pos + Vector2(8, 0), "capsula_aversiva")
+	_expect(main.world.interact_object(c, object_id), "M3c contradição usa contato real")
+	main._open_knowledge()
+	_expect(main.knowledge_text.text.contains("perdeu credibilidade") and main.knowledge_text.text.contains("0,35") and main.knowledge_text.text.contains("EVIDÊNCIA de contato"), "M3c fonte corrigida sem apagar proveniência")
+	main.knowledge_dialog.hide()
+	main._show_lab(true)
+	main.lab.knowledge_open.button_pressed = true
+	main.lab.memory_switch.button_pressed = false
+	_expect(not c.mind.memory_enabled and main.lab.knowledge.text.contains("Memória em ablação"), "M3c ablação marca registros como históricos")
+	main.store = Store.new(folder.path_join("m3c"))
+	main._save()
+	main._load()
+	_expect(not main.world.creatures[main.selected_id].mind.memory_enabled and main.world.library.books.size() == 1, "M3c livros e ablação persistem pela UI")
+	main._m3c_fixture()
+	c = main.world.creatures[main.selected_id]
+	object_id = main.world.place_object(c.pos + Vector2(8, 0), "capsula_aversiva")
+	c.mind.decide(c, main.world.tick, main.world.sense(c))
+	main._refresh()
+	_expect(main.question_card.visible and main.question_text.text.contains("viu um objeto desconhecido"), "M3c lacuna mostra pergunta contextual discreta")
+	await process_frame
+	await process_frame
+	for button in main.question_buttons.values():
+		_expect(button.get_global_rect().end.x <= 1100 and button.get_global_rect().end.y <= 650, "M3c todas as opções cabem na área inicial")
+	main.question_buttons.seguro.pressed.emit()
+	_expect(main.knowledge_dialog.visible and main.knowledge_text.text.contains("O cuidador disse:") and main.knowledge_text.text.contains("FONTE: cuidador") and main.knowledge_text.text.contains("HIPÓTESE"), "M3c resposta fechada vira afirmação atribuída")
+	_expect(main.world.pending_questions.is_empty() and not main.question_card.visible, "M3c pergunta respondida encerra")
+	main.knowledge_dialog.hide()
+	main.world.demonstrar_simbolo(c.id, "anel", object_id, true)
+	main.world.demonstrar_simbolo(c.id, "anel", object_id, true)
+	main._open_knowledge()
+	_expect(main.knowledge_text.text.contains("anel → cápsula") and main.knowledge_text.text.contains("onda → associação desconhecida") and main.knowledge_text.text.contains("Não demonstram escrita"), "M3c glifos conhecidos e desconhecidos sem alegar escrita")
+	await process_frame
+	await process_frame
+	_expect(main.knowledge_dialog.size.x <= 1100 and main.knowledge_dialog.size.y < 680 and main.knowledge_text.size.x <= 610, "M3c Conhecimento cabe e quebra texto na janela mínima")
+	_expect(main.tool_buttons.book.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "M3c Livro cabe no rodapé mínimo")
+	main.knowledge_dialog.hide()
+	main._open_library_tutorial()
+	_expect(main.tutorial_text.text.contains("7/7") and main.tutorial_text.text.contains("Não sei / ignorar"), "M3c roteiro cobre livro e dúvida")
+	main.tutorial_dialog.hide()
+	main._m3c_fixture()
+	c = main.world.creatures[main.selected_id]
+	main.world.place_object(c.pos + Vector2(8, 0), "pedra")
+	c.mind.decide(c, main.world.tick, main.world.sense(c))
+	main._refresh()
+	main.question_buttons.silencio.pressed.emit()
+	_expect(main.world.pending_questions.is_empty() and c.knowledge_snapshot().get("facts", []).is_empty(), "M3c ignorar encerra sem fato")
+	main.selected_id = -1
+	main._refresh()
+	main._open_knowledge()
+	_expect(main.reading_text.text.is_empty() and not main.knowledge_text.text.contains("O cuidador disse"), "M3c troca de seleção limpa conhecimento")
+	main.knowledge_dialog.hide()
+
 func _verify_m3(main, folder: String) -> void:
 	main._m3_fixture()
 	var creature = main.world.creatures[main.selected_id]
@@ -922,7 +1004,7 @@ func _verify_m3(main, folder: String) -> void:
 	await process_frame
 	_expect(main.world.to_dict() == saved_m3 and main.gallery_list.get_child_count() >= 1, "M3b save/load v11 preserva quadros, galeria, ateliê e ablações")
 	main._open_atelier_tutorial()
-	_expect(main.tutorial_dialog.visible and main.tutorial_step == 5 and main.tutorial_text.text.contains("6/6") and main.tutorial_text.text.contains("competência é experimental"), "M3b roteiro do ateliê acessível e honesto")
+	_expect(main.tutorial_dialog.visible and main.tutorial_step == 5 and main.tutorial_text.text.contains("6/7") and main.tutorial_text.text.contains("competência é experimental"), "M3b roteiro do ateliê acessível e honesto")
 	main.tutorial_dialog.hide()
 	await process_frame
 	await process_frame

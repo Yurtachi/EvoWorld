@@ -71,6 +71,8 @@ func _draw() -> void:
 		_draw_object(ObjectCatalog.appearance(row))
 	for board in world.boards:
 		_draw_board(board)
+	for book in world.library.books:
+		_draw_book(book)
 	for creature in world.creatures.values():
 		if creature.id == selected_id and show_sensors:
 			_sensor(creature)
@@ -110,6 +112,24 @@ func _draw() -> void:
 		draw_arc(pointer, radius, 0, TAU, 40, Color("f1dfab"), 1.5, true)
 		if tool in ["board", "demo"]:
 			_draw_board_preview(pointer)
+
+func _draw_book(book: Dictionary) -> void:
+	var pos: Vector2 = book.pos
+	draw_rect(Rect2(pos - Vector2(12, 8) + Vector2(2, 3), Vector2(24, 16)), Color("17372b"))
+	draw_rect(Rect2(pos - Vector2(12, 8), Vector2(24, 16)), Color("6b4534"))
+	draw_rect(Rect2(pos - Vector2(10, 7), Vector2(20, 13)), Color("fff0c7"))
+	draw_line(pos + Vector2(0, -7), pos + Vector2(0, 6), Color("9c7653"), 1.4, true)
+	for y in [-3, 0, 3]:
+		draw_line(pos + Vector2(-8, y), pos + Vector2(-3, y), Color("9c7653"), 1, true)
+		draw_line(pos + Vector2(3, y), pos + Vector2(8, y), Color("9c7653"), 1, true)
+	var zoom := maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	if zoom >= 0.65:
+		var text := Texto.texto("m3c_book_tag", [book.id])
+		var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		draw_set_transform(pos + Vector2(-width / 2 / zoom, -12), 0, Vector2.ONE / zoom)
+		draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color("17372b"))
+		draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("fff2d1"))
+		draw_set_transform(Vector2.ZERO)
 
 func _water(pos: Vector2, radius: float) -> void:
 	draw_circle(pos, radius + 3, Color("aecfc2"))

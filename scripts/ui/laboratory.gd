@@ -2,6 +2,7 @@ extends VBoxContainer
 signal intervention
 ## Consultas somente de leitura; emissão/ativação são intervenções explícitas.
 const Texto = preload("res://scripts/core/textos.gd")
+const KnowledgePresenter = preload("res://scripts/ui/knowledge_presenter.gd")
 const Genes = preload("res://scripts/creature/genome.gd")
 const Chart = preload("res://scripts/ui/population_chart.gd")
 const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
@@ -33,6 +34,8 @@ var _world
 var _last_tick := -1
 var _last_selection := -2
 var mind_summary: Label
+var knowledge: Label
+var knowledge_open: Button
 var mind_values: Label
 var mind_scores: Label
 var mind_causes: Label
@@ -52,6 +55,16 @@ var atelier_attempts: Label
 
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_heading("m3c_lab")
+	_text(Texto.texto("m3c_x6"))
+	_text(Texto.texto("m3c_ablation"))
+	knowledge_open = Button.new()
+	knowledge_open.text = Texto.texto("m3c_open")
+	knowledge_open.toggle_mode = true
+	add_child(knowledge_open)
+	knowledge = _text("")
+	knowledge.hide()
+	knowledge_open.toggled.connect(func(enabled): knowledge.visible = enabled)
 	_heading("m1_lab")
 	_text(Texto.texto("m1_note"))
 	mind_summary = _text("")
@@ -296,6 +309,7 @@ func _ablate(enabled: bool, affect: bool) -> void:
 	observe(_world, _last_selection, true)
 
 func _observe_mind(creature) -> void:
+	knowledge.text = KnowledgePresenter.describe(creature, _world.tick)
 	var active: bool = creature != null and creature.mind != null
 	for button in [affect_switch, memory_switch, curiosity_switch]:
 		button.disabled = not active

@@ -2,6 +2,66 @@ class_name Textos
 extends RefCounted
 ## Catálogo da apresentação. Identificadores e dados salvos continuam intactos.
 
+const M3C_UI := {
+	"tool_book": "Livro", "place_book": "livro",
+	"m3c_catalog": "Biblioteca · catálogo offline", "m3c_place": "Escolher e colocar no jardim",
+	"book_guia_capsulas": "Guia de cautela com cápsulas",
+	"book_guia_pedras": "Guia de pedras",
+	"book_guia_enganoso": "Guia enganoso de cápsulas",
+	"m3c_catalog_note": "Escolha um livro e clique perto da criatura. Ela pode aproximar-se e ler por iniciativa; curiosidade, percepção e necessidades influenciam a escolha. O catálogo é fixo e offline; não interpreta arquivos ou prosa livre.",
+	"m3c_catalog_guia_capsulas": "2 páginas: recomenda cautela com cápsulas e descreve pedras como neutras.",
+	"m3c_catalog_guia_pedras": "1 página: descreve pedras como neutras.",
+	"m3c_catalog_guia_enganoso": "1 página: recomenda cápsulas como seguras. Essa afirmação pode ser contradita por contato real; a aparência não revela a variante.",
+	"m3c_placed": "Livro #%d colocado: %s. A leitura depende de iniciativa e alcance físico.",
+	"m3c_blocked": "Não foi possível colocar o livro nesta posição ou o limite foi atingido.",
+	"m3c_title": "Conhecimento", "m3c_open": "Conhecimento · fatos e fontes",
+	"m3c_scope": "Registros da seleção, sem afirmar compreensão. Livro e cuidador são fontes atribuídas; repetir uma afirmação não a torna evidência.",
+	"m3c_facts": "FATOS REGISTRADOS · conteúdo e proveniência",
+	"m3c_no_facts": "Nenhum fato registrado. Observar um livro não significa registrar sua página.",
+	"m3c_fact": "#%d · %s\nFONTE: %s · CONFIANÇA do fato: %s\nRegistro: passo %d · validade até %d (%s)\n%s",
+	"m3c_source_observado": "observado", "m3c_source_interagido": "interagido",
+	"m3c_source_cuidador": "cuidador", "m3c_source_inferido": "inferido",
+	"m3c_book_source": "livro: %s · página %d",
+	"m3c_statement": "%s → %s (valor operacional %s)",
+	"m3c_category_capsula": "cápsula lisa", "m3c_category_pedra": "pedra rugosa", "m3c_category_quadro": "quadro",
+	"m3c_value_avoid": "evitar", "m3c_value_safe": "favorável/seguro segundo a fonte", "m3c_value_neutral": "neutro segundo o registro",
+	"m3c_evidence": "EVIDÊNCIA de contato físico; valor derivado das consequências observadas.",
+	"m3c_hypothesis": "HIPÓTESE / afirmação atribuída; sem confirmação física deste conteúdo.",
+	"m3c_sources": "CREDIBILIDADE DAS FONTES · corrigida pela experiência",
+	"m3c_trust": "%s · confiança da fonte: %s",
+	"m3c_no_sources": "Nenhuma fonte registrada.",
+	"m3c_book_distrusted": "Este livro perdeu credibilidade após experiência contraditória. A fonte original permanece atribuída.",
+	"m3c_caregiver_said": "O cuidador disse: %s",
+	"m3c_memory_off": "Memória em ablação: registros históricos preservados; aquisição e uso do conhecimento estão desativados nesta política.",
+	"m3c_approaching": "Parece interessada em ler · aproximando-se de um livro percebido.",
+	"m3c_read_idle": "Sem leitura registrada. Um livro próximo pode despertar iniciativa.",
+	"m3c_read_page": "página %d/%d · progresso %d/8 passos",
+	"m3c_read_done": "%d página(s) concluída(s)",
+	"m3c_last_reading": "Última leitura registrada",
+	"m3c_book_tag": "Livro #%d",
+	"m3c_reading": "%s · %s\nLeitura registrada: %s\nFatos deste título ainda na memória: %d (consulte Conhecimento).",
+	"m3c_question": "%s pergunta: “O que é isso?”\nContexto: viu um objeto desconhecido (#%d · %s) enquanto investigava, no passo %d.",
+	"m3c_question_note": "Resposta fechada e atribuída ao cuidador; a criatura pode recusá-la. A pergunta pode expirar; o mundo continua conforme a reprodução escolhida.",
+	"m3c_answer_evitar": "Evite", "m3c_answer_seguro": "É seguro", "m3c_answer_neutro": "É neutro", "m3c_answer_silencio": "Não sei / ignorar",
+	"m3c_answer_ok": "Resposta registrada como fonte cuidador, sujeita à experiência; consulte Conhecimento da criatura.",
+	"m3c_answer_no": "A resposta não foi registrada (recusa ou pergunta encerrada).",
+	"m3c_answer_ignore": "Pergunta encerrada sem acrescentar fato.",
+	"m3c_symbols": "GLIFOS · associações limitadas",
+	"m3c_glyph_anel": "○ anel", "m3c_glyph_barra": "| barra", "m3c_glyph_onda": "~ onda",
+	"m3c_symbol": "%s → %s · confiança: %s", "m3c_unknown": "associação desconhecida ou insuficiente",
+	"m3c_symbols_note": "São associações de IDs discretos com categorias, com limiar e validade. Não demonstram escrita, leitura de imagens nem linguagem geral.",
+	"m3c_lab": "BIBLIOTECA · evidências e limites",
+	"m3c_x6": "X6 restrito (24 seeds pareadas): livro cauteloso evitou contato aversivo em 24/24; sem livro, 0/24. Livro enganoso sofreu contato em 24/24 e a confiança caiu de 0,80 para 0,35; uma segunda cápsula foi evitada. Sem memória, 0/24 evitaram. Houve 24 perguntas por lacuna e zero nos controles conhecido/sem lacuna. Isso sustenta este cenário e associações fixas, sem provar compreensão, linguagem ou generalização ampla. Resultado existente; abrir esta tela não executa o experimento.",
+	"m3c_ablation": "O controle Memória ativa abaixo desliga aquisição e uso de fatos, além das memórias de objetos. Preserva o histórico; não é apagar nem reensinar. Confiança do fato e confiança da fonte são medidas separadas.",
+	"m3c_tutorial_btn": "Roteiro · livro e dúvida",
+	"m3c_tutorial": "25–30 min · Apresentar um livro e uma dúvida\nUse Livro, escolha Guia de pedras e clique perto da criatura. Inicie em 1× e espere sem comandar: ela pode aproximar-se e ler oito passos por página. Abra Conhecimento e confira a fonte livro, confiança e validade; o registro não prova compreensão.\nDepois apresente um objeto desconhecido antes de haver fato sobre sua categoria (por exemplo, cápsula após o Guia de pedras). Quando houver investigação e lacuna, pode surgir uma pergunta discreta. Responda por opção ou escolha Não sei / ignorar. Veja “O cuidador disse” como hipótese atribuída. Silêncio e ausência de pergunta também são possíveis. No Laboratório, compare fontes e a ablação de memória; glifos não são escrita.",
+	"m3c_banner": "Inspeção M3c · cenário preparado, APIs e contato reais.",
+	"m3c_fps": "%d criaturas · %s quadros/s · %d livro(s) · %d mente(s) ativa(s)",
+	"action_seek_book": "Aproximando-se do livro", "action_read_book": "Lendo página ao alcance",
+	"m1_goal_ler": "Parece interessada em ler",
+	"m1_reason_iniciativa.ler": "Livro percebido e curiosidade ou ociosidade favorecem a leitura."
+}
+
 const CATALOGO := {
 	"caregiver": "Convivência",
 	"laboratory": "Laboratório",
@@ -343,6 +403,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if M3C_UI.has(codigo): return M3C_UI[codigo] if valores.is_empty() else M3C_UI[codigo] % valores
 	if M3_UI.has(codigo) or M3_CATALOGO.has(codigo): return (M3_UI.get(codigo, M3_CATALOGO.get(codigo, ""))) if valores.is_empty() else (M3_UI.get(codigo, M3_CATALOGO.get(codigo, "")) % valores)
 	if M2_UI.has(codigo):
 		return M2_UI[codigo] if valores.is_empty() else M2_UI[codigo] % valores
@@ -405,6 +466,7 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
+	if M3C_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if M3_UI.has("action_" + codigo) or M3_CATALOGO.has("action_" + codigo): return texto("action_" + codigo)
 	if M2_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if E4_CATALOGO.has("action_" + codigo):
@@ -776,8 +838,8 @@ const M1_UI := {
 	"m1_ablation": "Ablação da seleção: altera escolhas futuras; não apaga o histórico. Memória e expressão legadas continuam independentes. Desligar afeto não demonstrou eliminar a diferença social de X1.",
 	"m1_history_off": "Afeto desligado; valores abaixo são históricos, sem modulação M1.",
 	"m1_value": "%s: %s", "m1_cause_row": "Passo %d · %s (%s)\n%s", "m1_log_row": "Passo %d · %s\n%s",
-	"m1_tutorial": "Primeiros 25 minutos", "m1_next": "Próxima etapa", "m1_previous": "Etapa anterior",
-	"m1_tutorial_step": "%d/6 · %s", "m1_tutorial_0": "0–3 min · Adotar\nDê um nome ao pet e use Acompanhar. Inicie em 1×; pause quando quiser observar.",
+	"m1_tutorial": "Primeiros 30 minutos", "m1_next": "Próxima etapa", "m1_previous": "Etapa anterior",
+	"m1_tutorial_step": "%d/7 · %s", "m1_tutorial_0": "0–3 min · Adotar\nDê um nome ao pet e use Acompanhar. Inicie em 1×; pause quando quiser observar.",
 	"m1_tutorial_1": "3–7 min · Alimentar\nOfereça fruta à seleção. Observe a aproximação e o recibo de ingestão; colocar comida não garante refeição.",
 	"m1_tutorial_2": "7–11 min · Apresentar companhia\nUse Apresentar companhia. Espere e observe os corpos; cada indivíduo pode reagir de modo diferente.",
 	"m1_tutorial_3": "11–15 min · Apresentar um objeto novo\nUse Objeto, escolha uma cápsula e coloque-a perto do pet, no campo de visão. Inicie em 1× e espere sem comandar. Observe interesse, hesitação e aproximação; fome e sede têm prioridade. Colocar não garante investigação.",
@@ -826,10 +888,12 @@ const M2_UI := {
 }
 
 static func mente_desejo(goal: String) -> String:
+	if M3C_UI.has("m1_goal_" + goal): return texto("m1_goal_" + goal)
 	return texto("m1_goal_" + goal) if M1_UI.has("m1_goal_" + goal) or M3_UI.has("m1_goal_" + goal) else texto("m1_wait")
 
 static func mente_motivo(reason: String) -> String:
 	var code := "m1_reason_" + reason.trim_prefix("mind.")
+	if M3C_UI.has(code): return texto(code)
 	return texto(code) if M1_UI.has(code) or M2_UI.has(code) or M3_UI.has(code) else texto("reason_unknown")
 
 static func mente_dominante(snapshot: Dictionary) -> Dictionary:
