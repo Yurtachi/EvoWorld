@@ -1,0 +1,213 @@
+{
+  "verdict": "PASS",
+  "learning_demonstrated_in_scenario": true,
+  "criteria": {
+    "A_success_margin": true,
+    "A_latency_margin": true,
+    "A_paired_test": true,
+    "B_revision": true,
+    "C_retention": true,
+    "D_richer": true,
+    "E_coverage": true,
+    "E_cpu": true,
+    "E_integrity": true
+  },
+  "summary": {
+    "A:treinado": {
+      "n": 72,
+      "success": 1,
+      "latency": 77.11111111111111,
+      "path_ratio": 0.9722453089725357,
+      "searches": 1,
+      "failures": 0
+    },
+    "A:sem_memoria": {
+      "n": 72,
+      "success": 0.19444444444444445,
+      "latency": 165.59722222222223,
+      "path_ratio": 2.375889589338049,
+      "searches": 0,
+      "failures": 0
+    },
+    "A:nao_treinado": {
+      "n": 72,
+      "success": 0.2222222222222222,
+      "latency": 163.125,
+      "path_ratio": 2.302788243103241,
+      "searches": 0,
+      "failures": 0
+    },
+    "A:sistematico": {
+      "n": 72,
+      "success": 0.16666666666666666,
+      "latency": 168.375,
+      "path_ratio": 2.435320381770447,
+      "searches": 0,
+      "failures": 0
+    },
+    "A:estrategia": {
+      "n": 72,
+      "success": 1,
+      "latency": 77.11111111111111,
+      "path_ratio": 0.9722453089725357,
+      "searches": 0,
+      "failures": 0
+    },
+    "A:oraculo": {
+      "n": 72,
+      "success": 1,
+      "latency": 77.11111111111111,
+      "path_ratio": 0.9722453089725357,
+      "searches": 1,
+      "failures": 0
+    },
+    "C:treinado": {
+      "n": 72,
+      "success": 1,
+      "latency": 77.11111111111111,
+      "path_ratio": 0.9722453089725357,
+      "searches": 1,
+      "failures": 0
+    }
+  },
+  "best_success_baseline": "nao_treinado",
+  "best_latency_baseline": "nao_treinado",
+  "paired": {
+    "wins": 24,
+    "losses": 0,
+    "ties": 0,
+    "p_one_sided": 5.960464477539063e-08,
+    "differences": [
+      {
+        "seed": 382401,
+        "baseline_minus_trained": 49.99999999999999
+      },
+      {
+        "seed": 382402,
+        "baseline_minus_trained": 93
+      },
+      {
+        "seed": 382403,
+        "baseline_minus_trained": 85.66666666666666
+      },
+      {
+        "seed": 382404,
+        "baseline_minus_trained": 78
+      },
+      {
+        "seed": 382405,
+        "baseline_minus_trained": 113.66666666666667
+      },
+      {
+        "seed": 382406,
+        "baseline_minus_trained": 27.333333333333343
+      },
+      {
+        "seed": 382407,
+        "baseline_minus_trained": 122.0
+      },
+      {
+        "seed": 382408,
+        "baseline_minus_trained": 141
+      },
+      {
+        "seed": 382409,
+        "baseline_minus_trained": 115.66666666666667
+      },
+      {
+        "seed": 382410,
+        "baseline_minus_trained": 83.33333333333333
+      },
+      {
+        "seed": 382411,
+        "baseline_minus_trained": 123.33333333333334
+      },
+      {
+        "seed": 382412,
+        "baseline_minus_trained": 66
+      },
+      {
+        "seed": 382413,
+        "baseline_minus_trained": 100.66666666666666
+      },
+      {
+        "seed": 382414,
+        "baseline_minus_trained": 120
+      },
+      {
+        "seed": 382415,
+        "baseline_minus_trained": 51
+      },
+      {
+        "seed": 382416,
+        "baseline_minus_trained": 77.66666666666667
+      },
+      {
+        "seed": 382417,
+        "baseline_minus_trained": 98
+      },
+      {
+        "seed": 382418,
+        "baseline_minus_trained": 105.33333333333333
+      },
+      {
+        "seed": 382419,
+        "baseline_minus_trained": 99.00000000000001
+      },
+      {
+        "seed": 382420,
+        "baseline_minus_trained": 53.66666666666667
+      },
+      {
+        "seed": 382421,
+        "baseline_minus_trained": 51.66666666666667
+      },
+      {
+        "seed": 382422,
+        "baseline_minus_trained": 97
+      },
+      {
+        "seed": 382423,
+        "baseline_minus_trained": 68.66666666666667
+      },
+      {
+        "seed": 382424,
+        "baseline_minus_trained": 42.66666666666667
+      }
+    ]
+  },
+  "B_revision_rate": 0.9166666666666666,
+  "B_mean_post_returns": 0,
+  "B_mean_entries": 2.0833333333333335,
+  "B_strategy_mean_entries": 5,
+  "B_mean_post_occupancy": 0,
+  "B_strategy_mean_post_occupancy": 180,
+  "D_preference_rate": 1,
+  "seeds": [
+    382401,
+    382402,
+    382403,
+    382404,
+    382405,
+    382406,
+    382407,
+    382408,
+    382409,
+    382410,
+    382411,
+    382412,
+    382413,
+    382414,
+    382415,
+    382416,
+    382417,
+    382418,
+    382419,
+    382420,
+    382421,
+    382422,
+    382423,
+    382424
+  ],
+  "oracle_is_ceiling_only": true
+}
