@@ -1,0 +1,90 @@
+{
+	"godot": {
+		"build": "official",
+		"hash": "ed1daf0bf001b61586d9930840f2f1394092c079",
+		"hex": 263938,
+		"major": 4,
+		"minor": 7,
+		"patch": 2,
+		"status": "stable",
+		"string": "4.7.2-stable (official)",
+		"timestamp": 0
+	},
+	"measured_ticks": 400,
+	"rows": [
+		{
+			"mean_ms_tick": 1.560044999999999,
+			"minds_final": 0,
+			"objects": 32,
+			"p95_ms_tick": 2.246,
+			"population_final": 12,
+			"population_initial": 12,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 1.7062700000000006,
+			"minds_final": 1,
+			"objects": 32,
+			"p95_ms_tick": 2.317,
+			"population_final": 12,
+			"population_initial": 12,
+			"scope": "pet"
+		},
+		{
+			"mean_ms_tick": 4.670179999999999,
+			"minds_final": 0,
+			"objects": 32,
+			"p95_ms_tick": 6.714,
+			"population_final": 30,
+			"population_initial": 30,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 5.1894149999999994,
+			"minds_final": 1,
+			"objects": 32,
+			"p95_ms_tick": 7.805,
+			"population_final": 30,
+			"population_initial": 30,
+			"scope": "pet"
+		},
+		{
+			"mean_ms_tick": 9.428984999999996,
+			"minds_final": 0,
+			"objects": 32,
+			"p95_ms_tick": 12.785,
+			"population_final": 60,
+			"population_initial": 60,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 10.118495,
+			"minds_final": 1,
+			"objects": 32,
+			"p95_ms_tick": 14.776,
+			"population_final": 60,
+			"population_initial": 60,
+			"scope": "pet"
+		},
+		{
+			"mean_ms_tick": 23.823637499999986,
+			"minds_final": 0,
+			"objects": 32,
+			"p95_ms_tick": 31.772,
+			"population_final": 100,
+			"population_initial": 100,
+			"scope": "off"
+		},
+		{
+			"mean_ms_tick": 22.240472499999985,
+			"minds_final": 1,
+			"objects": 32,
+			"p95_ms_tick": 29.658,
+			"population_final": 100,
+			"population_initial": 100,
+			"scope": "pet"
+		}
+	],
+	"seed": 106104,
+	"warmup": 100
+}
