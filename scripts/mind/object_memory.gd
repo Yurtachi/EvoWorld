@@ -3,7 +3,7 @@ extends RefCounted
 const Data = preload("res://scripts/core/sim_data.gd")
 const LIMIT := 48
 const TTL := 3600
-const CATEGORIES := ["capsula", "pedra"]
+const CATEGORIES := ["capsula", "pedra", "quadro"]
 
 static func state(mind) -> Dictionary:
 	if mind.objects.is_empty():
@@ -50,7 +50,7 @@ static func observe(mind, sensors: Dictionary, tick: int) -> void:
 		if tick > int(s.entries[key].valid_until): s.entries.erase(key)
 	for category in s.types.keys():
 		if tick - int(s.types[category].tick) > TTL: s.types.erase(category)
-	for row in sensors.get("objects", []):
+	for row in sensors.get("objects", []) + sensors.get("boards", []):
 		var key := str(row.id)
 		if not s.types.has(row.category):
 			s.types[row.category] = {"value": 0.0, "confidence": 0.0, "tick": tick, "evidence_tick": 0, "familiarity": 0.0, "samples": 0, "source": "observado"}

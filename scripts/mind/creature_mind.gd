@@ -10,7 +10,7 @@ const LOG_LIMIT := 48
 const MEMORY_LIMIT := 32
 const MEMORY_TTL := 2400
 const MEMORY_KINDS := ["contact", "food", "water", "blocked", "toxic"]
-const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento"]
+const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar"]
 var affect = Affect.new()
 var affect_enabled := true
 var memory_enabled := true
@@ -110,7 +110,7 @@ func consequence(creature, tick: int, kind: String, value: float, source: int = 
 
 func observe(world, creature, sensors: Dictionary, moving: bool) -> void:
 	var t := traits(creature)
-	if not sensors.get("objects", []).is_empty() or not objects.is_empty():
+	if not sensors.get("objects", []).is_empty() or not sensors.get("boards", []).is_empty() or not objects.is_empty():
 		ObjectMemory.observe(self, sensors, world.tick)
 	# Decay is not spontaneous emotion generation: zero remains zero.
 	if affect_enabled:
@@ -163,7 +163,7 @@ func to_dict() -> Dictionary:
 		"mind_log": mind_log, "experiences": experiences, "objects": objects, "blocked_ticks": blocked_ticks, "contact_ticks": contact_ticks, "absent_ticks": absent_ticks, "rng_state": rng.to_dict()})
 
 static func valid_scores(value: Variant) -> bool:
-	if not value is Dictionary or value.size() not in [0, Motivation.GOALS.size()]:
+	if not value is Dictionary or value.size() not in [0, Motivation.BASE_GOALS.size(), Motivation.GOALS.size()]:
 		return false
 	for key in value:
 		if key not in Motivation.GOALS or not Data.number(value[key]) or absf(float(value[key])) > 20.0:

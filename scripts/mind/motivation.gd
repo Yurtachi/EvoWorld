@@ -1,16 +1,18 @@
 extends RefCounted
 ## Retrieval affects utility; affect controls activation and commitment thresholds.
 ## Both channels are deterministic and independently ablatable; no physical writes.
-const GOALS := ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto"]
+const BASE_GOALS := ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto"]
+const GOALS := ["comer", "beber", "descansar", "explorar", "buscar_companhia", "buscar_privacidade", "brincar", "investigar_objeto", "desenhar"]
 const MIN_COMMITMENT := 12
 const MAX_COMMITMENT := 80
 const Objects = preload("res://scripts/mind/object_memory.gd")
+const Atelier = preload("res://scripts/atelier/atelier.gd")
 
 static func modulation(mind) -> Dictionary:
 	var a: Dictionary = mind.affect.values if mind.affect_enabled and mind.policy_mode == "full" else mind.empty_affect()
 	var frustration := float(a.frustracao)
 	# Commitment shortening concerns the currently obstructed locomotor strategy.
-	var blocked: bool = mind.blocked_ticks >= 2 and mind.objetivo_atual in ["explorar", "brincar", "buscar_companhia", "buscar_privacidade"]
+	var blocked: bool = mind.blocked_ticks >= 2 and mind.objetivo_atual in ["explorar", "brincar", "buscar_companhia", "buscar_privacidade", "desenhar"]
 	return {"minimum": maxi(2, MIN_COMMITMENT - int(10.0 * frustration)) if blocked else MIN_COMMITMENT,
 		"maximum": maxi(12, MAX_COMMITMENT - int(68.0 * frustration)) if blocked else MAX_COMMITMENT,
 		"release_blocked": blocked and frustration >= 0.25,
@@ -22,7 +24,8 @@ static func modulation(mind) -> Dictionary:
 			"buscar_companhia": 1.4 * float(a.saturacao_social) + 0.5 * float(a.receio) - 1.2 * float(a.solidao),
 			"buscar_privacidade": -1.4 * float(a.saturacao_social) - 0.8 * float(a.receio),
 			"brincar": 0.5 * frustration + 0.4 * float(a.satisfacao) - 0.4 * float(a.entusiasmo),
-			"investigar_objeto": 0.0}}
+			"investigar_objeto": 0.0,
+			"desenhar": 0.25 * frustration + 0.35 * float(a.receio) - 0.35 * float(a.entusiasmo)}}
 
 static func utilities(creature, mind, tick: int, sensors: Dictionary) -> Dictionary:
 	var t: Dictionary = mind.traits(creature)
@@ -38,14 +41,17 @@ static func utilities(creature, mind, tick: int, sensors: Dictionary) -> Diction
 		"investigar_objeto": -4.0}
 	if not sensors.get("objects", []).is_empty():
 		result.investigar_objeto = Objects.candidate(mind, creature, sensors, tick).score
-	for goal in GOALS:
+	for goal in BASE_GOALS:
 		result[goal] = snappedf(float(result[goal]) + mind.memory_bias(goal, tick, sensors) + mind.rng.between(-0.045, 0.045), 0.000001)
+	if not sensors.get("boards", []).is_empty() or mind.objetivo_atual == "desenhar":
+		var board_cand := Atelier.candidate(mind, creature, sensors, tick)
+		result["desenhar"] = snappedf(float(board_cand.score) + mind.rng.between(-0.045, 0.045), 0.000001)
 	return result
 
 static func scores(creature, mind, tick: int, sensors: Dictionary) -> Dictionary:
 	var result := utilities(creature, mind, tick, sensors)
 	var thresholds: Dictionary = modulation(mind).thresholds
-	for goal in GOALS:
+	for goal in result.keys():
 		result[goal] = snappedf(float(result[goal]) - float(thresholds[goal]), 0.000001)
 	if sensors.get("creatures", []).is_empty():
 		result.buscar_privacidade = -4.0
@@ -64,15 +70,19 @@ static func choose(creature, mind, tick: int, sensors: Dictionary) -> String:
 	var control := modulation(mind)
 	var release: bool = control.release_blocked
 	var object_candidate := Objects.candidate(mind, creature, sensors, tick)
+	var has_boards: bool = scores_now.has("desenhar")
+	var board_candidate: Dictionary = Atelier.candidate(mind, creature, sensors, tick) if has_boards else {"score": -4.0, "id": 0, "novelty": 0.0}
 	if mind.objetivo_atual == "investigar_objeto" and int(object_candidate.id) == 0:
+		release = true
+	if mind.objetivo_atual == "desenhar" and int(board_candidate.id) == 0:
 		release = true
 	if mind.objetivo_atual != "" and elapsed < int(control.minimum) and not release:
 		return mind.objetivo_atual
 	var timeout: bool = mind.objetivo_atual != "" and elapsed >= int(control.maximum)
 	var winner := ""
 	var highest := -INF
-	for goal in GOALS:
-		if (goal == "investigar_objeto" and int(object_candidate.id) == 0) or (goal == "beber" and not creature.personality_water_enabled) or (goal == "buscar_privacidade" and sensors.get("creatures", []).is_empty()):
+	for goal in scores_now.keys():
+		if (goal == "investigar_objeto" and int(object_candidate.id) == 0) or (goal == "desenhar" and int(board_candidate.id) == 0) or (goal == "beber" and not creature.personality_water_enabled) or (goal == "buscar_privacidade" and sensors.get("creatures", []).is_empty()):
 			continue
 		if (timeout or release) and goal == mind.objetivo_atual:
 			continue
@@ -89,7 +99,10 @@ static func choose(creature, mind, tick: int, sensors: Dictionary) -> String:
 	if winner == "investigar_objeto":
 		Objects.state(mind).target = int(object_candidate.id)
 		reason = "mind.iniciativa.novidade" if float(object_candidate.novelty) > 0.7 else "mind.iniciativa.lacuna"
-	elif mind.objetivo_atual == "investigar_objeto" and timeout:
+	elif winner == "desenhar":
+		Objects.state(mind).target = int(board_candidate.id)
+		reason = "mind.iniciativa.desenhar"
+	elif mind.objetivo_atual in ["investigar_objeto", "desenhar"] and timeout:
 		var state := Objects.state(mind)
 		var key := str(state.target)
 		if state.cooldowns.size() >= Objects.LIMIT: state.cooldowns.erase(state.cooldowns.keys()[0])

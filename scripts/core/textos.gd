@@ -343,6 +343,7 @@ const ERROS_PREFIXO := {
 }
 
 static func texto(codigo: String, valores: Array = []) -> String:
+	if M3_UI.has(codigo) or M3_CATALOGO.has(codigo): return (M3_UI.get(codigo, M3_CATALOGO.get(codigo, ""))) if valores.is_empty() else (M3_UI.get(codigo, M3_CATALOGO.get(codigo, "")) % valores)
 	if M2_UI.has(codigo):
 		return M2_UI[codigo] if valores.is_empty() else M2_UI[codigo] % valores
 	if M1_UI.has(codigo):
@@ -404,6 +405,7 @@ static func evento(event: Dictionary) -> String:
 	return texto("event_unknown", [tick])
 
 static func acao(codigo: String) -> String:
+	if M3_UI.has("action_" + codigo) or M3_CATALOGO.has("action_" + codigo): return texto("action_" + codigo)
 	if M2_UI.has("action_" + codigo): return texto("action_" + codigo)
 	if E4_CATALOGO.has("action_" + codigo):
 		return texto("action_" + codigo)
@@ -823,11 +825,11 @@ const M2_UI := {
 }
 
 static func mente_desejo(goal: String) -> String:
-	return texto("m1_goal_" + goal) if M1_UI.has("m1_goal_" + goal) else texto("m1_wait")
+	return texto("m1_goal_" + goal) if M1_UI.has("m1_goal_" + goal) or M3_UI.has("m1_goal_" + goal) else texto("m1_wait")
 
 static func mente_motivo(reason: String) -> String:
 	var code := "m1_reason_" + reason.trim_prefix("mind.")
-	return texto(code) if M1_UI.has(code) or M2_UI.has(code) else texto("reason_unknown")
+	return texto(code) if M1_UI.has(code) or M2_UI.has(code) or M3_UI.has(code) else texto("reason_unknown")
 
 static func mente_dominante(snapshot: Dictionary) -> Dictionary:
 	var result := {"key": "", "value": 0.0}
@@ -847,3 +849,40 @@ static func mente_causa(snapshot: Dictionary) -> String:
 		if row.get("estado") == dominant.key and row.get("causa") != "decay":
 			return texto("m1_cause_" + str(row.causa))
 	return texto("m1_cause_empty")
+
+
+# M3 — Ateliê e quadro de desenho; vocabulário observacional (parece/aparenta, nunca sente).
+const M3_CATALOGO := {
+	"action_seek_board": "Aproximando-se do quadro",
+	"action_draw_stroke": "Traçando segmentos no quadro",
+	"shape_linha": "Linha",
+	"shape_circulo": "Círculo",
+	"shape_quadrado": "Quadrado",
+	"shape_rabisco": "Rabisco exploratório"
+}
+
+const M3_UI := {
+	"tool_board": "Quadro",
+	"place_board": "um quadro de desenho",
+	"m1_goal_desenhar": "Parece querer desenhar no quadro",
+	"m1_reason_iniciativa.desenhar": "Curiosidade, entusiasmo ou ociosidade favoreceram a iniciativa de desenhar.",
+	"m1_cause_drawing_completed": "Concluiu uma sequência de traços no quadro.",
+	"m2_category_quadro": "quadro de desenho",
+	"m3_title": "Ateliê e Quadro",
+	"m3_present": "Colocar quadro de desenho",
+	"m3_placed": "Quadro #%d colocado. A criatura parece notar o quadro e pode desenhar quando motivada.",
+	"m3_blocked": "Não foi possível colocar o quadro: posição bloqueada, fora do jardim ou limite atingido.",
+	"m3_demo_linha": "Demonstrar linha",
+	"m3_demo_circulo": "Demonstrar círculo",
+	"m3_demo_quadrado": "Demonstrar quadrado",
+	"m3_demo_ok": "Forma %s demonstrada no quadro #%d.",
+	"m3_gallery": "Galeria do mundo",
+	"m3_gallery_empty": "Nenhum desenho concluído ainda.",
+	"m3_artifact_row": "%s · quadro #%d · passo %d · dono: %s (#%d) · erro: %s",
+	"m3_competence": "Competência observada por forma",
+	"m3_competence_row": "%s · tentativas: %d · taxa: %s%% · erro mediano: %s",
+	"m3_attempts": "Histórico de tentativas",
+	"m3_attempt_row": "Tentativa #%d · passo %d · %s · erro: %s · Δerro: %s",
+	"m3_note": "Cada artefato resulta de uma sequência real de ações primitivas da caneta. A recompensa é sinal de aprendizado e não repõe energia.",
+	"m3_symbols_note": "Escrita e símbolos: fora de escopo no M3a. Símbolos só entram na biblioteca (M3b) com avaliação experimental própria."
+}

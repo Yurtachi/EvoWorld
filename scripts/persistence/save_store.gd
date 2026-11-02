@@ -5,7 +5,7 @@ const World = preload("res://scripts/world/sim_world.gd")
 const Data = preload("res://scripts/core/sim_data.gd")
 const MAX_BYTES := 32 * 1024 * 1024
 # Envelope v2 compresses losslessly before the disk limit becomes a problem.
-# The world schema is v8; v1 envelopes remain readable and writable.
+# The world schema is v10 (migrating v1-v9); v1 envelopes remain readable and writable.
 const COMPRESS_AT_BYTES := 1024 * 1024
 # E5 measured ~0.8 MB per save: 8 MiB allows ~10x growth, without allocating
 # 128 MiB for an untrusted gzip. Ratio uses the on-disk envelope byte length.
