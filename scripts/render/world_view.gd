@@ -3,6 +3,7 @@ extends Node2D
 const Texto = preload("res://scripts/core/textos.gd")
 const FoodShapes = preload("res://scripts/render/food_shapes.gd")
 const World = preload("res://scripts/world/sim_world.gd")
+const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
 var world: World
 var teaching_snapshot: Dictionary = {}
 var teaching_target := Vector2.INF
@@ -18,6 +19,7 @@ var grass_texture: Texture2D
 var food_texture: Texture2D
 var rock_texture: Texture2D
 var visible_names: Dictionary = {}
+var object_styles: Dictionary = {}
 
 func set_world(value: World) -> void:
 	world = value
@@ -63,6 +65,8 @@ func _draw() -> void:
 		_rock(obstacle.pos, obstacle.radius)
 	for food in world.foods:
 		FoodShapes.draw(self, food.pos, food.get("food_type", "legacy"))
+	for row in world.objects:
+		_draw_object(ObjectCatalog.appearance(row))
 	for creature in world.creatures.values():
 		if creature.id == selected_id and show_sensors:
 			_sensor(creature)
@@ -108,6 +112,36 @@ func _water(pos: Vector2, radius: float) -> void:
 	for offset in [-0.35, 0.15, 0.48]:
 		var origin := pos + Vector2(-radius * 0.35, radius * offset)
 		draw_line(origin, origin + Vector2(radius * 0.6, 0), Color("a2e2e8"), 1.5, true)
+
+func _draw_object(row: Dictionary) -> void:
+	# Same public appearance yields identical pixels, regardless of hidden effect.
+	var pos: Vector2 = row.pos
+	draw_circle(pos + Vector2(1, 3), 9, Color(0.04, 0.12, 0.09, 0.5))
+	if row.appearance == "lisa":
+		draw_style_box(_capsule_style(Color("17372b")), Rect2(pos - Vector2(9, 6), Vector2(18, 12)))
+		draw_style_box(_capsule_style(Color("efe4c6")), Rect2(pos - Vector2(7, 4), Vector2(14, 8)))
+		draw_line(pos + Vector2(0, -3), pos + Vector2(0, 3), Color("8a826a"), 1, true)
+	else:
+		var points := PackedVector2Array([pos + Vector2(-8, 3), pos + Vector2(-6, -5), pos + Vector2(2, -7), pos + Vector2(8, -1), pos + Vector2(6, 5), pos + Vector2(-8, 3)])
+		draw_colored_polygon(points, Color("b8bec0"))
+		draw_polyline(points, Color("17372b"), 2, true)
+		draw_line(pos + Vector2(-3, -3), pos + Vector2(3, 2), Color("737e81"), 1.5, true)
+	var zoom := maxf(get_global_transform_with_canvas().get_scale().x, 0.05)
+	if zoom >= 0.7:
+		var text := Texto.texto("m2_object_tag", [row.id])
+		var width := ThemeDB.fallback_font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		draw_set_transform(pos + Vector2(-width / 2 / zoom, -12), 0, Vector2.ONE / zoom)
+		draw_string_outline(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, 4, Color("17372b"))
+		draw_string(ThemeDB.fallback_font, Vector2.ZERO, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("fff2d1"))
+		draw_set_transform(Vector2.ZERO)
+
+func _capsule_style(color: Color) -> StyleBoxFlat:
+	if object_styles.has(color): return object_styles[color]
+	var style := StyleBoxFlat.new()
+	style.bg_color = color
+	style.set_corner_radius_all(6)
+	object_styles[color] = style
+	return style
 
 func social_marker(creature) -> Dictionary:
 	var recent := false

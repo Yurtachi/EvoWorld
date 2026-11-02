@@ -4,6 +4,8 @@ signal intervention
 const Texto = preload("res://scripts/core/textos.gd")
 const Genes = preload("res://scripts/creature/genome.gd")
 const Chart = preload("res://scripts/ui/population_chart.gd")
+const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
+const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
 const SAMPLE_LIMIT := 180
 const LIST_LIMIT := 12
 var samples: Array = []
@@ -34,6 +36,8 @@ var mind_causes: Label
 var mind_logs: Label
 var affect_switch: CheckButton
 var memory_switch: CheckButton
+var curiosity_switch: CheckButton
+var object_memory: Label
 
 func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -48,6 +52,14 @@ func _ready() -> void:
 		if code == "m1_affect_switch": affect_switch = button
 		else: memory_switch = button
 	_text(Texto.texto("m1_ablation"))
+	curiosity_switch = CheckButton.new()
+	curiosity_switch.text = Texto.texto("m2_curiosity_switch")
+	add_child(curiosity_switch)
+	curiosity_switch.toggled.connect(_ablate_curiosity)
+	var warning := _text(Texto.texto("m2_ablation"))
+	warning.add_theme_color_override("font_color", Color("ffdda5"))
+	_heading("m2_objects")
+	object_memory = _text("")
 	_heading("m1_affects")
 	mind_values = _text("")
 	_heading("m1_scores")
@@ -250,15 +262,17 @@ func _ablate(enabled: bool, affect: bool) -> void:
 
 func _observe_mind(creature) -> void:
 	var active: bool = creature != null and creature.mind != null
-	for button in [affect_switch, memory_switch]:
+	for button in [affect_switch, memory_switch, curiosity_switch]:
 		button.disabled = not active
 		button.set_pressed_no_signal(false)
-	for label in [mind_values, mind_scores, mind_causes, mind_logs]:
+	for label in [mind_values, mind_scores, mind_causes, mind_logs, object_memory]:
 		label.text = ""
 	if not active:
 		mind_summary.text = Texto.texto("m1_disabled")
 		return
 	var snapshot: Dictionary = creature.mind_snapshot()
+	curiosity_switch.set_pressed_no_signal(snapshot.get("objects", {}).get("curiosity_enabled", true))
+	object_memory.text = _object_rows(snapshot)
 	affect_switch.set_pressed_no_signal(snapshot.affect_enabled)
 	memory_switch.set_pressed_no_signal(snapshot.memory_enabled)
 	mind_summary.text = Texto.mente_desejo(snapshot.objetivo_atual) + "\n" + Texto.mente_motivo(snapshot.motivo)
@@ -284,3 +298,34 @@ func _observe_mind(creature) -> void:
 		var item: Dictionary = logs[index]
 		rows.append(Texto.texto("m1_log_row", [item.tick, Texto.mente_desejo(item.objetivo), Texto.mente_motivo(item.motivo)]))
 	mind_logs.text = "\n\n".join(rows) if not rows.is_empty() else Texto.texto("m1_wait")
+
+func _ablate_curiosity(enabled: bool) -> void:
+	if _world == null: return
+	var creature = _world.creatures.get(_last_selection)
+	if creature == null or creature.mind == null: return
+	ObjectMemory.state(creature.mind).curiosity_enabled = enabled
+	intervention.emit()
+	observe(_world, _last_selection, true)
+
+func _object_rows(snapshot: Dictionary) -> String:
+	var rows: Array[String] = []
+	if not snapshot.memory_enabled: rows.append(Texto.texto("m2_memory_off"))
+	var objects: Dictionary = snapshot.get("objects", {})
+	if not objects.get("curiosity_enabled", true): rows.append(Texto.texto("m2_curiosity_off"))
+	var entries: Dictionary = objects.get("entries", {})
+	var keys: Array = entries.keys()
+	keys.sort_custom(func(a, b): return int(entries[a].tick) > int(entries[b].tick))
+	for key in keys.slice(0, 6):
+		var entry: Dictionary = entries[key]
+		var evidence: Dictionary = entry.evidence
+		var proof := Texto.texto("m2_evidence_none")
+		if entry.source == "interagido" and not evidence.is_empty():
+			proof = Texto.texto("m2_evidence", [entry.evidence_tick, Texto.numero(evidence.energy, 2), Texto.numero(evidence.hydration, 2), Texto.numero(evidence.toxicity, 3), Texto.numero(evidence.surprise, 2), int(entry.evidence_tick) + ObjectMemory.TTL])
+		var n := ObjectPresenter.novelty(snapshot, {"id": int(key), "category": entry.category}, _world.tick)
+		rows.append(Texto.texto("m2_memory_row", [int(key), Texto.texto("m2_category_" + entry.category), Texto.texto("m2_source_" + entry.source), Texto.numero(entry.confidence, 2), entry.valid_until, Texto.texto("m2_valid" if _world.tick <= int(entry.valid_until) else "m2_expired"), Texto.numero(n, 3), Texto.numero(entry.familiarity, 3), Texto.numero(entry.hypothesis, 3), proof]))
+	if keys.size() > 6: rows.append(Texto.texto("m2_more", [keys.size() - 6]))
+	for category in objects.get("types", {}):
+		var known: Dictionary = objects.types[category]
+		var proof := Texto.texto("m2_evidence_deadline", [int(known.evidence_tick) + ObjectMemory.TTL]) if known.source == "interagido" else Texto.texto("m2_evidence_none")
+		rows.append(Texto.texto("m2_category_row", [Texto.texto("m2_category_" + category), Texto.texto("m2_source_" + known.source), Texto.numero(known.value, 3), Texto.numero(known.confidence, 2), known.samples, Texto.numero(known.familiarity, 3), proof]))
+	return "\n\n".join(rows) if not rows.is_empty() else Texto.texto("m2_empty")

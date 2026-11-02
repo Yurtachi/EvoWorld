@@ -4,6 +4,9 @@ extends SceneTree
 const Store = preload("res://scripts/persistence/save_store.gd")
 const Texto = preload("res://scripts/core/textos.gd")
 const World = preload("res://scripts/world/sim_world.gd")
+const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
+const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
+const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
 var errors: Array[String] = []
 
 func _init() -> void:
@@ -241,8 +244,9 @@ func _verify() -> void:
 	await _verify_e3(main, folder)
 	await _verify_e4(main, folder)
 	await _verify_m1(main, folder)
+	await _verify_m2(main, folder)
 	# Layouts dos novos painéis também cabem na janela mínima.
-	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog]:
+	for dialog in [main.chat_dialog, main.settings_dialog, main.help_dialog, main.new_dialog, main.expand_dialog, main.object_dialog]:
 		dialog.popup_centered()
 		await process_frame
 		await process_frame
@@ -668,6 +672,101 @@ func _verify_e1(main, folder: String) -> void:
 	_expect(main.fps_chart.samples.size() > 0, "mini gráfico amostra quadros reais")
 	for button in main.food_buttons.values():
 		_expect(button.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "quatro alimentos cabem na janela mínima")
+
+func _verify_m2(main, folder: String) -> void:
+	main._m2_fixture()
+	var creature = main.world.creatures[main.selected_id]
+	var original: Dictionary = creature.to_dict()
+	main.tool_buttons.object.pressed.emit()
+	_expect(main.object_dialog.visible and main.object_choice.item_count == 4, "M2 catálogo real com quatro objetos")
+	var shortcut := InputEventKey.new()
+	shortcut.pressed = true
+	shortcut.keycode = KEY_SPACE
+	main._input(shortcut)
+	_expect(main.paused and main.tool == "select" and not main.tool_buttons.object.button_pressed, "M2 catálogo suspende atalhos e só muda ferramenta ao confirmar")
+	for index in range(4):
+		main.object_choice.select(index)
+		main.object_dialog.confirmed.emit()
+		main.object_dialog.hide()
+		main._apply_tool(creature.pos + Vector2(24 + 25 * index, 0))
+		_expect(main.world.objects.back().tipo == main.OBJECT_TYPES[index], "M2 ferramenta alcança place_object para cada lote")
+		var label: String = main.object_choice.get_item_text(index)
+		_expect(not label.contains("aversiv") and not label.contains("agradável") and not label.contains("neutra"), "M2 catálogo não revela consequência oculta")
+	_expect(main.world.objects.size() == 4 and creature.to_dict() == original, "M2 colocação preserva corpo, mente e seleção")
+	var first: Dictionary = ObjectCatalog.appearance(main.world.objects[0])
+	for row in main.world.objects.slice(1, 3):
+		var appearance: Dictionary = ObjectCatalog.appearance(row)
+		_expect(appearance.category == first.category and appearance.appearance == first.appearance, "M2 cápsulas compartilham aparência pública")
+	var world_before: Dictionary = main.world.to_dict()
+	main._refresh()
+	main.lab.observe(main.world, creature.id, true)
+	_expect(main.world.to_dict() == world_before, "M2 inspeção não inicializa nem modifica memória")
+	# Fresh fixture: decision, movement and contact only through real step().
+	main._m2_fixture()
+	creature = main.world.creatures[main.selected_id]
+	main.object_type = "capsula_neutra"
+	main._set_tool("object")
+	main._apply_tool(creature.pos + Vector2(24, 0))
+	var object_id: int = main.world.objects.back().id
+	var origin: Vector2 = creature.pos
+	main.world.step()
+	main._refresh()
+	main.lab.observe(main.world, creature.id, true)
+	_expect(creature.last_action == "seek_object" and origin.distance_to(creature.pos) > 0, "M2 aproximação real sem comando")
+	_expect(main.object_reaction.text.contains("curioso") and main.object_activity.text.contains("Aproximando"), "M2 convivência traduz interesse e movimento real")
+	_expect(main.lab.object_memory.text.contains("fonte: observado") and main.lab.object_memory.text.contains("Sem evidência"), "M2 observar não inventa contato")
+	_expect(main.lab.mind_logs.text.contains("novidade"), "M2 mind.iniciativa traduzido no laboratório")
+	var public_row: Dictionary = main.world.sense(creature).objects[0]
+	_expect(is_equal_approx(ObjectPresenter.novelty(creature.mind_snapshot(), public_row, main.world.tick), ObjectMemory.novelty(creature.mind, public_row, main.world.tick)), "M2 projeção de novidade coincide com simulador")
+	for index in range(40):
+		main.world.step()
+		if creature.last_action == "investigate_object": break
+	main._refresh()
+	main.lab.observe(main.world, creature.id, true)
+	_expect(creature.last_action == "investigate_object" and main.object_activity.text.contains("Investigando"), "M2 contato físico aparece na convivência")
+	_expect(main.lab.object_memory.text.contains("fonte: interagido") and main.lab.object_memory.text.contains("Δenergia") and main.lab.object_memory.text.contains("Confiança: 1,00"), "M2 prova de contato, confiança e validade")
+	# Repeated genuine contacts at the acquired position teach habituation.
+	for index in range(7):
+		main.world.tick += 181
+		_expect(main.world.interact_object(creature, object_id), "M2 aquisição local de familiaridade")
+	main._refresh()
+	_expect(main.object_reaction.text.contains("perdeu o interesse"), "M2 familiaridade real produz expressão de habituação")
+	main._show_lab(true)
+	main.lab.memory_switch.button_pressed = false
+	main.lab.curiosity_switch.button_pressed = false
+	_expect(not creature.mind.memory_enabled and not creature.mind.objects.curiosity_enabled, "M2 ablações pela UI")
+	_expect(main.lab.object_memory.text.contains("históricos") and main.lab.object_memory.text.contains("Curiosidade desligada"), "M2 registros retidos identificados como inativos")
+	main.store.save_world(main.world, "m2", {"name": "M2 UI"})
+	var saved: Dictionary = main.world.to_dict()
+	main._load("m2")
+	_expect(main.world.to_dict() == saved, "M2 save real preserva objetos, memória e ablações")
+	# Adverse history learned only via physical contact, never by hidden type lookup.
+	main._m2_fixture()
+	creature = main.world.creatures[main.selected_id]
+	var adverse: int = main.world.place_object(creature.pos, "capsula_aversiva")
+	for index in range(3):
+		main.world.tick += 181
+		_expect(main.world.interact_object(creature, adverse), "M2 contatos aversivos reais")
+	main._refresh()
+	main.lab.observe(main.world, creature.id, true)
+	_expect(main.object_reaction.text.contains("cauteloso") and main.lab.object_memory.text.contains(Texto.numero(-4.6)), "M2 cautela e evidência derivadas do histórico físico")
+	main.tutorial_step = 3
+	main._tutorial_move(0)
+	_expect(main.tutorial_text.text.contains("objeto novo") and main.tutorial_text.text.contains("espere sem comandar"), "M2 roteiro de iniciativa não comandada")
+	for reason in ["mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento"]:
+		_expect(Texto.razao(reason) != Texto.texto("reason_unknown"), "M2 motivo traduzido: " + reason)
+	main._show_lab(true)
+	await process_frame
+	await process_frame
+	_expect(main.lab.object_memory.size.x <= main.lab_scroll.size.x, "M2 memória quebra linhas na largura mínima")
+	_expect(main.tool_buttons.object.get_global_rect().end.x < 1100 - main.SIDEBAR - 30, "M2 seis ferramentas cabem na largura mínima")
+	main.selected_id = -1
+	main._refresh()
+	main.lab.observe(main.world, -1, true)
+	_expect(main.lab.object_memory.text.is_empty() and main.lab.curiosity_switch.disabled and main.object_activity.text.is_empty(), "M2 troca de seleção limpa conhecimento anterior")
+	for suffix in ["", ".bak", ".tmp", ".bak.tmp"]:
+		var path := folder.path_join("m2.json" + suffix)
+		if FileAccess.file_exists(path): DirAccess.remove_absolute(path)
 
 func _verify_m1(main, folder: String) -> void:
 	main.initial_population = 12

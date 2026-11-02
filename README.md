@@ -25,13 +25,19 @@ O primeiro comando deve indicar 4.7.2. Se `godot` não estiver no PATH, substitu
 
 O modo padrão é **Convivência**: o pet começa em destaque, com acompanhamento de câmera, estado afetivo aparente, desejo atual e um balão discreto com a causa registrada. Os textos usam “parece/aparenta”: são **estados computacionais simulados**, sem indicação de consciência. A cor, a postura e um único indicador junto à seleção variam com a intensidade do afeto dominante; desligar afeto M1 retira essa modulação. Desejo e ação física podem diferir, por exemplo durante fome, sede, ordens ou ensino.
 
-O seletor acima dos modos permite acompanhar qualquer organismo sem ativar sua mente. Só o pet recebe mente por padrão em mundos novos; os demais e os saves antigos exibem **Sem mente ativa**. **Ativar mente nesta criatura** chama `world.enable_mind`, com aviso do custo adicional de CPU. A ativação e as ablações são persistidas no save v8.
+O seletor acima dos modos permite acompanhar qualquer organismo sem ativar sua mente. Só o pet recebe mente por padrão em mundos novos; os demais e os saves anteriores ao M1 exibem **Sem mente ativa**. **Ativar mente nesta criatura** chama `world.enable_mind`, com aviso do custo adicional de CPU. A ativação e as ablações são persistidas no save v9 atual.
 
 **Apresentar companhia** coloca um organismo em espaço livre próximo, preservando a seleção. **Colocar obstáculo no mapa** usa a ferramenta física de rocha; **Retirar rochas próximas** remove as rochas até 120 unidades além de seus raios para observar recuperação. Use 1× e dê tempo: desviar de uma rocha não equivale a movimento bloqueado, e não há reação social garantida. Essas intervenções permitem observar situações de X1/X2, mas não substituem ensaios controlados.
 
-**Primeiros 20 minutos**, disponível na Convivência e na Ajuda, oferece cinco etapas manuais: adotar (0–3 min), alimentar (3–7), apresentar companhia (7–11), ler desejo e motivo (11–15), observar eventual privacidade e salvar (15–20). Os tempos são um roteiro, sem aceleração automática ou promessa de que um desejo específico aparecerá.
+**Objeto**, na barra inferior, ou **Apresentar objeto novo**, na Convivência, abre o catálogo: três lotes de cápsula lisa e uma pedra rugosa. Escolha, confirme **Colocar no jardim** e clique no terreno. A ferramenta chama `world.place_object`; as cápsulas têm a mesma aparência, sem cores que revelem seus efeitos. A pedra investigável é diferente do obstáculo **+ Rocha**. Coloque perto do pet, no campo de visão, inicie em 1× e **espere sem comandar**. O pet pode ignorar, aproximar-se, investigar por contato ou aparentar cautela; fome, sede e obstáculos continuam relevantes.
+
+Em **Diante dos objetos**, a Convivência mostra interesse, cautela ou habituação a partir da percepção atual e do conhecimento individual. A linha **Ação física** distingue aproximação de investigação por contato. A UI não move o corpo nem atribui um objetivo. As frases são interpretações de estados simulados; uma memória adversa pode generalizar para outras cápsulas da mesma categoria visual.
+
+**Primeiros 20 minutos**, disponível na Convivência e na Ajuda, oferece cinco etapas manuais: adotar (0–3 min), alimentar (3–7), apresentar companhia (7–11), apresentar um objeto novo e esperar sem comandar (11–15), observar eventual privacidade e salvar (15–20). Os tempos são um roteiro, sem aceleração automática ou promessa de que um desejo específico aparecerá.
 
 O **Laboratório** separado abre com os sete afetos, pontuações da última decisão, seis mudanças recentes de `cause_log` e seis trocas de `mind_log`, traduzidos. Os controles **Afeto M1 ativo** e **Memória M1 ativa** atuam apenas na seleção, inclusive no pet; não apagam o histórico, e as funções legadas permanecem independentes. A tela marca valores afetivos históricos quando a modulação está desligada. O resultado de X1 não demonstrou eliminar a diferença social desligando afeto; veja os limites em [reports/M1_mind.md](reports/M1_mind.md). Capturas novas, validação e FPS gráfico estão em [reports/M1_ui.md](reports/M1_ui.md).
+
+No M2, o Laboratório também mostra até seis memórias recentes de objetos e as categorias consolidadas: fonte **observado/interagido**, confiança, validade, novidade, familiaridade, hipótese e evidência de contato com variações físicas. Ver um objeto não ensina suas consequências. A validade da observação e o prazo da evidência são separados. **Memória M1 ativa** controla também a memória M2; **Curiosidade por objetos ativa** retira ou restaura o termo de curiosidade da escolha. O aviso explica que essas ablações alteram escolhas futuras, conservam registros históricos e persistem no save. Motivos `mind.iniciativa.*` aparecem traduzidos nas trocas de desejo. Veja [reports/M2_ui.md](reports/M2_ui.md) para evidências da UI e [reports/M2_curiosidade.md](reports/M2_curiosidade.md) para o ensaio controlado e seus limites.
 
 Ao abrir, escolha os nomes do jardim e do companheiro, uma semente inteira de 0 a 2147483647 e a população inicial de 1 a 100. O padrão é **Jardim de Musgo**, **Mel** e **12 organismos, com três regiões de água e personalidade ativa**. Os fundadores recebem nomes do catálogo brasileiro (Mel, Bento, Tica, Juca, Lola, Zeca, Nina, Dora, Caju, Bia, Chico e Lia); o nome escolhido para o companheiro prevalece. Essa criação usa `SimWorld.new_world`; o seletor explícito continua prevalecendo e carregar saves mantém população e nomes gravados. A semente recria condições iniciais; as intervenções do jogador mudam a trajetória. Criar um jardim substitui o mundo não salvo; **Continuar explorando** mantém o mundo aberto.
 
@@ -120,7 +126,7 @@ O protocolo pré-registrado E4 separado teve bebida em **18/20** episódios com 
 
 Cada ponto tem sua revisão válida anterior em `.json.bak`. `SaveStore` escreve um temporário, valida dados e soma SHA-256, preserva a cópia e substitui o principal por renomeação. Ao carregar um principal inválido, tenta a cópia; se ambos falharem, mantém o mundo aberto e mostra o erro em português. O limite por arquivo é 32 MiB. Alterações posteriores à última gravação podem se perder em uma interrupção.
 
-No Windows, `user://` normalmente corresponde a `%APPDATA%/Godot/app_userdata/EvoWorld/`. Preferências da interface ficam em `ui-settings.cfg`; capturas F12 ficam em `screenshots/`. Esta entrega usa **save v5**, com migração de v1–v4 fornecida pelo simulador. A migração preserva população, nomes e fisiologia histórica: em saves anteriores ao E1 a sede permanece desativada; nos anteriores ao E2, a personalidade permanece desativada. Nenhum campo de save foi acrescentado ou renomeado pela UI.
+No Windows, `user://` normalmente corresponde a `%APPDATA%/Godot/app_userdata/EvoWorld/`. Preferências da interface ficam em `ui-settings.cfg`; capturas F12 ficam em `screenshots/`. Esta entrega usa **save v9**, com migração de v1–v8 fornecida pelo simulador. A migração preserva população, nomes e fisiologia histórica: em saves anteriores ao E1 a sede permanece desativada; nos anteriores ao E2, a personalidade permanece desativada. Saves v8 recebem coleções vazias de objetos; carregar não apresenta objetos nem ativa mentes implicitamente. Nenhum campo de save foi acrescentado ou renomeado pela UI.
 
 ## Testes e capturas
 
@@ -146,6 +152,24 @@ godot --path . -- --capture=reports/ui2-novo-mundo.png --show-new-world --captur
 
 As capturas usam a cena real, desativam autosave e não escrevem preferências pessoais. O laboratório avança naturalmente até o passo 1200 para mostrar descendência, sem forçar genomas ou nascimentos. O cenário de sinais faz uma emissão manual pelo mesmo botão disponível ao jogador e avança um passo. Resultados e limites em [reports/ui2.md](reports/ui2.md).
 
+## M2: reproduzir capturas e FPS com objetos
+
+Use um caminho absoluto para as capturas; os caminhos relativos são recusados pelo modo de inspeção:
+
+```powershell
+$m2Reports = (Resolve-Path reports).Path.Replace('\', '/')
+godot --path . -- "--capture=$m2Reports/M2-objeto-novo.png" --capture-state=m2-new --capture-minimum
+godot --path . -- "--capture=$m2Reports/M2-aproximando.png" --capture-state=m2-approaching --capture-minimum
+godot --path . -- "--capture=$m2Reports/M2-investigando.png" --capture-state=m2-investigating --capture-minimum
+godot --path . -- "--capture=$m2Reports/M2-habituado.png" --capture-state=m2-habituated --capture-minimum
+godot --path . -- "--capture=$m2Reports/M2-historico-aversivo.png" --capture-state=m2-aversive --capture-minimum
+godot --path . -- --fps-benchmark=12 "--capture=$m2Reports/M2-fps-12.png"
+```
+
+Também existem `m2-memory`, `m2-cautious`, `m2-lab`, `m2-ablation`, `m2-catalog` e `m2-tutorial`. São cenários explícitos de inspeção da cena real, seed 81102, um pet com perfil curioso, visão de 360° e reservas iniciais altas. O objeto é colocado a 24 unidades; aproximação e investigação vêm exclusivamente de `world.step()`. Para habituação e histórico aversivo, oito contatos físicos prévios são espaçados por 181 passos de relógio, com reservas restauradas antes de cada aquisição; esse preparo não representa vida livre. As capturas pausam nos estados observados, não executam avaliadores científicos nem escrevem saves pessoais.
+
+O benchmark atual apresenta **três objetos**, conserva **12 criaturas** e mede **mente só no pet** na cena de jogo a 1×. Salva JSON ao lado do PNG, com população, objetos, mentes ativas, janela, adaptador, média e p95. A medição exige modo gráfico e não demonstra eficácia comportamental.
+
 ## E1: capturas e mini gráfico de quadros/s
 
 A barra inferior contém um gráfico das últimas 120 durações de quadro (exibidas como quadros/s). Para medir a cena real, renderizada e em execução a 1×, com dois segundos de aquecimento e oito segundos de coleta:
@@ -155,7 +179,7 @@ godot --path . -- --fps-benchmark=12
 godot --path . -- --fps-benchmark=30
 ```
 
-Esses comandos usam seed 7421, janela de 1280×720 e escrevem `reports/E2-fps-12.json`/`.png` e `reports/E2-fps-30.json`/`.png`, com média de quadros/s, p95 de duração, população final e adaptador. Exigem modo gráfico; não use `--headless`. Não acessam saves nem preferências pessoais. Valores dependem de hardware, carga e sincronização da janela; não constituem um gate de eficácia do aprendizado.
+Esses comandos usam seed 7421, janela de 1280×720 e, sem `--capture` explícito, escrevem `user://E4-fps-12.json`/`.png` e `user://E4-fps-30.json`/`.png`, com média de quadros/s, p95 de duração, população final e adaptador. Para guardar em `reports/`, passe o caminho absoluto como nos comandos M2 acima. Exigem modo gráfico; não use `--headless`. Não acessam saves nem preferências pessoais. Valores dependem de hardware, carga e sincronização da janela; não constituem um gate de eficácia do aprendizado.
 
 ```powershell
 godot --path . -- --capture=reports/E1-12-criaturas-agua.png --capture-state=e1-garden
