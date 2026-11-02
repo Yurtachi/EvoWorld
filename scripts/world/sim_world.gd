@@ -24,7 +24,8 @@ const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
-const SAVE_VERSION := 15 # Pet worlds and finite physical feeders; legacy rules preserved.
+const SAVE_VERSION := 16 # Bounded spatial evidence and expectations per pet.
+const SpatialPolicy = preload("res://scripts/spatial/spatial_policy.gd")
 const Terminal = preload("res://scripts/terminal/terminal.gd")
 const TerminalAdapter = preload("res://scripts/terminal/terminal_mundo_real.gd")
 const TerminalState = preload("res://scripts/terminal/terminal_estado.gd")
@@ -134,7 +135,10 @@ static func new_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
 			initial["feeding_mode"] = "ecosystem" if initial.get("food_regrow", true) else "manual"
 	initial.merge({"water_enabled": true, "water_count": 3, "personality_enabled": true}, false)
 	initial["_mind_pet_default"] = not config.has("mind_enabled_ids") and not config.get("mind_all", false)
-	return load("res://scripts/world/sim_world.gd").new(world_seed, initial)
+	var result = load("res://scripts/world/sim_world.gd").new(world_seed, initial)
+	if not config.has("creature_count") and result.creatures.has(result.pet_id):
+		result.creatures[result.pet_id].enable_spatial_memory()
+	return result
 
 static func new_pet_world(world_seed: int = 1, nome: String = "") -> SimWorld:
 	return new_world(world_seed, {"_pet_name": nome.strip_edges().left(64)})
@@ -1062,6 +1066,7 @@ func _eat(creature: Creature, food_id: int) -> void:
 			creature.personality.ingest(creature, tick, episode_context, food["food_type"], gained, creature.hydration - old_hydration, float(params["toxicity"]))
 		if creature.mind != null:
 			creature.mind.consequence(creature, tick, "food", gained)
+			_spatial_ingestion(creature, "comida", food.pos, gained)
 			if float(params["toxicity"]) > 0.0:
 				creature.mind.consequence(creature, tick, "toxic", float(params["toxicity"]))
 		foods.remove_at(index)
@@ -1088,10 +1093,11 @@ func _seek_water(creature: Creature, sensors: Dictionary) -> bool:
 		if distance <= Obs.reach(creature):
 			_drink(creature, int(nearest["id"]))
 			return false
-		creature.heading = (nearest["pos"] - creature.pos).angle()
+		creature.heading = (nearest.pos - creature.pos).angle()
 		creature.last_action = "seek_water"
 		creature.last_reason = "ecology.seek_water"
 	else:
+		if _has_spatial(creature): return _spatial_seek(creature, sensors, "agua")
 		if creature.age % 15 == 0:
 			creature.heading += rng.between(-0.9, 0.9)
 		creature.last_action = "explore"
@@ -1118,6 +1124,7 @@ func _drink(creature: Creature, water_id: int) -> bool:
 			creature.personality.record(tick, episode_context, "drink", 0.0, gained, 0.0, "water", "drinking")
 		if creature.mind != null:
 			creature.mind.consequence(creature, tick, "water", gained)
+			_spatial_ingestion(creature, "agua", shore, gained)
 		creature.last_action = "drink"
 		creature.last_reason = "ecology.drink"
 		_record({"type": "drink", "creature_id": creature.id, "water_id": water_id, "hydration": gained})
@@ -1275,9 +1282,16 @@ static func _migrate_v13(data: Dictionary) -> Dictionary:
 
 ## No population, RNG, food or reproduction change during migration.
 static func _migrate_v14(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [15, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 14 or data.has("feeders"): return {}
 	if not data.get("config") is Dictionary or data.config.has("feeding_mode"): return {}
+	var migrated := data.duplicate(true)
+	migrated.save_version = 15
+	return migrated
+
+static func _migrate_v15(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 15: return {}
 	var migrated := data.duplicate(true)
 	migrated.save_version = SAVE_VERSION
 	return migrated
@@ -1490,8 +1504,11 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, SAVE_VERSION]:
 		return null
+	if int(data.save_version) < 16 and data.get("creatures") is Array:
+		for entry in data.creatures:
+			if entry is Dictionary and entry.get("mind") is Dictionary and entry.mind.has("spatial"): return null
 	if int(data.save_version) < 15:
 		if data.has("feeders") or (data.get("config") is Dictionary and data.config.has("feeding_mode")): return null
 	if int(data.save_version) < 13:
@@ -1543,6 +1560,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if data.is_empty(): return null
 	if int(data["save_version"]) == 14:
 		data = _migrate_v14(data)
+		if data.is_empty(): return null
+	if int(data["save_version"]) == 15:
+		data = _migrate_v15(data)
 		if data.is_empty(): return null
 	if not data.get("feeders", []) is Array or data.get("feeders", []).size() > Feeder.LIMIT: return null
 	if not data.get("terminals", []) is Array or data.get("terminals", []).size() > TERMINAL_LIMIT or not data.get("terminal_markers", []) is Array or data.get("terminal_markers", []).size() > 48: return null
@@ -1668,6 +1688,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			return null
 		if creature.pos != result._inside(creature.pos, creature.genome.size) or not result._clear(creature.pos, creature.genome.size):
 			return null
+		if creature.mind != null and not Mind.Spatial.valid(creature.mind.spatial, result.tick, result.size): return null
 		for event in creature.memory:
 			if not Data.event(event, result.tick, int(data["next_id"])):
 				return null
@@ -1977,15 +1998,55 @@ func _personality_seek_food(creature: Creature, sensors: Dictionary, closest: Di
 		if distance <= Obs.reach(creature):
 			_eat(creature, int(closest["id"]))
 			return false
-		creature.heading = (closest["pos"] - creature.pos).angle()
+		creature.heading = (closest.pos - creature.pos).angle()
 		creature.last_action = "seek_food"
 		creature.last_reason = "personality.survival"
 	else:
+		if _has_spatial(creature): return _spatial_seek(creature, sensors, "comida")
 		if creature.age % 15 == 0:
 			creature.heading += rng.between(-0.9, 0.9)
 		creature.last_action = "explore"
 		creature.last_reason = "personality.survival"
 	return _move(creature, sensors["obstacles"])
+
+func _has_spatial(creature: Creature) -> bool:
+	return creature.mind != null and not creature.mind.spatial.is_empty()
+
+func _spatial_ingestion(creature: Creature, resource: String, position: Vector2, gain: float) -> void:
+	if not _has_spatial(creature) or not creature.mind.memory_enabled: return
+	Mind.Spatial.evidence(creature.mind.spatial, resource, position, tick, true, gain, "interagido")
+	creature.mind.spatial.objetivo_atual = ""
+	creature.mind.spatial.arrival_tick = -1
+
+func _spatial_seek(creature: Creature, sensors: Dictionary, resource: String) -> bool:
+	var mind = creature.mind
+	# Critical energy limits how much time can be spent testing uncertain places.
+	# The existing broad exploration remains a physical survival fallback.
+	if resource == "comida" and creature.hunger > 0.75:
+		mind.spatial.objetivo_atual = ""
+		mind.spatial.arrival_tick = -1
+		mind.spatial.motivo = "spatial.explore"
+		if creature.age % 15 == 0: creature.heading += rng.between(-0.9, 0.9)
+		creature.last_action = "explore"
+		creature.last_reason = "spatial.explore"
+		return _move(creature, sensors.get("obstacles", []))
+	var previous: String = mind.spatial.motivo
+	var decision := SpatialPolicy.choose(creature, mind.spatial, sensors, resource, tick, size, mind.memory_enabled and mind.policy_mode == "full")
+	if previous != mind.spatial.motivo:
+		mind.mind_log.append({"tick": tick, "objetivo": mind.objetivo_atual, "pontuacoes": mind.pontuacoes.duplicate(true), "motivo": mind.spatial.motivo})
+		if mind.mind_log.size() > Mind.LOG_LIMIT: mind.mind_log.pop_front()
+	creature.last_reason = mind.spatial.motivo
+	if decision.get("wander", false):
+		if creature.age % 15 == 0: creature.heading += rng.between(-0.9, 0.9)
+		creature.last_action = "explore"
+		return _move(creature, sensors.get("obstacles", []))
+	if decision.scan:
+		creature.heading = decision.heading
+		creature.last_action = "inspect_place"
+		return false
+	creature.heading = SpatialPolicy.heading(creature, mind.spatial, decision.target, tick)
+	creature.last_action = "seek_place" if mind.spatial.motivo == "spatial.expected" else "explore"
+	return _move(creature, sensors.get("obstacles", []))
 
 func _personality_action(creature: Creature, sensors: Dictionary, motive: String) -> bool:
 	if motive == "rest":

@@ -1,0 +1,201 @@
+{
+  "verdict": "PARTIAL",
+  "learning_demonstrated_in_scenario": true,
+  "criteria": {
+    "A_success_margin": true,
+    "A_latency_margin": true,
+    "A_paired_test": true,
+    "B_revision": false,
+    "C_retention": true,
+    "D_richer": true,
+    "E_coverage": true,
+    "E_cpu": true,
+    "E_integrity": true
+  },
+  "summary": {
+    "A:treinado": {
+      "n": 72,
+      "success": 1,
+      "latency": 69.98611111111111,
+      "path_ratio": 0.9694119582394466,
+      "searches": 1,
+      "failures": 0
+    },
+    "A:sem_memoria": {
+      "n": 72,
+      "success": 0.18055555555555555,
+      "latency": 166.20833333333334,
+      "path_ratio": 2.5859377777516066,
+      "searches": 0,
+      "failures": 0
+    },
+    "A:nao_treinado": {
+      "n": 72,
+      "success": 0.18055555555555555,
+      "latency": 166.20833333333334,
+      "path_ratio": 2.5859377777516066,
+      "searches": 0,
+      "failures": 0
+    },
+    "A:sistematico": {
+      "n": 72,
+      "success": 0.19444444444444445,
+      "latency": 168.88888888888889,
+      "path_ratio": 2.6824542515172176,
+      "searches": 0,
+      "failures": 0
+    },
+    "A:oraculo": {
+      "n": 72,
+      "success": 1,
+      "latency": 69.98611111111111,
+      "path_ratio": 0.9694119582394466,
+      "searches": 1,
+      "failures": 0
+    },
+    "C:treinado": {
+      "n": 72,
+      "success": 1,
+      "latency": 69.98611111111111,
+      "path_ratio": 0.9694119582394466,
+      "searches": 1,
+      "failures": 0
+    }
+  },
+  "best_success_baseline": "sistematico",
+  "best_latency_baseline": "sem_memoria",
+  "paired": {
+    "wins": 24,
+    "losses": 0,
+    "ties": 0,
+    "p_one_sided": 5.960464477539063e-08,
+    "differences": [
+      {
+        "seed": 271401,
+        "baseline_minus_trained": 71.33333333333334
+      },
+      {
+        "seed": 271402,
+        "baseline_minus_trained": 110.66666666666667
+      },
+      {
+        "seed": 271403,
+        "baseline_minus_trained": 118.33333333333334
+      },
+      {
+        "seed": 271404,
+        "baseline_minus_trained": 104
+      },
+      {
+        "seed": 271405,
+        "baseline_minus_trained": 74
+      },
+      {
+        "seed": 271406,
+        "baseline_minus_trained": 109.33333333333334
+      },
+      {
+        "seed": 271407,
+        "baseline_minus_trained": 61.66666666666667
+      },
+      {
+        "seed": 271408,
+        "baseline_minus_trained": 120.66666666666666
+      },
+      {
+        "seed": 271409,
+        "baseline_minus_trained": 100
+      },
+      {
+        "seed": 271410,
+        "baseline_minus_trained": 47
+      },
+      {
+        "seed": 271411,
+        "baseline_minus_trained": 124.66666666666666
+      },
+      {
+        "seed": 271412,
+        "baseline_minus_trained": 88.33333333333334
+      },
+      {
+        "seed": 271413,
+        "baseline_minus_trained": 86.66666666666667
+      },
+      {
+        "seed": 271414,
+        "baseline_minus_trained": 121
+      },
+      {
+        "seed": 271415,
+        "baseline_minus_trained": 98.0
+      },
+      {
+        "seed": 271416,
+        "baseline_minus_trained": 109.33333333333333
+      },
+      {
+        "seed": 271417,
+        "baseline_minus_trained": 68.66666666666667
+      },
+      {
+        "seed": 271418,
+        "baseline_minus_trained": 97.00000000000001
+      },
+      {
+        "seed": 271419,
+        "baseline_minus_trained": 105
+      },
+      {
+        "seed": 271420,
+        "baseline_minus_trained": 96.33333333333333
+      },
+      {
+        "seed": 271421,
+        "baseline_minus_trained": 122
+      },
+      {
+        "seed": 271422,
+        "baseline_minus_trained": 85.66666666666666
+      },
+      {
+        "seed": 271423,
+        "baseline_minus_trained": 71.66666666666666
+      },
+      {
+        "seed": 271424,
+        "baseline_minus_trained": 118
+      }
+    ]
+  },
+  "B_revision_rate": 0,
+  "B_mean_post_returns": 0.5833333333333334,
+  "D_preference_rate": 1,
+  "seeds": [
+    271401,
+    271402,
+    271403,
+    271404,
+    271405,
+    271406,
+    271407,
+    271408,
+    271409,
+    271410,
+    271411,
+    271412,
+    271413,
+    271414,
+    271415,
+    271416,
+    271417,
+    271418,
+    271419,
+    271420,
+    271421,
+    271422,
+    271423,
+    271424
+  ],
+  "oracle_is_ceiling_only": true
+}

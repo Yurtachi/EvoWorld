@@ -73,6 +73,11 @@ if git cat-file -e "$revision:reports/M4b_terminal_eval.json" 2>/dev/null; then
     python tests/experiments/m4b_terminal_verify.py "$revision"
 fi
 
+# P1 has its own immutable freeze and one-opening marker. Read-only audit.
+if git cat-file -e "$revision:tests/experiments/p1_holdout.json" 2>/dev/null; then
+    python tests/experiments/p1_verify.py "$revision"
+fi
+
 if git cat-file -e "$revision:reports/M5_convivencia_eval.json" 2>/dev/null; then
     verify M5 ffe9e14 \
         tests/experiments/m5_convivencia_preregistro.md tests/experiments/m5_convivencia_eval.gd \

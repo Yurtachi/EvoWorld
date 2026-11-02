@@ -9,13 +9,15 @@ const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
 const Knowledge = preload("res://scripts/library/knowledge.gd")
 const Reading = preload("res://scripts/library/reading.gd")
 const TerminalLearning = preload("res://scripts/mind/terminal_learning.gd")
+const Spatial = preload("res://scripts/spatial/spatial_memory.gd")
+var spatial: Dictionary = {}
 var terminal: Dictionary = {}
 var knowledge: Dictionary = {}
 const LOG_LIMIT := 48
 const MEMORY_LIMIT := 32
 const MEMORY_TTL := 2400
 const MEMORY_KINDS := ["contact", "food", "water", "blocked", "toxic"]
-const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar", "mind.iniciativa.ler", "mind.iniciativa.terminal"]
+const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar", "mind.iniciativa.ler", "mind.iniciativa.terminal", "spatial.expected", "spatial.explore", "spatial.inspect", "spatial.failure"]
 var affect = Affect.new()
 var affect_enabled := true
 var memory_enabled := true
@@ -56,6 +58,8 @@ func set_goal(goal: String, tick: int, reason: String) -> void:
 		mind_log.pop_front()
 
 func decide(creature, tick: int, sensors: Dictionary) -> String:
+	if not spatial.is_empty() and memory_enabled:
+		Spatial.observe(spatial, sensors, tick)
 	Knowledge.maintain(self, tick)
 	var goal := Motivation.choose(creature, self, tick, sensors)
 	Knowledge.gap(self, creature, sensors, tick)
@@ -171,6 +175,7 @@ func to_dict() -> Dictionary:
 		"mind_log": mind_log, "experiences": experiences, "objects": objects, "blocked_ticks": blocked_ticks, "contact_ticks": contact_ticks, "absent_ticks": absent_ticks, "rng_state": rng.to_dict()})
 	if not knowledge.is_empty(): out["knowledge"] = Data.restore_precision(knowledge)
 	if not terminal.is_empty(): out["terminal"] = Data.restore_precision(terminal)
+	if not spatial.is_empty(): out["spatial"] = Data.restore_precision(spatial)
 	return out
 
 static func valid_scores(value: Variant) -> bool:
@@ -182,8 +187,9 @@ static func valid_scores(value: Variant) -> bool:
 	return true
 
 static func from_dict(data: Variant, max_tick: int = 2147483647):
-	if not data is Dictionary or data.size() != 15 + int(data.has("knowledge")) + int(data.has("terminal")) or not Data.json_data(data):
+	if not data is Dictionary or data.size() != 15 + int(data.has("knowledge")) + int(data.has("terminal")) + int(data.has("spatial")) or not Data.json_data(data):
 		return null
+	if data.has("spatial") and not Spatial.valid(data.spatial, max_tick): return null
 	if data.has("terminal") and not TerminalLearning.valid(data.terminal, max_tick): return null
 	if data.has("knowledge") and not Knowledge.valid(data.knowledge, max_tick): return null
 	if not data.get("affect_enabled") is bool or not data.get("memory_enabled") is bool or data.get("policy_mode") not in ["full", "random", "fixed"] or data.get("objetivo_atual") not in Motivation.GOALS + [""] or data.get("motivo") not in REASONS:

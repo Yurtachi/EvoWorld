@@ -16,6 +16,13 @@ var personality = null
 var ensino = null
 var atelier = null
 var personality_water_enabled := false
+
+func enable_spatial_memory() -> void:
+	if mind != null and mind.spatial.is_empty():
+		mind.spatial = Mind.Spatial.empty(genome.vision_range / 2.0)
+
+func spatial_snapshot() -> Dictionary:
+	return Mind.Spatial.snapshot(mind.spatial if mind != null else {})
 var temperament: Dictionary:
 	get:
 		return genome.temperament.duplicate()
