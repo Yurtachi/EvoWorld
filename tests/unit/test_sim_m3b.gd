@@ -140,7 +140,7 @@ func _scalar_search_and_migration(f: Array) -> void:
 	check(migrated != null, "migracao v10 real rejeitada", f)
 	if migrated != null:
 		var ma = migrated.creatures[migrated.pet_id].atelier
-		check(migrated.to_dict().save_version == 11 and ma.shape_memory.is_empty() and ma.to_dict().best_params == Atelier.new().to_dict().best_params, "migracao inventou memoria/calibracao X5", f)
+		check(migrated.to_dict().save_version == World.SAVE_VERSION and ma.shape_memory.is_empty() and ma.to_dict().best_params == Atelier.new().to_dict().best_params, "migracao inventou memoria/calibracao X5", f)
 		check(World._migrate_v10(migrated.to_dict()) == migrated.to_dict() and Atelier.migrate_v1(ma.to_dict()) == ma.to_dict(), "migracao nao idempotente", f)
 	for bad_value in [NAN, INF, -INF, true, null, [], {}, "invalido"]:
 		var bad: Dictionary = w.to_dict()

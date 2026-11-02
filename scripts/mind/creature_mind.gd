@@ -6,11 +6,14 @@ const Motivation = preload("res://scripts/mind/motivation.gd")
 const Rng = preload("res://scripts/core/sim_rng.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
+const Knowledge = preload("res://scripts/library/knowledge.gd")
+const Reading = preload("res://scripts/library/reading.gd")
+var knowledge: Dictionary = {}
 const LOG_LIMIT := 48
 const MEMORY_LIMIT := 32
 const MEMORY_TTL := 2400
 const MEMORY_KINDS := ["contact", "food", "water", "blocked", "toxic"]
-const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar"]
+const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar", "mind.iniciativa.ler"]
 var affect = Affect.new()
 var affect_enabled := true
 var memory_enabled := true
@@ -51,7 +54,10 @@ func set_goal(goal: String, tick: int, reason: String) -> void:
 		mind_log.pop_front()
 
 func decide(creature, tick: int, sensors: Dictionary) -> String:
-	return Motivation.choose(creature, self, tick, sensors)
+	Knowledge.maintain(self, tick)
+	var goal := Motivation.choose(creature, self, tick, sensors)
+	Knowledge.gap(self, creature, sensors, tick)
+	return goal
 
 func remember(tick: int, kind: String, valence: float, importance: float, source: int = 0) -> void:
 	# Ablation removes retrieval/encoding, not actual bodily experience.
@@ -158,12 +164,14 @@ func snapshot(base: Dictionary) -> Dictionary:
 	return {"afetos": affect.values.duplicate(true) if affect_enabled else empty_affect(), "objetivo_atual": objetivo_atual, "motivo": motivo, "ultimos_logs": mind_log.duplicate(true), "expressao": expression(base), "cause_log": affect.cause_log.duplicate(true), "pontuacoes": pontuacoes.duplicate(true), "affect_enabled": affect_enabled, "memory_enabled": memory_enabled, "objects": Data.restore_precision(objects)}
 
 func to_dict() -> Dictionary:
-	return Data.restore_precision({"affect": affect.to_dict(), "affect_enabled": affect_enabled, "memory_enabled": memory_enabled, "policy_mode": policy_mode,
+	var out: Dictionary = Data.restore_precision({"affect": affect.to_dict(), "affect_enabled": affect_enabled, "memory_enabled": memory_enabled, "policy_mode": policy_mode,
 		"objetivo_atual": objetivo_atual, "motivo": motivo, "goal_started": goal_started, "pontuacoes": pontuacoes,
 		"mind_log": mind_log, "experiences": experiences, "objects": objects, "blocked_ticks": blocked_ticks, "contact_ticks": contact_ticks, "absent_ticks": absent_ticks, "rng_state": rng.to_dict()})
+	if not knowledge.is_empty(): out["knowledge"] = Data.restore_precision(knowledge)
+	return out
 
 static func valid_scores(value: Variant) -> bool:
-	if not value is Dictionary or value.size() not in [0, Motivation.BASE_GOALS.size(), Motivation.GOALS.size()]:
+	if not value is Dictionary or value.size() not in [0, Motivation.BASE_GOALS.size(), 9, Motivation.GOALS.size()]:
 		return false
 	for key in value:
 		if key not in Motivation.GOALS or not Data.number(value[key]) or absf(float(value[key])) > 20.0:
@@ -171,8 +179,10 @@ static func valid_scores(value: Variant) -> bool:
 	return true
 
 static func from_dict(data: Variant, max_tick: int = 2147483647):
-	if not data is Dictionary or data.size() != 15 or not Data.json_data(data):
+	if not data is Dictionary or data.size() not in [15, 16] or not Data.json_data(data):
 		return null
+	if data.size() == 16 and not data.has("knowledge"): return null
+	if data.has("knowledge") and not Knowledge.valid(data.knowledge, max_tick): return null
 	if not data.get("affect_enabled") is bool or not data.get("memory_enabled") is bool or data.get("policy_mode") not in ["full", "random", "fixed"] or data.get("objetivo_atual") not in Motivation.GOALS + [""] or data.get("motivo") not in REASONS:
 		return null
 	if not Data.integer(data.get("goal_started")) or int(data["goal_started"]) > max_tick or not valid_scores(data.get("pontuacoes")):

@@ -30,6 +30,9 @@ func mind_snapshot() -> Dictionary:
 		return mind.snapshot(base)
 	return {"afetos": Mind.new().empty_affect(), "objetivo_atual": "", "motivo": "mind.disabled", "ultimos_logs": [], "expressao": base, "cause_log": [], "pontuacoes": {}, "affect_enabled": false, "memory_enabled": false}
 
+func knowledge_snapshot() -> Dictionary:
+	return Data.restore_precision(mind.knowledge) if mind != null and not mind.knowledge.is_empty() else Mind.Knowledge.empty()
+
 func atelier_snapshot() -> Dictionary:
 	return atelier.snapshot() if atelier != null else Atelier.empty_snapshot()
 

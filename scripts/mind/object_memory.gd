@@ -31,7 +31,8 @@ static func candidate(mind, creature, sensors: Dictionary, tick: int) -> Diction
 		var risk := maxf(0.0, -float(known.get("value", 0.0))) * float(known.get("confidence", 0.0))
 		var t: Dictionary = mind.traits(creature)
 		var curiosity := float(t.curiosity) if s.curiosity_enabled else 0.0
-		var score := n * curiosity - risk * float(t.caution)
+		var advice: float = mind.Knowledge.expectation(mind, row.category, tick)
+		var score := n * curiosity - risk * float(t.caution) + advice * 1.5
 		if mind.affect_enabled and mind.policy_mode == "full":
 			var a: Dictionary = mind.affect.values
 			# Boredom is a derived gap in stimulation, not an invented bodily event.
