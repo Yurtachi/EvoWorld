@@ -16,7 +16,8 @@ def git(*args):
 
 
 def digest(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    # Git stores LF; Windows checkouts can use CRLF without changing code.
+    return hashlib.sha256(path.read_bytes().replace(b'\r\n', b'\n')).hexdigest()
 
 
 def seed_inventory():
