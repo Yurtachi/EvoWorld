@@ -33,6 +33,9 @@ func mind_snapshot() -> Dictionary:
 func knowledge_snapshot() -> Dictionary:
 	return Data.restore_precision(mind.knowledge) if mind != null and not mind.knowledge.is_empty() else Mind.Knowledge.empty()
 
+func terminal_snapshot() -> Dictionary:
+	return Data.restore_precision(mind.terminal) if mind != null and not mind.terminal.is_empty() else Mind.TerminalLearning.empty()
+
 func atelier_snapshot() -> Dictionary:
 	return atelier.snapshot() if atelier != null else Atelier.empty_snapshot()
 

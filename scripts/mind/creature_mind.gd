@@ -8,12 +8,14 @@ const Social = preload("res://scripts/social/social_dynamics.gd")
 const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
 const Knowledge = preload("res://scripts/library/knowledge.gd")
 const Reading = preload("res://scripts/library/reading.gd")
+const TerminalLearning = preload("res://scripts/mind/terminal_learning.gd")
+var terminal: Dictionary = {}
 var knowledge: Dictionary = {}
 const LOG_LIMIT := 48
 const MEMORY_LIMIT := 32
 const MEMORY_TTL := 2400
 const MEMORY_KINDS := ["contact", "food", "water", "blocked", "toxic"]
-const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar", "mind.iniciativa.ler"]
+const REASONS := ["mind.disabled", "mind.score", "mind.timeout", "mind.urgency", "mind.iniciativa.novidade", "mind.iniciativa.lacuna", "mind.iniciativa.evento", "mind.iniciativa.desenhar", "mind.iniciativa.ler", "mind.iniciativa.terminal"]
 var affect = Affect.new()
 var affect_enabled := true
 var memory_enabled := true
@@ -168,10 +170,11 @@ func to_dict() -> Dictionary:
 		"objetivo_atual": objetivo_atual, "motivo": motivo, "goal_started": goal_started, "pontuacoes": pontuacoes,
 		"mind_log": mind_log, "experiences": experiences, "objects": objects, "blocked_ticks": blocked_ticks, "contact_ticks": contact_ticks, "absent_ticks": absent_ticks, "rng_state": rng.to_dict()})
 	if not knowledge.is_empty(): out["knowledge"] = Data.restore_precision(knowledge)
+	if not terminal.is_empty(): out["terminal"] = Data.restore_precision(terminal)
 	return out
 
 static func valid_scores(value: Variant) -> bool:
-	if not value is Dictionary or value.size() not in [0, Motivation.BASE_GOALS.size(), 9, Motivation.GOALS.size()]:
+	if not value is Dictionary or value.size() not in [0, Motivation.BASE_GOALS.size(), 9, 10, Motivation.GOALS.size()]:
 		return false
 	for key in value:
 		if key not in Motivation.GOALS or not Data.number(value[key]) or absf(float(value[key])) > 20.0:
@@ -179,9 +182,9 @@ static func valid_scores(value: Variant) -> bool:
 	return true
 
 static func from_dict(data: Variant, max_tick: int = 2147483647):
-	if not data is Dictionary or data.size() not in [15, 16] or not Data.json_data(data):
+	if not data is Dictionary or data.size() != 15 + int(data.has("knowledge")) + int(data.has("terminal")) or not Data.json_data(data):
 		return null
-	if data.size() == 16 and not data.has("knowledge"): return null
+	if data.has("terminal") and not TerminalLearning.valid(data.terminal, max_tick): return null
 	if data.has("knowledge") and not Knowledge.valid(data.knowledge, max_tick): return null
 	if not data.get("affect_enabled") is bool or not data.get("memory_enabled") is bool or data.get("policy_mode") not in ["full", "random", "fixed"] or data.get("objetivo_atual") not in Motivation.GOALS + [""] or data.get("motivo") not in REASONS:
 		return null

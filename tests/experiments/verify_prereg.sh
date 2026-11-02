@@ -63,3 +63,12 @@ verify M3c 4eb4050 \
     tests/experiments/m3c_biblioteca_preregistro.md tests/experiments/m3c_biblioteca_eval.gd \
     reports/M3c_biblioteca_eval.json preregister_sha256
 python tests/experiments/m3c_biblioteca_verify.py "$revision"
+
+# X7 is audited at the historical freeze, so later integration stays possible.
+# Before its single opening there is deliberately no result artifact to audit.
+if git cat-file -e "$revision:reports/M4b_terminal_eval.json" 2>/dev/null; then
+    verify M4b d9b57a1 \
+        tests/experiments/m4b_terminal_preregistro.md tests/experiments/m4b_terminal_eval.gd \
+        reports/M4b_terminal_eval.json preregister_sha256
+    python tests/experiments/m4b_terminal_verify.py "$revision"
+fi
