@@ -27,6 +27,7 @@ func run() -> Array:
 	_capture_flags(failures)
 	_hostile_order_ttl(failures)
 	_new_world_generations(failures)
+	_hostile_types_regression(failures)
 	return failures
 
 func _check(ok: bool, message: String, failures: Array) -> void:
@@ -359,3 +360,52 @@ func _new_world_generations(f: Array) -> void:
 	for event in child.memory:
 		_check(event.type == "birth" and event.creature_id == child_id, "filhote herdou memoria do genitor", f)
 	_check(child.genome.temperament.size() == 4 and child.genome.parents == [parent.id] and child.genome.generation == 1, "novos tracos/ancestralidade nao herdados", f)
+
+func _hostile_types_regression(f: Array) -> void:
+	var cases := 0
+	# F4: library/version com tipos hostis (sim_world.gd:1400)
+	var w1 = World.new_world(140010, {"creature_count": 1})
+	w1.place_book(w1.creatures[w1.pet_id].pos + Vector2(20, 0), "guia_capsulas")
+	var base_lib: Dictionary = w1.to_dict()
+	_check(World.from_dict(base_lib) != null, "base library fixture invalido", f)
+	for bad_val in [[], {}, "str", true, false, -1, 0, 1.5, NAN, INF]:
+		var bad := base_lib.duplicate(true)
+		bad.library.version = bad_val
+		_reject(bad, int(bad.save_version), "library.version hostil " + str(bad_val), f)
+		cases += 1
+
+	# F4: terminal_estado conhecidos com tipos hostis (terminal_estado.gd:84,96)
+	var w2 = World.new_world(154004, {"creature_count": 1})
+	var c2 = w2.creatures[w2.pet_id]
+	var device: int = w2.place_terminal(c2.pos)
+	for i in range(3):
+		w2.tick += 1
+		w2.terminal_offer_manual(c2, device)
+	var base_term: Dictionary = w2.to_dict()
+	_check(World.from_dict(base_term) != null, "base terminal fixture invalido", f)
+	for cmd in ["OLHAR", "AJUDA", "REPETIR", "MOVER", "DESENHAR"]:
+		for bad_val in [[], {}, -1, true, false, 0, NAN, INF, "desconhecido"]:
+			var bad := base_term.duplicate(true)
+			bad.creatures[0].mind.terminal.state.conhecidos[cmd] = bad_val
+			_reject(bad, int(bad.save_version), "conhecidos[%s] hostil %s" % [cmd, str(bad_val)], f)
+			cases += 1
+		var bad_cmd := base_term.duplicate(true)
+		bad_cmd.creatures[0].mind.terminal.state.conhecidos[123] = "inicial"
+		_reject(bad_cmd, int(bad_cmd.save_version), "conhecidos chave int", f)
+		cases += 1
+
+	# F4: knowledge questions com tipos hostis (knowledge.gd:147)
+	var w3 = World.new_world(140012, {"creature_count": 1})
+	var c3 = w3.creatures[w3.pet_id]
+	w3.place_object(c3.pos + Vector2(8, 0), "capsula_aversiva")
+	c3.mind.decide(c3, w3.tick, w3.sense(c3))
+	var base_k: Dictionary = w3.to_dict()
+	_check(World.from_dict(base_k) != null, "base knowledge fixture invalido", f)
+	_check(not base_k.creatures[0].mind.knowledge.questions.is_empty(), "knowledge sem questoes para teste", f)
+	for field in ["goal", "text_key", "category"]:
+		for bad_val in [[], {}, -1, true, false, 0, NAN, INF, "desconhecido"]:
+			var bad := base_k.duplicate(true)
+			bad.creatures[0].mind.knowledge.questions[0][field] = bad_val
+			_reject(bad, int(bad.save_version), "knowledge questions[%s] hostil %s" % [field, str(bad_val)], f)
+			cases += 1
+	print("F4 tipos hostis regressao: %d casos sem SCRIPT ERROR" % cases)
