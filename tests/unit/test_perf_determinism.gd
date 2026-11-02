@@ -10,11 +10,16 @@ const GOLDEN := {
 }
 
 static func digest(world) -> String:
-	return JSON.stringify(world.to_dict(), "", true, true).sha256_text()
+	var data: Dictionary = world.to_dict()
+	# Compare the exact historical v7 state; remove only new schema metadata.
+	data.save_version = 7
+	data.config.erase("mind_all")
+	data.config.erase("mind_enabled_ids")
+	return JSON.stringify(data, "", true, true).sha256_text()
 
 func run() -> Array:
 	var failures: Array = []
-	var product = World.new_world(7421, {"creature_count": 30, "max_population": 100, "signal_enabled": true})
+	var product = World.new_world(7421, {"creature_count": 30, "max_population": 100, "signal_enabled": true, "mind_enabled_ids": []})
 	var legacy = World.new(5, {"creature_count": 16})
 	for i in 600:
 		product.step()

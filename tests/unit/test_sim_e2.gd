@@ -251,7 +251,7 @@ func _inheritance_and_identity(f: Array) -> void:
 	_check(loaded != null and loaded.pet_id == -1 and loaded.genealogy.records[old_id].death_tick >= 0, "Morte/identidade não persistiu", f)
 
 func _round_trip(f: Array) -> void:
-	var w := World.new_world(9181)
+	var w := World.new_world(9181, {"mind_enabled_ids": []}) # E2 brain compatibility, before M1.
 	var pet = w.creatures[w.pet_id]
 	w.interagir_jogador(pet.id, pet.pos, 0.4)
 	pet.brain = Q.new()

@@ -21,7 +21,8 @@ const Personality = preload("res://scripts/behavior/personality.gd")
 const Ensino = preload("res://scripts/interaction/ensino.gd")
 const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
-const SAVE_VERSION := 7 # E4 extends the validated episode/action vocabulary.
+const Mind = preload("res://scripts/mind/creature_mind.gd")
+const SAVE_VERSION := 8 # M1 adds opt-in per-creature mental state.
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
 	"reproduction_enabled": true, "max_population": 150, "min_reproduction_age": 300,
@@ -42,6 +43,8 @@ var obstacles: Array = []
 var waters: Array = []
 var water_enabled := false
 var personality_enabled := false
+var mind_all := false
+var mind_enabled_ids: Array = []
 var events: Array = []
 var pet_id: int = -1
 var food_regrow: bool = true
@@ -81,6 +84,7 @@ var _in_step := false
 static func new_world(world_seed: int = 1, config: Dictionary = {}) -> SimWorld:
 	var initial := config.duplicate(true)
 	initial.merge({"creature_count": NEW_WORLD_CREATURE_COUNT, "water_enabled": true, "water_count": 3, "personality_enabled": true}, false)
+	initial["_mind_pet_default"] = not config.has("mind_enabled_ids") and not config.get("mind_all", false)
 	return load("res://scripts/world/sim_world.gd").new(world_seed, initial)
 
 func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
@@ -114,6 +118,7 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 	mutation_scale = snappedf(clampf(mutation_scale, 0.0, 0.1), 0.000001)
 	water_enabled = config.get("water_enabled", false) == true
 	personality_enabled = config.get("personality_enabled", false) == true
+	mind_all = config.get("mind_all", false) == true
 	for index in range(clampi(int(config.get("water_count", 0)), 0, Water.MAX_REGIONS)):
 		var radius := minf(rng.between(18.0, 48.0), minf(size.x, size.y) * 0.2)
 		place_water(_random_position(radius), radius)
@@ -126,6 +131,32 @@ func _init(world_seed: int = 1, config: Dictionary = {}) -> void:
 		var creature_id := spawn_creature(_free_position(16.0))
 		if pet_id == -1:
 			pet_id = creature_id
+
+	if config.get("_mind_pet_default", false) and pet_id != -1:
+		enable_mind(pet_id)
+	if config.get("mind_enabled_ids", []) is Array:
+		for creature_id in config.get("mind_enabled_ids", []):
+			if Data.integer(creature_id, 1):
+				enable_mind(int(creature_id))
+
+## Explicit opt-in never consumes the biological world RNG or changes physiology.
+func enable_mind(creature_id: int) -> bool:
+	if not creatures.has(creature_id) or not creatures[creature_id].alive:
+		return false
+	if creatures[creature_id].mind == null:
+		creatures[creature_id].mind = Mind.new(seed ^ (creature_id * 104729))
+		creatures[creature_id].personality_water_enabled = water_enabled
+	if creature_id not in mind_enabled_ids:
+		mind_enabled_ids.append(creature_id)
+		mind_enabled_ids.sort()
+	return true
+
+func disable_mind(creature_id: int) -> bool:
+	if not creatures.has(creature_id):
+		return false
+	creatures[creature_id].mind = null
+	mind_enabled_ids.erase(creature_id)
+	return true
 
 func spawn_creature(pos: Vector2, creature_name: String = "", genome = null) -> int:
 	if not pos.is_finite() or creatures.size() >= max_population or genealogy.records.size() >= Genealogy.MAX_RECORDS:
@@ -169,6 +200,8 @@ func _spawn(pos: Vector2, creature_name: String, genes: Genes, initial_energy: f
 	creature.max_energy = snappedf(80.0 + genes.size * 2.0, 0.000001)
 	creature.energy = snappedf(creature.max_energy * 0.8, 0.000001) if initial_energy < 0.0 else initial_energy
 	creatures[creature.id] = creature
+	if mind_all:
+		enable_mind(creature.id)
 	genealogy.register(creature, tick, mutations)
 	if _in_step:
 		_creature_grid.insert(creature.id, creature.pos)
@@ -298,6 +331,7 @@ func step() -> void:
 		if not creature.alive:
 			_creature_grid.remove(creature_id)
 			creatures.erase(creature_id)
+			mind_enabled_ids.erase(creature_id)
 			if pet_id == creature_id:
 				pet_id = -1
 		else:
@@ -382,7 +416,7 @@ func _update_creature(creature: Creature) -> void:
 	var before: Dictionary = Personality.context(creature) if personality_enabled else {}
 	if personality_enabled:
 		creature.personality.advance(tick, creature.temperament)
-	var sensors := sense(creature, personality_enabled)
+	var sensors := sense(creature, personality_enabled or creature.mind != null)
 	if personality_enabled:
 		creature.personality.perceive(sensors, tick)
 	var closest: Dictionary = {}
@@ -399,9 +433,10 @@ func _update_creature(creature: Creature) -> void:
 	var teaching_acted := false
 	var order: Dictionary = comandos.acao_pendente(creature, self)
 	var teaching_active: bool = creature.ensino != null and creature.ensino.running()
-	var survival := (personality_enabled or teaching_active) and (creature.hunger > Commands.FOME_SUSPENDE_ORDEM or (water_enabled and creature.thirst > Water.THIRST_THRESHOLD))
-	var social: Dictionary = Social.decide(self, creature, sensors) if personality_enabled and not survival else {}
-	var motive: String = creature.personality.motive(creature.temperament) if personality_enabled and not survival else ""
+	var mental_goal: String = creature.mind.decide(creature, tick, sensors) if creature.mind != null else ""
+	var survival := (personality_enabled or teaching_active or creature.mind != null) and (creature.hunger > Commands.FOME_SUSPENDE_ORDEM or (water_enabled and creature.thirst > Water.THIRST_THRESHOLD))
+	var social: Dictionary = Social.decide(self, creature, sensors) if personality_enabled and not survival and creature.mind == null else {}
+	var motive: String = creature.personality.motive(creature.temperament) if personality_enabled and not survival and creature.mind == null else ""
 	if survival:
 		_suspend_brain(creature)
 		if water_enabled and creature.thirst > Water.THIRST_THRESHOLD and (creature.thirst >= creature.hunger or closest.is_empty()):
@@ -418,6 +453,9 @@ func _update_creature(creature: Creature) -> void:
 	elif creature.ensino != null and creature.ensino.running() and creature.hunger <= Commands.FOME_SUSPENDE_ORDEM and (not water_enabled or creature.thirst <= Water.THIRST_THRESHOLD):
 		moving = _ensino_act(creature, sensors)
 		teaching_acted = true
+	elif creature.mind != null:
+		_suspend_brain(creature)
+		moving = _mind_action(creature, sensors, mental_goal, closest, closest_distance)
 	elif not social.is_empty() and creature.personality.fatigue < 0.85:
 		_suspend_brain(creature)
 		moving = _social_action(creature, sensors, social)
@@ -462,6 +500,8 @@ func _update_creature(creature: Creature) -> void:
 	creature.heading = snappedf(wrapf(creature.heading, -PI, PI), 0.000001)
 	if personality_enabled:
 		creature.personality.finish_tick(creature, tick, moving, before, started)
+	if creature.mind != null:
+		creature.mind.observe(self, creature, sensors, moving)
 	if creature.energy <= 0.0:
 		_die(creature, "starvation")
 	elif creature.ensino != null and creature.ensino.running():
@@ -517,6 +557,8 @@ func _apply_action(creature: Creature, sensors: Dictionary, action: int) -> bool
 	var target := creature.pos + Vector2.from_angle(creature.heading) * creature.genome.speed * TICK_DT
 	if target != _inside(target, creature.genome.size) or _occluded(creature.pos, target, creature.genome.size):
 		creature.last_reason = "brain.blocked"
+		if creature.mind != null:
+			creature.mind.consequence(creature, tick, "blocked", 1.0)
 		return false
 	creature.pos = target
 	return true
@@ -543,6 +585,10 @@ func _eat(creature: Creature, food_id: int) -> void:
 		var gained := creature.energy - before
 		if personality_enabled:
 			creature.personality.ingest(creature, tick, episode_context, food["food_type"], gained, creature.hydration - old_hydration, float(params["toxicity"]))
+		if creature.mind != null:
+			creature.mind.consequence(creature, tick, "food", gained)
+			if float(params["toxicity"]) > 0.0:
+				creature.mind.consequence(creature, tick, "toxic", float(params["toxicity"]))
 		foods.remove_at(index)
 		_food_grid.remove(food_id)
 		_food_by_id.erase(food_id)
@@ -595,6 +641,8 @@ func _drink(creature: Creature, water_id: int) -> bool:
 		if personality_enabled:
 			creature.personality.event_valence = 0.5
 			creature.personality.record(tick, episode_context, "drink", 0.0, gained, 0.0, "water", "drinking")
+		if creature.mind != null:
+			creature.mind.consequence(creature, tick, "water", gained)
 		creature.last_action = "drink"
 		creature.last_reason = "ecology.drink"
 		_record({"type": "drink", "creature_id": creature.id, "water_id": water_id, "hydration": gained})
@@ -618,6 +666,8 @@ func _move(creature: Creature, visible_obstacles: Array) -> bool:
 		creature.heading += rng.between(1.0, 2.2)
 		creature.last_action = "avoid_obstacle"
 		creature.last_reason = "Physical boundary contact; turning"
+		if creature.mind != null:
+			creature.mind.consequence(creature, tick, "blocked", 1.0)
 		return false
 	creature.pos = target
 	return true
@@ -687,6 +737,8 @@ func to_dict() -> Dictionary:
 		saved_waters.append({"id": water["id"], "pos": Data.pack_vector(water["pos"]), "radius": water["radius"]})
 	var saved_config := {"food_regrow": food_regrow, "food_capacity": food_capacity,
 		"food_regrow_interval": food_regrow_interval, "food_regrow_batch": food_regrow_batch, "water_enabled": water_enabled, "personality_enabled": personality_enabled}
+	saved_config["mind_all"] = mind_all
+	saved_config["mind_enabled_ids"] = mind_enabled_ids.duplicate()
 	for key in EVOLUTION_DEFAULTS:
 		saved_config[key] = get(key)
 	for key in Signals.DEFAULTS:
@@ -706,7 +758,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -728,6 +780,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		data = _migrate_v5(data)
 	if int(data["save_version"]) == 6:
 		data = _migrate_v6(data)
+	if int(data["save_version"]) == 7:
+		data = _migrate_v7(data)
+		if data.is_empty():
+			return null
 	if not Data.integer_text(data.get("world_seed")):
 		return null
 	if not Data.integer(data.get("tick")) or not Data.integer(data.get("next_id"), 1) or not Data.integer(data.get("pet_id"), -1):
@@ -750,6 +806,13 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	for key in ["mutation_rate", "mutation_scale"]:
 		if not Data.number(config.get(key)) or float(config[key]) < 0.0 or float(config[key]) > (1.0 if key == "mutation_rate" else 0.1):
 			return null
+	if not config.get("mind_all") is bool or not config.get("mind_enabled_ids") is Array or config["mind_enabled_ids"].size() > 10000:
+		return null
+	var unique_minds: Dictionary = {}
+	for creature_id in config["mind_enabled_ids"]:
+		if not Data.integer(creature_id, 1) or unique_minds.has(int(creature_id)):
+			return null
+		unique_minds[int(creature_id)] = true
 	if not config.get("personality_enabled") is bool:
 		return null
 	if not config.get("water_enabled") is bool:
@@ -799,6 +862,12 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		var creature := Creature.from_dict(entry)
 		if creature == null or not creature.alive or used_ids.has(creature.id) or used_ids.has(creature.genome.id) or creature.id == creature.genome.id or creature.genome.id < 1:
 			return null
+		if (creature.mind != null) != unique_minds.has(creature.id):
+			return null
+		if creature.mind != null:
+			if Mind.from_dict(entry["mind"], result.tick) == null:
+				return null
+			creature.personality_water_enabled = result.water_enabled
 		if creature.ensino != null:
 			if Ensino.from_dict(entry["ensino"], result.tick) == null:
 				return null
@@ -822,6 +891,10 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		used_ids[creature.id] = true
 		used_ids[creature.genome.id] = true
 		result.creatures[creature.id] = creature
+	if unique_minds.size() != result.creatures.values().filter(func(c): return c.mind != null).size():
+		return null
+	result.mind_enabled_ids = unique_minds.keys()
+	result.mind_enabled_ids.sort()
 	for ancestor_id in ancestry.records:
 		var ancestor: Dictionary = ancestry.records[ancestor_id]
 		var genome_id := int(ancestor["genome"]["id"])
@@ -839,6 +912,12 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if result.personality_enabled:
 			for key in result.creatures[creature_id].personality.bonds:
 				if key != "player" and (int(key) == creature_id or not ancestry.records.has(int(key))):
+					return null
+		if result.creatures[creature_id].mind != null:
+			for episode in result.creatures[creature_id].mind.experiences:
+				if episode.kind == "contact" and (int(episode.source) == creature_id or not ancestry.records.has(int(episode.source))):
+					return null
+				if episode.kind != "contact" and int(episode.source) != 0:
 					return null
 		var heard: Dictionary = result.creatures[creature_id].last_signal
 		if not heard.is_empty() and (int(heard["emitter"]) == creature_id or not ancestry.records.has(int(heard["emitter"]))):
@@ -961,8 +1040,23 @@ static func _migrate_v5(data: Dictionary) -> Dictionary:
 ## Only the allowed vocabulary changed; retain every existing event and bond.
 static func _migrate_v6(data: Dictionary) -> Dictionary:
 	var migrated := data.duplicate(true)
-	if data.get("save_version") in [6, SAVE_VERSION]:
-		migrated["save_version"] = SAVE_VERSION
+	if data.get("save_version") == 6:
+		migrated["save_version"] = 7
+	return migrated
+
+## Idempotent migration never activates M1 or invents an acquired experience.
+static func _migrate_v7(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION:
+		return data.duplicate(true)
+	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
+		return {}
+	var migrated := data.duplicate(true)
+	migrated["config"]["mind_all"] = false
+	migrated["config"]["mind_enabled_ids"] = []
+	for entry in migrated["creatures"]:
+		if not entry is Dictionary or entry.has("mind"):
+			return {}
+	migrated["save_version"] = SAVE_VERSION
 	return migrated
 
 func _suspend_brain(creature: Creature) -> void:
@@ -1211,4 +1305,43 @@ func _social_action(creature: Creature, sensors: Dictionary, decision: Dictionar
 	if creature.pos.distance_to(decision.target) < 0.01:
 		return false
 	creature.heading = (decision.target - creature.pos).angle()
+	return _move(creature, sensors.obstacles)
+
+
+## Mental goals execute exclusively through existing physical/cost paths.
+func _mind_action(creature: Creature, sensors: Dictionary, goal: String, closest: Dictionary, distance: float) -> bool:
+	creature.last_reason = "mind." + goal
+	match goal:
+		"comer":
+			return _personality_seek_food(creature, sensors, closest, distance)
+		"beber":
+			return _seek_water(creature, sensors)
+		"descansar":
+			creature.last_action = "rest"
+			return false
+		"buscar_companhia", "buscar_privacidade":
+			var nearest: Dictionary = {}
+			var best := INF
+			for row in sensors.get("creatures", []):
+				var d: float = creature.pos.distance_to(row.pos)
+				if d < best:
+					best = d
+					nearest = row
+			if not nearest.is_empty():
+				var other: Creature = creatures[int(nearest.id)]
+				if goal == "buscar_companhia":
+					if best <= creature.genome.size + other.genome.size + 8.0:
+						creature.last_action = "social_contact"
+						return false
+					creature.heading = (other.pos - creature.pos).angle()
+					creature.last_action = "seek_contact"
+				else:
+					var away := creature.pos - other.pos
+					creature.heading = away.angle() if not away.is_zero_approx() else creature.heading + PI
+					creature.last_action = "social_avoid"
+				return _move(creature, sensors.obstacles)
+	# Play is physical locomotion with ordinary movement cost; M2 remains a stub.
+	creature.last_action = "explore"
+	if creature.age % (8 if goal == "brincar" else 15) == 0:
+		creature.heading += creature.mind.rng.between(-0.9, 0.9)
 	return _move(creature, sensors.obstacles)
