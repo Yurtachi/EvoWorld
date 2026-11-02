@@ -1,0 +1,23 @@
+{
+	"active_minds": 1,
+	"adapter": "NVIDIA GeForce RTX 2050",
+	"boards": 1,
+	"books": 1,
+	"display": "Windows",
+	"final_population": 12,
+	"frames": 805,
+	"gallery": 1,
+	"godot": "4.7.2-stable (official)",
+	"initial_population": 12,
+	"mean_fps": 100.617592029787,
+	"objects": 3,
+	"p95_frame_ms": 13.556,
+	"pet_mind_active": true,
+	"seconds": 8.000589,
+	"speed": 1.0,
+	"tick": 102,
+	"window": [
+		1100,
+		680
+	]
+}

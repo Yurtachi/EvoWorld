@@ -10,6 +10,8 @@ const FoodCatalog = preload("res://scripts/environment/food_catalog.gd")
 const FpsChart = preload("res://scripts/ui/fps_chart.gd")
 const PersonalityInspector = preload("res://scripts/ui/personality_inspector.gd")
 const TeachingPanel = preload("res://scripts/ui/teaching_panel.gd")
+const KnowledgePresenter = preload("res://scripts/ui/knowledge_presenter.gd")
+const Books = preload("res://scripts/library/book_catalog.gd")
 const ObjectPresenter = preload("res://scripts/ui/object_presenter.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
 const AtelierCanvas = preload("res://scripts/ui/atelier_canvas.gd")
@@ -107,6 +109,18 @@ var mind_reason: Label
 var mind_enable: Button
 var mind_cost: Label
 var mind_intensity: ProgressBar
+var book_dialog: AcceptDialog
+var book_choice: OptionButton
+var book_description: Label
+var book_type := "guia_capsulas"
+var knowledge_dialog: AcceptDialog
+var knowledge_text: Label
+var reading_text: Label
+var question_card: VBoxContainer
+var question_text: Label
+var question_buttons: Dictionary = {}
+var _question_id := ""
+var _question_creature := -1
 var tutorial_step := 0
 var tutorial_text: Label
 var tutorial_dialog: AcceptDialog
@@ -153,6 +167,7 @@ func _ready() -> void:
 	_build_expand()
 	_build_objects()
 	_build_demo()
+	_build_library()
 	_set_speed(speed)
 	create_world(Texto.texto("world_default"), Texto.texto("pet_default"), 7421)
 	get_viewport().size_changed.connect(_fit_world)
@@ -301,6 +316,22 @@ func _build_ui() -> void:
 	mode_note = _label(inspector, "", 12, Color("d4d6ab"))
 	mode_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	mode_note.hide()
+	question_card = VBoxContainer.new()
+	inspector.add_child(question_card)
+	question_text = _wrapped(question_card, "")
+	question_text.add_theme_color_override("font_color", Color("fff0bb"))
+	_wrapped(question_card, Texto.texto("m3c_question_note"))
+	var answers := GridContainer.new()
+	answers.columns = 2
+	question_card.add_child(answers)
+	for option in ["evitar", "seguro", "neutro", "silencio"]:
+		question_buttons[option] = _button(answers, Texto.texto("m3c_answer_" + option), _answer_question.bind(option))
+		question_buttons[option].size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		question_buttons[option].add_theme_font_size_override("font_size", 12)
+	question_card.hide()
+	reading_text = _wrapped(inspector, "")
+	_button(inspector, Texto.texto("m3c_open"), _open_knowledge)
+	_button(inspector, Texto.texto("m3c_tutorial_btn"), _open_library_tutorial)
 	_label(inspector, Texto.texto("m1_state"), 12, Color("bccc98"))
 	mind_emotion = _wrapped(inspector, "")
 	mind_emotion.add_theme_font_size_override("font_size", 20)
@@ -427,6 +458,8 @@ func _build_ui() -> void:
 	tool_buttons.demo.toggle_mode = true
 	var food_row := HBoxContainer.new()
 	bottom_col.add_child(food_row)
+	tool_buttons["book"] = _button(food_row, Texto.texto("tool_book"), _open_books)
+	tool_buttons.book.toggle_mode = true
 	for kind in ["fruta", "semente", "folha", "cogumelo"]:
 		var button := _button(food_row, Texto.texto("tool_" + kind), _choose_food.bind(kind))
 		button.icon = _food_icon(kind)
@@ -500,7 +533,7 @@ func _confirm_new_world() -> void:
 	create_world(world_input.text.strip_edges(), pet_input.text.strip_edges(), seed_input.text.to_int())
 
 func _unhandled_input(event: InputEvent) -> void:
-	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible):
+	if new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible):
 		return
 	if event is InputEventMouseButton and _over_world(event.position):
 		if event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
@@ -525,7 +558,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _input(event: InputEvent) -> void:
 	# Global shortcuts work even after clicking a focused toolbar button.
-	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible):
+	if new_dialog == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible):
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var handled := true
@@ -547,7 +580,7 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
-	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible):
+	if world == null or new_dialog.visible or chat_dialog.visible or settings_dialog.visible or help_dialog.visible or expand_dialog.visible or teaching.reset_dialog.visible or (tutorial_dialog != null and tutorial_dialog.visible) or (object_dialog != null and object_dialog.visible) or (demo_dialog != null and demo_dialog.visible) or (book_dialog != null and book_dialog.visible) or (knowledge_dialog != null and knowledge_dialog.visible):
 		return
 	var direction := Vector2(float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 		float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
@@ -581,6 +614,9 @@ func _apply_tool(pos: Vector2) -> void:
 		"object":
 			var id := world.place_object(pos, object_type)
 			_notify(Texto.texto("m2_placed", [id]) if id >= 0 else Texto.texto("m2_blocked"), 10)
+		"book":
+			var id := world.place_book(pos, book_type)
+			_notify(Texto.texto("m3c_placed", [id, Texto.texto("book_" + book_type)]) if id >= 0 else Texto.texto("m3c_blocked"), 10)
 		"board":
 			var id := world.place_board(pos)
 			if id >= 0:
@@ -625,6 +661,7 @@ func _apply_tool(pos: Vector2) -> void:
 
 
 func _refresh() -> void:
+	_refresh_library()
 	_refresh_mind()
 	_refresh_atelier()
 	teaching.observe(world, selected_id)
@@ -1085,6 +1122,10 @@ func _capture_demo(path: String) -> void:
 			await _benchmark_fps(path)
 			get_tree().quit()
 			return
+	if state.begins_with("m3c-"):
+		await _capture_m3c(state, path)
+		get_tree().quit()
+		return
 	if state.begins_with("m3-"):
 		await _capture_m3(state, path)
 		get_tree().quit()
@@ -1525,6 +1566,7 @@ func _benchmark_fps(path: String) -> void:
 	if bench_board_id >= 0:
 		_selected_board_id = bench_board_id
 		world.demonstrar_forma(bench_board_id, "circulo", {"scale": 1.0, "center": [32.0, 32.0]})
+	world.place_book(world.creatures[world.pet_id].pos + Vector2(42, 18), "guia_capsulas")
 	paused = false
 	_set_speed(1)
 	var warmup := Time.get_ticks_msec() + 2000
@@ -1546,6 +1588,7 @@ func _benchmark_fps(path: String) -> void:
 	var result := {"initial_population": initial_population, "final_population": world.creatures.size(), "frames": intervals.size(), "seconds": elapsed, "mean_fps": mean, "p95_frame_ms": p95, "godot": Engine.get_version_info().string, "adapter": RenderingServer.get_video_adapter_name(), "display": DisplayServer.get_name(), "window": [get_window().size.x, get_window().size.y], "speed": speed, "tick": world.tick}
 	result["active_minds"] = world.mind_enabled_ids.size()
 	result["objects"] = world.objects.size()
+	result["books"] = world.library.books.size()
 	result["boards"] = world.boards.size()
 	result["gallery"] = world.gallery.size()
 	result["pet_mind_active"] = world.creatures.has(world.pet_id) and world.creatures[world.pet_id].mind != null
@@ -1556,7 +1599,9 @@ func _benchmark_fps(path: String) -> void:
 	else:
 		printerr("Benchmark: caminho de saída não gravável; use caminho absoluto.")
 	paused = true
-	if path.get_file().begins_with("M3-"):
+	if path.get_file().begins_with("M3c-"):
+		_notify(Texto.texto("m3c_fps", [world.creatures.size(), Texto.numero(mean), world.library.books.size(), world.mind_enabled_ids.size()]), 15)
+	elif path.get_file().begins_with("M3-"):
 		_notify(Texto.texto("m3_fps_sample", [world.creatures.size(), Texto.numero(mean), world.boards.size(), world.objects.size(), world.mind_enabled_ids.size(), Texto.texto("yes" if result.pet_mind_active else "no")]), 15)
 	else:
 		_notify(Texto.texto("m2_fps_sample", [world.creatures.size(), Texto.numero(mean), world.objects.size(), world.mind_enabled_ids.size(), Texto.texto("yes" if result.pet_mind_active else "no")]), 15)
@@ -1803,8 +1848,8 @@ func _open_objects() -> void:
 	object_dialog.popup_centered()
 
 func _tutorial_move(direction: int) -> void:
-	tutorial_step = clampi(tutorial_step + direction, 0, 5)
-	tutorial_text.text = Texto.texto("m1_tutorial_step", [tutorial_step + 1, Texto.texto("m1_tutorial_" + str(tutorial_step))])
+	tutorial_step = clampi(tutorial_step + direction, 0, 6)
+	tutorial_text.text = Texto.texto("m1_tutorial_step", [tutorial_step + 1, Texto.texto("m3c_tutorial" if tutorial_step == 6 else "m1_tutorial_" + str(tutorial_step))])
 
 func _capture_m1(state: String, path: String) -> void:
 	# Explicit inspection fixture with physical consequences; never normal gameplay.
@@ -2192,8 +2237,122 @@ func _refresh_atelier() -> void:
 		if world.gallery.size() > 6:
 			_wrapped(gallery_list, Texto.texto("m3_gallery_more", [world.gallery.size() - 6]))
 
-func _m3_fixture() -> void:
-	world = World.new_world(81203, {"creature_count": 0, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false})
+func _build_library() -> void:
+	book_dialog = _window("m3c_catalog", Vector2i(540, 340))
+	var column := _window_column(book_dialog)
+	_wrapped(column, Texto.texto("m3c_catalog_note"))
+	book_choice = OptionButton.new()
+	book_choice.fit_to_longest_item = false
+	column.add_child(book_choice)
+	for key in Books.BOOKS: book_choice.add_item(Texto.texto("book_" + key))
+	book_description = _wrapped(column, Texto.texto("m3c_catalog_" + book_type))
+	book_choice.item_selected.connect(func(index):
+		book_description.text = Texto.texto("m3c_catalog_" + Books.BOOKS.keys()[index]))
+	_button(column, Texto.texto("m3c_place"), _confirm_book)
+	knowledge_dialog = _window("m3c_title", Vector2i(610, 470))
+	knowledge_text = _wrapped(_window_column(knowledge_dialog), "")
+
+func _open_books() -> void:
+	book_dialog.popup_centered()
+
+func _confirm_book() -> void:
+	book_type = Books.BOOKS.keys()[book_choice.selected]
+	book_dialog.hide()
+	_set_tool("book")
+
+func _open_knowledge() -> void:
+	knowledge_text.text = KnowledgePresenter.describe(world.creatures.get(selected_id), world.tick)
+	knowledge_dialog.popup_centered()
+
+func _open_library_tutorial() -> void:
+	tutorial_step = 6
+	_tutorial_move(0)
+	tutorial_dialog.popup_centered()
+
+func _refresh_library() -> void:
+	if reading_text == null: return
+	var creature = world.creatures.get(selected_id)
+	reading_text.text = KnowledgePresenter.reading(creature)
+	if knowledge_dialog != null and knowledge_dialog.visible:
+		knowledge_dialog.title = Texto.texto("m3c_title") + (" · " + Texto.nome_criatura(creature.name) if creature != null else "")
+		knowledge_text.text = KnowledgePresenter.describe(creature, world.tick)
+	var pending: Array = world.pending_questions
+	question_card.visible = not pending.is_empty()
+	_question_id = ""
+	_question_creature = -1
+	if pending.is_empty(): return
+	# Display the selected creature first, otherwise identify the actual asker.
+	var q: Dictionary = pending[0]
+	for candidate in pending:
+		if int(candidate.creature_id) == selected_id:
+			q = candidate
+			break
+	_question_id = q.id
+	_question_creature = int(q.creature_id)
+	var asker = world.creatures.get(_question_creature)
+	question_text.text = Texto.texto("m3c_question", [Texto.nome_criatura(asker.name) if asker != null else str(_question_creature), q.object_id, Texto.texto("m3c_category_" + str(q.category)), q.tick])
+
+func _answer_question(option: String) -> void:
+	if _question_id.is_empty(): return
+	var asker_id := _question_creature
+	var accepted := world.responder_pergunta(_question_id, option)
+	_world_dirty = true
+	# Retain the asker in the inspector so the attributed record is reviewable.
+	selected_id = asker_id
+	_refresh()
+	_notify(Texto.texto("m3c_answer_ignore" if option == "silencio" else ("m3c_answer_ok" if accepted else "m3c_answer_no")), 12)
+	if accepted: _open_knowledge()
+
+func _m3c_fixture() -> void:
+	_m3_fixture(81303)
+	var creature = world.creatures[selected_id]
+	creature.genome.temperament = {"curiosity": 0.9, "caution": 0.25, "sociability": 0.7, "impulsivity": 0.8}
+	creature.heading = 0.0
+
+func _capture_m3c(state: String, path: String) -> void:
+	_m3c_fixture()
+	var creature = world.creatures[selected_id]
+	book_type = "guia_enganoso" if state in ["m3c-contradiction", "m3c-sources"] else "guia_pedras"
+	if state not in ["m3c-question", "m3c-answer", "m3c-ignore"]:
+		_set_tool("book")
+		_apply_tool(creature.pos + Vector2(42, 0))
+		if state != "m3c-catalog":
+			for _step in range(90):
+				world.step()
+				var r: Dictionary = creature.knowledge_snapshot().get("reading", {})
+				if state == "m3c-approaching" and creature.last_action == "seek_book": break
+				if state == "m3c-reading" and creature.last_action == "read_book" and int(r.get("progress", 0)) >= 3: break
+				if int(r.get("page", 0)) >= 1: break
+	if state in ["m3c-question", "m3c-answer", "m3c-ignore", "m3c-contradiction", "m3c-sources", "m3c-symbols"]:
+		var obj := world.place_object(creature.pos + Vector2(8, 0), "capsula_aversiva")
+		if state in ["m3c-question", "m3c-answer", "m3c-ignore"]:
+			creature.mind.decide(creature, world.tick, world.sense(creature))
+			_refresh_library()
+			if state != "m3c-question": _answer_question("seguro" if state == "m3c-answer" else "silencio")
+		elif state in ["m3c-contradiction", "m3c-sources"]:
+			world.interact_object(creature, obj)
+		elif state == "m3c-symbols":
+			world.demonstrar_simbolo(creature.id, "anel", obj, true)
+			world.demonstrar_simbolo(creature.id, "anel", obj, true)
+	camera.position = creature.pos + Vector2(15, 0) + _camera_bias()
+	_refresh()
+	if state in ["m3c-knowledge", "m3c-answer", "m3c-contradiction", "m3c-sources", "m3c-symbols"]: _open_knowledge()
+	if state == "m3c-catalog": _open_books()
+	if state == "m3c-tutorial": _open_library_tutorial()
+	if state in ["m3c-lab", "m3c-ablation"]:
+		_show_lab(true)
+		if state == "m3c-ablation": lab.memory_switch.button_pressed = false
+	_notify(Texto.texto("m3c_banner"), 20)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if state == "m3c-symbols": knowledge_text.get_parent().get_parent().scroll_vertical = 10000
+	if state == "m3c-sources": knowledge_text.get_parent().get_parent().scroll_vertical = 280
+	if state == "m3c-ablation": lab_scroll.scroll_vertical = int(lab.memory_switch.position.y) - 60
+	print(JSON.stringify({"capture": state, "tick": world.tick, "action": creature.last_action, "knowledge": creature.knowledge_snapshot(), "pending": world.pending_questions.size()}))
+	await capture_screenshot(path)
+
+func _m3_fixture(fixture_seed: int = 81203) -> void:
+	world = World.new_world(fixture_seed, {"creature_count": 0, "food_count": 0, "water_count": 0, "obstacle_count": 0, "food_regrow": false, "reproduction_enabled": false})
 	var genes = load("res://scripts/creature/genome.gd").new()
 	genes.size = 8.5
 	genes.speed = 32.0

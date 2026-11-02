@@ -192,6 +192,28 @@ godot --path . -- --fps-benchmark=12 "--capture=$m3Reports/M3-fps-12.png" --capt
 
 As capturas M3 usam a cena real de jogo com seed de fixture 81203, pet curioso e reservas elevadas para isolar o comportamento artístico de urgências vitais. O benchmark gráfico registra 12 criaturas, 1 quadro com desenho ativo e 3 objetos, gerando `reports/M3-fps-12.json` e `reports/M3-fps-12.png`. Evidências detalhadas, validação e auditoria dos limites em [reports/M3_ui.md](reports/M3_ui.md).
 
+## M3c: livros, conhecimento e perguntas
+
+Use **Livro** na segunda linha do rodapé, escolha um dos três títulos do catálogo offline e clique no jardim. Uma criatura com mente ativa pode aproximar-se e ler quando percebe o livro e tem curiosidade ou ociosidade suficientes; fome e sede prevalecem. A Convivência mostra aproximação, página e progresso real (oito passos por página), além da quantidade de fatos daquele título ainda registrados. Colocar um livro não garante leitura nem compreensão.
+
+**Conhecimento · fatos e fontes** abre os registros da seleção com FONTE, CONFIANÇA do fato, passo, validade e distinção entre evidência física e hipótese/afirmação atribuída. A confiança histórica de cada fonte aparece separada. Um livro contradito por contato físico perde credibilidade; a atribuição original permanece. Glifos aparecem como associações discretas, incluindo os desconhecidos, sem alegar escrita ou linguagem geral.
+
+Quando uma investigação encontra uma lacuna, uma caixa discreta na Convivência identifica quem perguntou, o objeto percebido e o passo. As opções são **Evite**, **É seguro**, **É neutro** e **Não sei / ignorar**. Uma resposta aceita aparece como **O cuidador disse**, com fonte cuidador e confiança limitada; pode ser recusada ou corrigida por experiência. Ignorar encerra sem acrescentar fato. Perguntas podem expirar; consultar a caixa não pausa a reprodução automaticamente.
+
+O Laboratório apresenta o resultado restrito já registrado do X6, fontes e confiança, e explica o efeito do controle **Memória M1 ativa**: desliga aquisição e uso do conhecimento, preservando registros históricos. O botão **Roteiro · livro e dúvida** abre a sétima etapa do tutorial, com Guia de pedras seguido de objeto ainda desconhecido. Livros, fatos, fontes, glifos e perguntas usam o save v12 fornecido pelo simulador; a UI não muda o schema.
+
+Reproduza as capturas do build de desenvolvimento com caminho absoluto:
+
+```powershell
+$m3cReports = (Resolve-Path reports).Path.Replace('\', '/')
+godot --path . -- "--capture=$m3cReports/M3c-reading.png" --capture-state=m3c-reading --capture-minimum
+godot --path . -- "--capture=$m3cReports/M3c-question.png" --capture-state=m3c-question --capture-minimum
+godot --path . -- "--capture=$m3cReports/M3c-sources.png" --capture-state=m3c-sources --capture-minimum
+godot --path . -- --fps-benchmark=12 "--capture=$m3cReports/M3c-fps-12.png" --capture-minimum
+```
+
+Também existem `m3c-catalog`, `m3c-approaching`, `m3c-answer`, `m3c-knowledge`, `m3c-contradiction`, `m3c-symbols`, `m3c-lab`, `m3c-ablation` e `m3c-tutorial`. São cenários de inspeção, seed 81303, com pet curioso/sociável, percepção de 360° e reservas iniciais altas; páginas avançam por `world.step()`. Pergunta, resposta, contato e demonstração de glifo usam as APIs reais. O benchmark usa a cena normal, seed 7421, 12 criaturas, uma mente ativa, um livro, três objetos e um quadro: não mede 12 mentes. Nenhum modo reabre avaliadores científicos ou grava saves pessoais. Validação, capturas e limites: [reports/M3c_ui.md](reports/M3c_ui.md).
+
 ## E1: capturas e mini gráfico de quadros/s
 
 A barra inferior contém um gráfico das últimas 120 durações de quadro (exibidas como quadros/s). Para medir a cena real, renderizada e em execução a 1×, com dois segundos de aquecimento e oito segundos de coleta:
