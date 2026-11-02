@@ -1,0 +1,79 @@
+{
+	"rows": [
+		{
+			"alive": 12,
+			"mean_ms": 1.6308499999999997,
+			"median_ms": 1.545,
+			"mind_active": false,
+			"p95_ms": 2.14,
+			"population": 12,
+			"ticks_per_sec": 613.1771775454519
+		},
+		{
+			"alive": 12,
+			"mean_ms": 3.1986000000000017,
+			"median_ms": 3.044,
+			"mind_active": true,
+			"p95_ms": 4.535,
+			"population": 12,
+			"ticks_per_sec": 312.63677859063324
+		},
+		{
+			"alive": 30,
+			"mean_ms": 3.81217,
+			"median_ms": 3.696,
+			"mind_active": false,
+			"p95_ms": 5.077,
+			"population": 30,
+			"ticks_per_sec": 262.31778750685305
+		},
+		{
+			"alive": 30,
+			"mean_ms": 7.765454999999999,
+			"median_ms": 7.589,
+			"mind_active": true,
+			"p95_ms": 10.098,
+			"population": 30,
+			"ticks_per_sec": 128.77545488319745
+		},
+		{
+			"alive": 60,
+			"mean_ms": 7.6630800000000026,
+			"median_ms": 7.455,
+			"mind_active": false,
+			"p95_ms": 9.354,
+			"population": 60,
+			"ticks_per_sec": 130.49583196312705
+		},
+		{
+			"alive": 60,
+			"mean_ms": 16.387085,
+			"median_ms": 15.625,
+			"mind_active": true,
+			"p95_ms": 21.299,
+			"population": 60,
+			"ticks_per_sec": 61.02366589298829
+		},
+		{
+			"alive": 100,
+			"mean_ms": 13.654210000000003,
+			"median_ms": 13.44,
+			"mind_active": false,
+			"p95_ms": 15.768,
+			"population": 100,
+			"ticks_per_sec": 73.23748499547025
+		},
+		{
+			"alive": 100,
+			"mean_ms": 28.573984999999997,
+			"median_ms": 27.773,
+			"mind_active": true,
+			"p95_ms": 35.538,
+			"population": 100,
+			"ticks_per_sec": 34.99686865517708
+		}
+	],
+	"seed": 151301,
+	"ticks": 200,
+	"warmup": 40
+}
