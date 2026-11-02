@@ -1,15 +1,18 @@
 extends RefCounted
-## Bounded per-creature atelier competence and board drawing primitives (E3.5).
-## Every drawing is generated strictly by executing discrete primitive actions
-## (move_pen, pen_down, pen_up, segment); never from pre-made or random images.
-## Learning uses tabular hill-climbing over discrete direction and length
-## conditioned on normalized residual error; reward is error reduction only,
-## never adding physical energy or hydration.
+## Bounded per-creature atelier competence, observation memory, and open-loop motor reproduction (M3b / X5).
+## Phase 1 (Observation): creature perceives demonstration as a noisy, capacity-bounded stroke-3 sequence
+## and encodes a translation/scale-invariant representation in shape_memory.
+## Phase 2 (Reproduction): creature generates primitive pen actions (move_pen, pen_down, pen_up, segment)
+## strictly from shape_memory without reading reference_strokes, subject to motor drift, corner compliance, and noise.
+## Phase 3 (Feedback): creature receives only scalar symmetric Chamfer error in [0, 1].
+## Phase 4 (Learning): creature calibrates decoder_params and consolidates shape_memory across attempts;
+## competence is persisted per creature, never inherited genetically, and never adds energy or hydration.
 
 const Data = preload("res://scripts/core/sim_data.gd")
 const ObjectMemory = preload("res://scripts/mind/object_memory.gd")
+const Textos = preload("res://scripts/core/textos.gd")
 
-const VERSION := 1
+const VERSION := 2
 const BOARD_LIMIT := 32
 const BOARD_RADIUS := 6.0
 const GALLERY_LIMIT := 64
@@ -25,18 +28,45 @@ const DIRECTIONS := 16
 const MAG_BUCKETS := 3
 const LENGTHS := [2.0, 3.0, 4.5]
 const OPS := ["move_pen", "pen_down", "pen_up", "segment"]
+const TRAIN_SHAPES := ["linha", "circulo", "quadrado"]
+const HOLDOUT_SHAPES := ["triangulo", "cruz", "zigue_zague"]
+const KNOWN_SHAPES := ["linha", "circulo", "quadrado", "triangulo", "cruz", "zigue_zague"]
 const SHAPES := ["linha", "circulo", "quadrado"]
-const ALL_SHAPES := ["linha", "circulo", "quadrado", "rabisco"]
+const ALL_SHAPES := ["linha", "circulo", "quadrado", "triangulo", "cruz", "zigue_zague", "rabisco"]
+const POLICY_MODES := ["trained", "naive", "memoria_sem_treino", "servo_geometrico", "random", "frozen", "oraculo"]
 const SUCCESS_THRESHOLD := 0.22
 const DRAW_COOLDOWN := 90
 const DRAW_ENERGY_COST := 0.012
 const SAMPLES_PER_SEGMENT := 4
 
+const MEMORY_SLOT_LIMIT := 6
+const MAX_MEMORY_SEGMENTS := 8
+const PERCEPTION_ANG_NOISE := 0.22
+const PERCEPTION_LEN_NOISE := 0.20
+const MOTOR_ANG_NOISE := 0.38
+const PHYSICAL_WRIST_DRIFT := -0.26
+const PHYSICAL_TURN_COMPLIANCE := 0.64
+
+const INITIAL_DECODER_PARAMS := [0.62, -0.44, 0.0]
+const ORACLE_DECODER_PARAMS := [0.26, 0.5625, 1.0]
+const SERVO_DECODER_PARAMS := [0.0, 0.0, 0.0]
+const INITIAL_SEARCH_DIRS := [-1.0, 1.0, 1.0]
+const INITIAL_STEP_SIZES := [0.34, 0.46, 0.36]
+
 var version: int = VERSION
 var next_id: int = 1
 var learning: bool = true
-var policy_mode: String = "trained" # "trained", "naive", "random", "frozen"
+var policy_mode: String = "trained"
+var observation_enabled: bool = true
 var updates: int = 0
+var decoder_params: Array = []
+var best_params: Array = []
+var search_dirs: Array = []
+var step_sizes: Array = []
+var active_probe_axis: int = -1
+var probe_shape: String = ""
+var best_error: Dictionary = {}
+var shape_memory: Dictionary = {}
 var offset_weights: Array = []
 var dir_weights: Array = []
 var len_weights: Array = []
@@ -50,6 +80,14 @@ func _init() -> void:
 
 func reset_policy() -> void:
 	updates = 0
+	decoder_params = INITIAL_DECODER_PARAMS.duplicate()
+	best_params = INITIAL_DECODER_PARAMS.duplicate()
+	search_dirs = INITIAL_SEARCH_DIRS.duplicate()
+	step_sizes = INITIAL_STEP_SIZES.duplicate()
+	active_probe_axis = -1
+	probe_shape = ""
+	best_error.clear()
+	shape_memory.clear()
 	offset_weights.resize(DIRECTIONS)
 	offset_weights.fill(0.0)
 	dir_weights.resize(DIRECTIONS * DIRECTIONS)
@@ -57,6 +95,49 @@ func reset_policy() -> void:
 	len_weights.resize(MAG_BUCKETS * LENGTHS.size())
 	len_weights.fill(0.0)
 	last_error.clear()
+
+func has_observed(shape: String) -> bool:
+	if not shape_memory.has(shape):
+		return false
+	var mem: Variant = shape_memory.get(shape)
+	return mem is Dictionary and mem.get("rel_turns") is Array and not mem["rel_turns"].is_empty()
+
+func clear_memory(shape: String = "") -> void:
+	if shape == "":
+		shape_memory.clear()
+	else:
+		shape_memory.erase(shape)
+
+func effective_params(shape: String = "") -> Array:
+	if policy_mode == "oraculo":
+		return ORACLE_DECODER_PARAMS.duplicate()
+	if policy_mode == "servo_geometrico":
+		return SERVO_DECODER_PARAMS.duplicate()
+	if policy_mode in ["naive", "memoria_sem_treino"] or (not learning and updates == 0):
+		return INITIAL_DECODER_PARAMS.duplicate()
+	if not learning or policy_mode == "frozen":
+		return best_params.duplicate()
+	return decoder_params.duplicate()
+
+func _sync_summary_weights() -> void:
+	if offset_weights.size() != DIRECTIONS:
+		offset_weights.resize(DIRECTIONS)
+	if dir_weights.size() != DIRECTIONS * DIRECTIONS:
+		dir_weights.resize(DIRECTIONS * DIRECTIONS)
+	if len_weights.size() != MAG_BUCKETS * LENGTHS.size():
+		len_weights.resize(MAG_BUCKETS * LENGTHS.size())
+	var p0 := clampf(float(best_params[0]), -1.0, 1.0)
+	var p1 := clampf(float(best_params[1]), -1.0, 1.0)
+	var p2 := clampf(float(best_params[2]), 0.0, 1.0)
+	for i in range(DIRECTIONS):
+		var ang := float(i) * TAU / float(DIRECTIONS)
+		offset_weights[i] = snappedf(clampf(p0 * cos(ang) + p1 * sin(ang), -1.0, 1.0), 0.000001)
+	for i in range(DIRECTIONS * DIRECTIONS):
+		var r := float(int(i / DIRECTIONS)) / float(DIRECTIONS)
+		var c := float(i % DIRECTIONS) / float(DIRECTIONS)
+		dir_weights[i] = snappedf(clampf(0.5 * p1 * (r - c) + 0.4 * p2, -1.0, 1.0), 0.000001)
+	for i in range(MAG_BUCKETS * LENGTHS.size()):
+		len_weights[i] = snappedf(p2, 0.000001)
 
 static func make_board(board_id: int, pos: Vector2, tick: int = 0) -> Dictionary:
 	return {
@@ -114,10 +195,22 @@ static func shape_segment_dirs(shape: String, dir_offset: int = 0) -> Array:
 		"quadrado":
 			for i in range(8):
 				dirs.append((base + 4 * int(i / 2)) % DIRECTIONS)
+		"triangulo":
+			# Closed 8-segment isosceles triangle (unseen holdout shape).
+			for o in [0, 0, 5, 5, 5, 11, 11, 11]:
+				dirs.append((base + o) % DIRECTIONS)
+		"cruz":
+			# Symmetric 4-arm cross in '+' (unseen holdout shape).
+			for o in [0, 8, 8, 0, 4, 12, 12, 4]:
+				dirs.append((base + o) % DIRECTIONS)
+		"zigue_zague":
+			# 4-tooth sawtooth wave (unseen holdout shape).
+			for o in [3, 3, 13, 13, 3, 3, 13, 13]:
+				dirs.append((base + o) % DIRECTIONS)
 	return dirs
 
 static func build_reference_strokes(shape: String, params: Dictionary = {}) -> Array:
-	if shape not in SHAPES:
+	if shape not in KNOWN_SHAPES:
 		return []
 	var clean := sanitize_params(params)
 	var center := Data.unpack_vector(clean.center)
@@ -140,7 +233,7 @@ static func build_reference_strokes(shape: String, params: Dictionary = {}) -> A
 	return [stroke]
 
 static func demonstrate_shape(board: Dictionary, forma: String, tick: int, params: Dictionary = {}) -> bool:
-	if forma not in SHAPES:
+	if forma not in KNOWN_SHAPES:
 		return false
 	var clean := sanitize_params(params)
 	var ref_strokes := build_reference_strokes(forma, clean)
@@ -151,6 +244,167 @@ static func demonstrate_shape(board: Dictionary, forma: String, tick: int, param
 	board["reference_strokes"] = ref_strokes
 	board["updated_tick"] = tick
 	return true
+
+## Phase 1: Observe demonstration as noisy, capacity-bounded stroke-3 sequence and encode into shape_memory.
+func observe_demonstration(shape: String, reference_strokes: Array, rng, tick: int = 0) -> bool:
+	if not observation_enabled or shape not in KNOWN_SHAPES or reference_strokes.is_empty():
+		return false
+	var stroke: Variant = reference_strokes[0]
+	if not stroke is Array or stroke.size() < 2:
+		return false
+	var seg_count := mini(stroke.size() - 1, MAX_MEMORY_SEGMENTS)
+	if seg_count < 1:
+		return false
+	var eff := effective_params(shape)
+	var prec := clampf(float(eff[2]), 0.0, 1.0)
+	var noise_scale := 0.0 if policy_mode == "oraculo" else (1.0 - 0.85 * prec)
+	var seg_angles: Array = []
+	var seg_lens: Array = []
+	var stroke3: Array = []
+	var sum_len := 0.0
+	for i in range(seg_count):
+		var a := Data.unpack_vector(stroke[i])
+		var b := Data.unpack_vector(stroke[i + 1])
+		var delta := b - a
+		var ang_noise := noise_scale * float(rng.between(-PERCEPTION_ANG_NOISE, PERCEPTION_ANG_NOISE))
+		var len_noise := noise_scale * float(rng.between(-PERCEPTION_LEN_NOISE, PERCEPTION_LEN_NOISE))
+		var ang: float = delta.angle() + ang_noise
+		var l: float = clampf(delta.length() * (1.0 + len_noise), 0.2, CANVAS_SIZE)
+		seg_angles.append(ang)
+		seg_lens.append(l)
+		sum_len += l
+		var obs_vec := Vector2.from_angle(ang) * l
+		var pen_end := 1 if i == seg_count - 1 else 0
+		stroke3.append([snappedf(obs_vec.x, 0.000001), snappedf(obs_vec.y, 0.000001), pen_end])
+	var mean_len := sum_len / float(seg_count)
+	# Store normalized observed displacements, never absolute canvas coordinates
+	# or the demonstration's physical scale.
+	for item in stroke3:
+		item[0] = snappedf(float(item[0]) * LENGTHS[1] / mean_len, 0.000001)
+		item[1] = snappedf(float(item[1]) * LENGTHS[1] / mean_len, 0.000001)
+	var step_rad := TAU / float(DIRECTIONS)
+	var cont_dir0 := wrapf(float(seg_angles[0]), 0.0, TAU) / step_rad
+	var anchor_dir := ((int(round(cont_dir0)) % DIRECTIONS) + DIRECTIONS) % DIRECTIONS
+	var turn_rads: Array = [0.0]
+	var rel_lens: Array = []
+	for i in range(seg_count):
+		var ratio := float(seg_lens[i]) / maxf(0.5, mean_len)
+		var l_b := 0 if ratio < 0.78 else (1 if ratio <= 1.24 else 2)
+		rel_lens.append(l_b)
+		if i > 0:
+			var diff_rad := wrapf(float(seg_angles[i]) - float(seg_angles[i - 1]), -PI, PI)
+			turn_rads.append(snappedf(diff_rad, 0.000001))
+	var obs_count := 1
+	if learning and policy_mode == "trained" and shape_memory.has(shape):
+		var prev_mem: Dictionary = shape_memory[shape]
+		var prev_rads: Array = prev_mem.get("turn_rads", [])
+		var prev_n: int = int(prev_mem.get("observations", 1))
+		if prev_rads.size() == turn_rads.size():
+			obs_count = mini(prev_n + 1, 64)
+			var w_prev := clampf(float(prev_n) / float(obs_count), 0.3, 0.85)
+			for i in range(1, turn_rads.size()):
+				var prev_r := float(prev_rads[i])
+				var cur_r := float(turn_rads[i])
+				turn_rads[i] = snappedf(wrapf(prev_r + wrapf(cur_r - prev_r, -PI, PI) * (1.0 - w_prev), -PI, PI), 0.000001)
+	var rel_turns: Array = [0]
+	var flip_sign := 1
+	for i in range(1, turn_rads.size()):
+		var raw_bins := int(round(float(turn_rads[i]) / step_rad))
+		var wrapped_bins := ((raw_bins + 8 + DIRECTIONS) % DIRECTIONS) - 8
+		if absi(wrapped_bins) == 8:
+			wrapped_bins = 8 * flip_sign
+			flip_sign = -flip_sign
+		rel_turns.append(clampi(wrapped_bins, -8, 8))
+	if not shape_memory.has(shape) and shape_memory.size() >= MEMORY_SLOT_LIMIT:
+		var oldest_key := ""
+		var oldest_tick := 2147483647
+		for k in shape_memory:
+			var t_k := int(shape_memory[k].get("last_tick", 0))
+			if t_k < oldest_tick:
+				oldest_tick = t_k
+				oldest_key = str(k)
+		if oldest_key != "":
+			shape_memory.erase(oldest_key)
+	shape_memory[shape] = {
+		"anchor_dir": anchor_dir,
+		"rel_turns": rel_turns,
+		"rel_lens": rel_lens,
+		"turn_rads": turn_rads,
+		"stroke3": stroke3,
+		"observations": obs_count,
+		"last_tick": maxi(0, tick)
+	}
+	return true
+
+## Phase 2: Reproduce segment plan strictly from shape_memory without access to reference_strokes.
+func _plan_reproduction_trace(target_shape: String, rng) -> Array:
+	var planned: Array = []
+	if policy_mode == "random" or target_shape == "" or target_shape == "rabisco":
+		for i in range(MAX_MEMORY_SEGMENTS):
+			var r_dir := clampi(int(rng.between(0.0, float(DIRECTIONS))), 0, DIRECTIONS - 1)
+			var r_len := clampi(int(rng.between(0.0, float(LENGTHS.size()))), 0, LENGTHS.size() - 1)
+			planned.append({
+				"s_dir": r_dir,
+				"s_mag": r_len,
+				"a_dir": r_dir,
+				"a_len": r_len,
+				"r_step": 0.0
+			})
+		return planned
+	if not has_observed(target_shape):
+		return []
+	var mem: Dictionary = shape_memory[target_shape]
+	var eff := effective_params(target_shape)
+	var b_drift := float(eff[0])
+	var b_turn := float(eff[1])
+	var prec := clampf(float(eff[2]), 0.0, 1.0)
+	var net_drift := 0.0 if policy_mode == "oraculo" else (PHYSICAL_WRIST_DRIFT + b_drift)
+	var motor_noise_scale := 0.0 if policy_mode == "oraculo" else (1.0 - 0.84 * prec)
+	var turn_mult := 1.0 if policy_mode == "oraculo" else clampf(PHYSICAL_TURN_COMPLIANCE * (1.0 + 1.0 * b_turn), 0.25, 1.35)
+	var heading := float(mem.anchor_dir) + 1.5 * net_drift
+	var nom_heading := int(mem.anchor_dir)
+	var rel_turns: Array = mem.rel_turns
+	var rel_lens: Array = mem.rel_lens
+	for i in range(mini(rel_turns.size(), MAX_MEMORY_SEGMENTS)):
+		var turn_i := float(rel_turns[i])
+		nom_heading = ((nom_heading + int(rel_turns[i])) % DIRECTIONS + DIRECTIONS) % DIRECTIONS
+		var corner_load := 2.4 * sin(turn_i * PI / 8.0) + 0.36 * turn_i
+		var jitter: float = motor_noise_scale * float(rng.between(-MOTOR_ANG_NOISE, MOTOR_ANG_NOISE))
+		var speed_tremor: float = 0.0 if policy_mode == "oraculo" else float(rng.between(-1.0, 1.0)) * (1.0 - 0.55 * prec)
+		heading += turn_i + (turn_mult - 1.0) * corner_load + 0.62 * net_drift + jitter
+		var a_dir := ((int(round(heading)) % DIRECTIONS) + DIRECTIONS) % DIRECTIONS
+		var base_len := clampi(int(rel_lens[i]), 0, LENGTHS.size() - 1)
+		var a_len := base_len
+		if speed_tremor > 0.36:
+			a_len = mini(LENGTHS.size() - 1, base_len + 1)
+		elif speed_tremor < -0.36:
+			a_len = maxi(0, base_len - 1)
+		planned.append({
+			"s_dir": nom_heading,
+			"s_mag": base_len,
+			"a_dir": a_dir,
+			"a_len": a_len,
+			"r_step": 0.0
+		})
+	return planned
+
+## Direct action proposal from internal memory without reference vertices.
+func propose_actions(shape: String, rng) -> Array:
+	var is_known := shape in KNOWN_SHAPES
+	if is_known and policy_mode != "random" and not has_observed(shape):
+		return []
+	var start_dir := clampi(int(rng.between(0.0, float(DIRECTIONS))), 0, DIRECTIONS - 1)
+	var planned := _plan_reproduction_trace(shape, rng)
+	if planned.is_empty():
+		return []
+	var actions: Array = [
+		{"op": "move_pen", "dir": start_dir, "len": 0},
+		{"op": "pen_down", "dir": 0, "len": 0}
+	]
+	for step in planned:
+		actions.append({"op": "segment", "dir": int(step.a_dir), "len": int(step.a_len)})
+	actions.append({"op": "pen_up", "dir": 0, "len": 0})
+	return actions
 
 static func execute_actions(actions: Array) -> Dictionary:
 	var pen_pos := Vector2(CANVAS_SIZE * 0.5, CANVAS_SIZE * 0.5)
@@ -315,159 +569,104 @@ static func candidate(mind, creature, sensors: Dictionary, tick: int) -> Diction
 			best = {"score": snappedf(score, 0.000001), "id": int(row.id), "novelty": nov}
 	return best
 
-static func residual_state(err_vec: Vector2, ref_step: float) -> Dictionary:
-	var angle := wrapf(err_vec.angle(), 0.0, TAU)
-	var s_dir := int(round(angle / (TAU / float(DIRECTIONS)))) % DIRECTIONS
-	var ratio := err_vec.length() / maxf(1.0, ref_step)
-	var s_mag := 0 if ratio < 0.75 else (1 if ratio < 1.35 else 2)
-	return {"s_dir": s_dir, "s_mag": s_mag}
-
-static func _uncalibrated_dir(s_dir: int) -> int:
-	return (int(s_dir / 2) + 5) % DIRECTIONS
-
-static func _uncalibrated_len(s_mag: int) -> int:
-	return (s_mag + 1) % LENGTHS.size()
-
-func choose_action(s_dir: int, s_mag: int, rng) -> Dictionary:
-	if policy_mode == "random":
-		return {
-			"dir": clampi(int(rng.between(0.0, float(DIRECTIONS))), 0, DIRECTIONS - 1),
-			"len": clampi(int(rng.between(0.0, float(LENGTHS.size()))), 0, LENGTHS.size() - 1)
-		}
-	if policy_mode == "naive" or (not learning and updates == 0):
-		return {
-			"dir": _uncalibrated_dir(s_dir),
-			"len": _uncalibrated_len(s_mag)
-		}
-	var base_dir := _uncalibrated_dir(s_dir)
-	var best_dir := base_dir
-	var best_score := -INF
-	for cand_dir in range(DIRECTIONS):
-		var delta_dir := (cand_dir - s_dir + DIRECTIONS) % DIRECTIONS
-		var ang_dist := absi(((cand_dir - base_dir + 8 + DIRECTIONS) % DIRECTIONS) - 8)
-		var prior := 0.08 - 0.015 * float(ang_dist)
-		var score := prior + 0.65 * float(offset_weights[delta_dir]) + 0.35 * float(dir_weights[s_dir * DIRECTIONS + cand_dir])
-		if score > best_score:
-			best_score = score
-			best_dir = cand_dir
-	var base_len := _uncalibrated_len(s_mag)
-	var best_len := base_len
-	var best_len_score := -INF
-	for cand_len in range(LENGTHS.size()):
-		var prior_len := 0.06 - 0.025 * float(absi(cand_len - base_len))
-		var lscore := prior_len + float(len_weights[s_mag * LENGTHS.size() + cand_len])
-		if lscore > best_len_score:
-			best_len_score = lscore
-			best_len = cand_len
-	return {"dir": best_dir, "len": best_len}
-
-func apply_feedback(trace: Array, error: float, error_reduction: float) -> int:
-	if not learning or policy_mode in ["random", "naive", "frozen"]:
+## Phase 3 & 4: Scalar error feedback hill-climbing (no reference vertices or per-segment target directions).
+func apply_feedback(shape: String, error: float, _unused_reduction: float = 0.0) -> int:
+	if not learning or policy_mode != "trained" or shape not in KNOWN_SHAPES:
 		return 0
-	var count := 0
-	var chamfer_term := clampf(error_reduction + (SUCCESS_THRESHOLD - error), -0.5, 0.5)
-	for row in trace:
-		var s_dir := int(row.s_dir)
-		var s_mag := int(row.s_mag)
-		var a_dir := int(row.a_dir)
-		var a_len := int(row.a_len)
-		var r_step := float(row.r_step)
-		var delta_dir := (a_dir - s_dir + DIRECTIONS) % DIRECTIONS
-		var signal_dir := clampf(0.75 * r_step + 0.25 * chamfer_term, -1.0, 1.0)
-		var d_idx := s_dir * DIRECTIONS + a_dir
-		dir_weights[d_idx] = snappedf(clampf(lerpf(float(dir_weights[d_idx]), signal_dir, 0.32), -1.0, 1.0), 0.000001)
-		offset_weights[delta_dir] = snappedf(clampf(lerpf(float(offset_weights[delta_dir]), signal_dir, 0.16), -1.0, 1.0), 0.000001)
-		var signed_diff := ((s_dir - a_dir + 8 + DIRECTIONS) % DIRECTIONS) - 8
-		if signed_diff != 0:
-			dir_weights[d_idx] = snappedf(clampf(float(dir_weights[d_idx]) - 0.08, -1.0, 1.0), 0.000001)
-			offset_weights[delta_dir] = snappedf(clampf(float(offset_weights[delta_dir]) - 0.055, -1.0, 1.0), 0.000001)
-			var step_sign := 1 if signed_diff > 0 else -1
-			var adj_dir := (a_dir + step_sign + DIRECTIONS) % DIRECTIONS
-			var adj_delta := (adj_dir - s_dir + DIRECTIONS) % DIRECTIONS
-			var adj_idx := s_dir * DIRECTIONS + adj_dir
-			dir_weights[adj_idx] = snappedf(clampf(float(dir_weights[adj_idx]) + 0.115, -1.0, 1.0), 0.000001)
-			offset_weights[adj_delta] = snappedf(clampf(float(offset_weights[adj_delta]) + 0.065, -1.0, 1.0), 0.000001)
-		var len_err := absf(float(a_len - s_mag))
-		var len_reward := clampf(0.6 * r_step + (0.45 if len_err == 0.0 else (-0.35 * len_err)), -1.0, 1.0)
-		var l_idx := s_mag * LENGTHS.size() + a_len
-		len_weights[l_idx] = snappedf(clampf(lerpf(float(len_weights[l_idx]), len_reward, 0.30), -1.0, 1.0), 0.000001)
-		if a_len != s_mag:
-			var adj_len := a_len + (1 if s_mag > a_len else -1)
-			var adj_l_idx := s_mag * LENGTHS.size() + adj_len
-			len_weights[adj_l_idx] = snappedf(clampf(float(len_weights[adj_l_idx]) + 0.11, -1.0, 1.0), 0.000001)
-		count += 1
-	updates += count
-	return count
+	if not is_finite(error) or error < 0.0 or error > 1.0:
+		return 0
+	var clean_err := snappedf(clampf(error, 0.0, 1.0), 0.000001)
+	last_error[shape] = clean_err
+	if not best_error.has(shape) or probe_shape != shape:
+		best_error[shape] = clean_err
+		probe_shape = shape
+		best_params = decoder_params.duplicate()
+		active_probe_axis = -1
+	elif active_probe_axis >= 0:
+		var prev_best := float(best_error[shape])
+		if clean_err < prev_best - 0.002:
+			best_error[shape] = clean_err
+			best_params = decoder_params.duplicate()
+		else:
+			search_dirs[active_probe_axis] = -float(search_dirs[active_probe_axis])
+			step_sizes[active_probe_axis] = snappedf(maxf(0.03, float(step_sizes[active_probe_axis]) * 0.75), 0.000001)
+	updates += 1
+	# Coordinate search only compares scalar outcomes. No ideal plant parameter
+	# or reference direction enters acceptance or the next proposal.
+	active_probe_axis = (updates - 1) % 3
+	decoder_params = best_params.duplicate()
+	var lo := 0.0 if active_probe_axis == 2 else -1.0
+	var delta := float(search_dirs[active_probe_axis]) * float(step_sizes[active_probe_axis])
+	decoder_params[active_probe_axis] = snappedf(clampf(float(best_params[active_probe_axis]) + delta, lo, 1.0), 0.000001)
+	_sync_summary_weights()
+	return 1
 
-func start_session(board: Dictionary, tick: int, rng) -> void:
+func start_session(board: Dictionary, tick: int, rng) -> bool:
 	var target_shape := str(board.get("reference_shape", ""))
+	if target_shape in KNOWN_SHAPES and policy_mode != "random" and not has_observed(target_shape):
+		active.clear()
+		return false
 	var start_dir := clampi(int(rng.between(0.0, float(DIRECTIONS))), 0, DIRECTIONS - 1)
 	var start_len := 0
 	var start_virtual := Vector2(CANVAS_SIZE * 0.5, CANVAS_SIZE * 0.5)
-	if target_shape in SHAPES and not board.get("reference_strokes", []).is_empty():
-		var ref_stroke: Array = board.reference_strokes[0]
-		if not ref_stroke.is_empty():
-			start_virtual = Data.unpack_vector(ref_stroke[0])
+	# Exploratory scribbles retain their historical per-tick RNG consumption.
+	var planned_trace: Array = [] if target_shape == "" else _plan_reproduction_trace(target_shape, rng)
+	if planned_trace.is_empty() and target_shape != "":
+		active.clear()
+		return false
 	active = {
 		"id": next_id,
 		"board_id": int(board.id),
 		"target_shape": target_shape,
 		"start_tick": tick,
 		"step_index": 0,
-		"total_segments": 8,
+		"total_segments": MAX_MEMORY_SEGMENTS,
 		"status": "active",
 		"actions": [
 			{"op": "move_pen", "dir": start_dir, "len": start_len},
 			{"op": "pen_down", "dir": 0, "len": 0}
 		],
-		"trace": [],
+		"trace": planned_trace,
 		"virtual_pos": Data.pack_vector(start_virtual)
 	}
 	next_id += 1
+	return true
 
 func step_drawing(world, creature, board: Dictionary) -> Dictionary:
 	var rng = creature.mind.rng if creature.mind != null else world.rng
-	if active.is_empty() or int(active.get("board_id", 0)) != int(board.id) or str(active.get("status", "")) != "active":
-		start_session(board, world.tick, rng)
+	var board_target := str(board.get("reference_shape", ""))
+	if board_target in KNOWN_SHAPES and policy_mode != "random" and not has_observed(board_target):
+		active.clear()
+		return {"completed": false, "reproduced": false, "reason": "unobserved"}
+	if active.is_empty() or int(active.get("board_id", 0)) != int(board.id) or str(active.get("status", "")) != "active" or str(active.get("target_shape", "")) != board_target:
+		if not start_session(board, world.tick, rng):
+			return {"completed": false, "reproduced": false, "reason": "unobserved"}
 	var target_shape := str(active.target_shape)
-	var has_ref: bool = target_shape in SHAPES and not board.get("reference_strokes", []).is_empty() and board.reference_strokes[0].size() >= 9
-	var ref_stroke: Array = board.reference_strokes[0] if has_ref else []
-	var ref_step := float(LENGTHS[1])
-	if has_ref:
-		var total_len := 0.0
-		for i in range(8):
-			total_len += Data.unpack_vector(ref_stroke[i]).distance_to(Data.unpack_vector(ref_stroke[i + 1]))
-		ref_step = maxf(1.0, total_len / 8.0)
+	var is_known_shape := target_shape in KNOWN_SHAPES
 	var virtual_pos := Data.unpack_vector(active.virtual_pos)
-	for s in range(MAX_STEPS_PER_TICK):
+	for _s in range(MAX_STEPS_PER_TICK):
 		var idx := int(active.step_index)
 		if idx >= int(active.total_segments):
 			break
 		var a_dir := 0
 		var a_len := 1
-		if has_ref:
-			var target_pt := Data.unpack_vector(ref_stroke[idx + 1])
-			var err_vec := target_pt - virtual_pos
-			var state := residual_state(err_vec, ref_step)
-			var chosen := choose_action(int(state.s_dir), int(state.s_mag), rng)
-			a_dir = int(chosen.dir)
-			a_len = int(chosen.len)
-			var step_scale := float(LENGTHS[a_len]) / float(LENGTHS[1])
-			var virtual_next := virtual_pos + Vector2.from_angle(float(a_dir) * TAU / float(DIRECTIONS)) * (ref_step * step_scale)
-			var err_before := err_vec.length()
-			var err_after := target_pt.distance_to(virtual_next)
-			var r_step := clampf((err_before - err_after) / maxf(1.0, err_before), -1.0, 1.0)
-			active.trace.append({
-				"s_dir": int(state.s_dir),
-				"s_mag": int(state.s_mag),
-				"a_dir": a_dir,
-				"a_len": a_len,
-				"r_step": snappedf(r_step, 0.000001)
-			})
-			virtual_pos = Vector2(snappedf(virtual_next.x, 0.000001), snappedf(virtual_next.y, 0.000001))
+		if idx < active.trace.size():
+			var planned_step: Dictionary = active.trace[idx]
+			a_dir = int(planned_step.get("a_dir", 0))
+			a_len = int(planned_step.get("a_len", 1))
 		else:
 			a_dir = clampi(int(rng.between(0.0, float(DIRECTIONS))), 0, DIRECTIONS - 1)
 			a_len = clampi(int(rng.between(0.0, float(LENGTHS.size()))), 0, LENGTHS.size() - 1)
+			active.trace.append({
+				"s_dir": a_dir,
+				"s_mag": a_len,
+				"a_dir": a_dir,
+				"a_len": a_len,
+				"r_step": 0.0
+			})
+		var step_px := float(LENGTHS[clampi(a_len, 0, LENGTHS.size() - 1)])
+		var virtual_next := (virtual_pos + Vector2.from_angle(float(a_dir) * TAU / float(DIRECTIONS)) * step_px).clamp(Vector2.ZERO, Vector2.ONE * CANVAS_SIZE)
+		virtual_pos = Vector2(snappedf(virtual_next.x, 0.000001), snappedf(virtual_next.y, 0.000001))
 		active.actions.append({"op": "segment", "dir": a_dir, "len": a_len})
 		active.step_index = idx + 1
 	active.virtual_pos = Data.pack_vector(virtual_pos)
@@ -477,21 +676,26 @@ func step_drawing(world, creature, board: Dictionary) -> Dictionary:
 	board["owner_id"] = creature.id
 	board["updated_tick"] = world.tick
 	if int(active.step_index) < int(active.total_segments):
-		return {"completed": false}
+		return {"completed": false, "reproduced": true}
 	active.actions.append({"op": "pen_up", "dir": 0, "len": 0})
 	var executed := execute_actions(active.actions)
 	board["active_actions"] = active.actions.duplicate(true)
 	board["active_strokes"] = executed.strokes
-	var error := chamfer_distance(executed.strokes, board.reference_strokes) if has_ref else 0.0
+	var has_board_ref: bool = is_known_shape and not board.get("reference_strokes", []).is_empty() and board.reference_strokes[0].size() >= 2
+	var eval_ref_strokes: Array = []
+	if has_board_ref:
+		eval_ref_strokes = board.reference_strokes
+	var has_eval_ref := is_known_shape and not eval_ref_strokes.is_empty()
+	var error := chamfer_distance(executed.strokes, eval_ref_strokes) if has_eval_ref else (1.0 if is_known_shape else 0.0)
 	var prev_err := float(last_error.get(target_shape, 0.48))
-	var error_reduction := snappedf(prev_err - error, 0.000001) if has_ref else 0.0
-	if has_ref:
+	var error_reduction := snappedf(prev_err - error, 0.000001) if has_eval_ref else 0.0
+	if has_eval_ref:
 		last_error[target_shape] = error
-	var applied_updates := apply_feedback(active.trace, error, error_reduction) if has_ref else 0
-	var shape_key := target_shape if has_ref else "rabisco"
-	var label: String = {"linha": "Linha", "circulo": "Círculo", "quadrado": "Quadrado", "rabisco": "Rabisco"}.get(shape_key, "Rabisco")
+	var applied_updates := apply_feedback(target_shape, error, error_reduction) if has_board_ref else 0
+	var shape_key := target_shape if is_known_shape else "rabisco"
+	var label: String = Textos.texto("shape_" + shape_key)
 	var art_id: int = world.ids.take()
-	var title := ("%s #%d de %s" % [label, int(active.id), creature.name]).left(64)
+	var title := Textos.texto("m3_artifact_title", [label, int(active.id), creature.name]).left(64)
 	var artifact := {
 		"id": art_id,
 		"title": title,
@@ -521,7 +725,7 @@ func step_drawing(world, creature, board: Dictionary) -> Dictionary:
 		"shape": shape_key,
 		"error": error,
 		"error_reduction": error_reduction,
-		"success": has_ref and error < SUCCESS_THRESHOLD,
+		"success": has_eval_ref and error < SUCCESS_THRESHOLD,
 		"steps": int(active.step_index),
 		"actions_count": active.actions.size(),
 		"updates": applied_updates
@@ -530,7 +734,7 @@ func step_drawing(world, creature, board: Dictionary) -> Dictionary:
 	while attempts.size() > ATTEMPT_LIMIT:
 		attempts.pop_front()
 	active["status"] = "completed"
-	return {"completed": true, "artifact": artifact, "attempt": attempt}
+	return {"completed": true, "reproduced": true, "artifact": artifact, "attempt": attempt}
 
 func shape_competence(shape: String) -> Dictionary:
 	var subset: Array = []
@@ -538,7 +742,7 @@ func shape_competence(shape: String) -> Dictionary:
 		if str(row.shape) == shape:
 			subset.append(row)
 	if subset.is_empty():
-		return {"shape": shape, "attempts": 0, "successes": 0, "success_rate": 0.0, "best_error": 1.0, "median_error": 1.0, "last_error": 1.0, "learned": false}
+		return {"shape": shape, "attempts": 0, "successes": 0, "success_rate": 0.0, "best_error": 1.0, "median_error": 1.0, "last_error": 1.0, "learned": false, "observed": has_observed(shape)}
 	var successes := 0
 	var errors: Array = []
 	var best := 1.0
@@ -562,12 +766,13 @@ func shape_competence(shape: String) -> Dictionary:
 		"best_error": snappedf(best, 0.000001),
 		"median_error": snappedf(median, 0.000001),
 		"last_error": snappedf(float(subset.back().error), 0.000001),
-		"learned": subset.size() >= 3 and (rate >= 0.5 or recent_ok)
+		"learned": subset.size() >= 3 and (rate >= 0.5 or recent_ok),
+		"observed": has_observed(shape)
 	}
 
 func snapshot() -> Dictionary:
 	var comp: Dictionary = {}
-	for shape in SHAPES:
+	for shape in KNOWN_SHAPES:
 		comp[shape] = shape_competence(shape)
 	var current := active.duplicate(true)
 	current.erase("trace")
@@ -575,13 +780,17 @@ func snapshot() -> Dictionary:
 		"enabled": true,
 		"learning": learning,
 		"policy_mode": policy_mode,
+		"observation_enabled": observation_enabled,
 		"updates": updates,
 		"competence": comp,
+		"shape_memory": shape_memory.duplicate(true),
 		"attempts": attempts.duplicate(true),
 		"historico_tentativas": attempts.duplicate(true),
 		"artifacts": artifacts.duplicate(true),
 		"active": current,
 		"policy_summary": {
+			"decoder_params": decoder_params.duplicate(),
+			"best_params": best_params.duplicate(),
 			"offset_weights": offset_weights.duplicate(),
 			"dir_weights": dir_weights.duplicate(),
 			"len_weights": len_weights.duplicate()
@@ -590,19 +799,21 @@ func snapshot() -> Dictionary:
 
 static func empty_snapshot() -> Dictionary:
 	var comp: Dictionary = {}
-	for shape in SHAPES:
-		comp[shape] = {"shape": shape, "attempts": 0, "successes": 0, "success_rate": 0.0, "best_error": 1.0, "median_error": 1.0, "last_error": 1.0, "learned": false}
+	for shape in KNOWN_SHAPES:
+		comp[shape] = {"shape": shape, "attempts": 0, "successes": 0, "success_rate": 0.0, "best_error": 1.0, "median_error": 1.0, "last_error": 1.0, "learned": false, "observed": false}
 	return {
 		"enabled": false,
 		"learning": false,
 		"policy_mode": "naive",
+		"observation_enabled": true,
 		"updates": 0,
 		"competence": comp,
+		"shape_memory": {},
 		"attempts": [],
 		"historico_tentativas": [],
 		"artifacts": [],
 		"active": {},
-		"policy_summary": {"offset_weights": [], "dir_weights": [], "len_weights": []}
+		"policy_summary": {"decoder_params": [], "best_params": [], "offset_weights": [], "dir_weights": [], "len_weights": []}
 	}
 
 func to_dict() -> Dictionary:
@@ -611,7 +822,16 @@ func to_dict() -> Dictionary:
 		"next_id": next_id,
 		"learning": learning,
 		"policy_mode": policy_mode,
+		"observation_enabled": observation_enabled,
 		"updates": updates,
+		"decoder_params": decoder_params,
+		"best_params": best_params,
+		"search_dirs": search_dirs,
+		"step_sizes": step_sizes,
+		"active_probe_axis": active_probe_axis,
+		"probe_shape": probe_shape,
+		"best_error": best_error,
+		"shape_memory": shape_memory,
 		"offset_weights": offset_weights,
 		"dir_weights": dir_weights,
 		"len_weights": len_weights,
@@ -658,6 +878,41 @@ static func valid_stroke3(stroke3: Variant) -> bool:
 			return false
 	return true
 
+static func valid_shape_memory(mem_dict: Variant, max_tick: int) -> bool:
+	if not mem_dict is Dictionary or mem_dict.size() > MEMORY_SLOT_LIMIT:
+		return false
+	for shape_key in mem_dict:
+		if not shape_key is String or shape_key not in KNOWN_SHAPES:
+			return false
+		var entry: Variant = mem_dict[shape_key]
+		if not entry is Dictionary or entry.size() != 7:
+			return false
+		if not Data.integer(entry.get("anchor_dir")) or int(entry["anchor_dir"]) >= DIRECTIONS:
+			return false
+		if not Data.integer(entry.get("observations"), 1) or int(entry["observations"]) > 64:
+			return false
+		if not Data.integer(entry.get("last_tick")) or int(entry["last_tick"]) > max_tick:
+			return false
+		var rt: Variant = entry.get("rel_turns")
+		var rl: Variant = entry.get("rel_lens")
+		var tr: Variant = entry.get("turn_rads")
+		var s3: Variant = entry.get("stroke3")
+		if not rt is Array or not rl is Array or not tr is Array or not s3 is Array:
+			return false
+		var seg_n: int = rt.size()
+		if seg_n < 1 or seg_n > MAX_MEMORY_SEGMENTS or rl.size() != seg_n or tr.size() != seg_n or s3.size() != seg_n:
+			return false
+		for i in range(seg_n):
+			if not Data.integer(rt[i], -8) or int(rt[i]) > 8:
+				return false
+			if not Data.integer(rl[i]) or int(rl[i]) >= LENGTHS.size():
+				return false
+			if not Data.number(tr[i]) or absf(float(tr[i])) > PI + 0.01:
+				return false
+		if not valid_stroke3(s3):
+			return false
+	return true
+
 static func valid_artifact(art: Variant, max_tick: int, next_world_id: int) -> bool:
 	if not art is Dictionary or art.size() != 11:
 		return false
@@ -698,7 +953,7 @@ static func valid_board(b: Variant, max_tick: int, next_world_id: int) -> bool:
 	if not Data.integer(b.get("id"), 1) or int(b["id"]) >= next_world_id or not Data.vector(b.get("pos")):
 		return false
 	var ref_shape = b.get("reference_shape")
-	if not ref_shape is String or ref_shape not in SHAPES + [""]:
+	if not ref_shape is String or ref_shape not in KNOWN_SHAPES + [""]:
 		return false
 	var ref_params = b.get("reference_params")
 	if not ref_params is Dictionary:
@@ -707,10 +962,18 @@ static func valid_board(b: Variant, max_tick: int, next_world_id: int) -> bool:
 		if not ref_params.is_empty() or not b.get("reference_strokes") is Array or not b["reference_strokes"].is_empty():
 			return false
 	else:
-		if ref_params.size() != 3 or not Data.vector(ref_params.get("center")) or not Data.number(ref_params.get("scale")) or float(ref_params["scale"]) < 0.4 or float(ref_params["scale"]) > 1.7 or not Data.integer(ref_params.get("dir_offset")) or int(ref_params["dir_offset"]) >= DIRECTIONS:
+		var strokes_val = b.get("reference_strokes")
+		if not strokes_val is Array:
 			return false
-		if not valid_strokes(b.get("reference_strokes")) or b["reference_strokes"].is_empty():
-			return false
+		if ref_params.is_empty() and strokes_val.is_empty():
+			pass # Cleared demonstration after observation for memory-only reproduction
+		else:
+			if ref_params.size() != 3 or not Data.vector(ref_params.get("center")) or not Data.number(ref_params.get("scale")) or float(ref_params["scale"]) < 0.4 or float(ref_params["scale"]) > 1.7 or not Data.integer(ref_params.get("dir_offset")) or int(ref_params["dir_offset"]) >= DIRECTIONS:
+				return false
+			if not valid_strokes(strokes_val) or strokes_val.is_empty():
+				return false
+			if Data.restore_precision(strokes_val) != Data.restore_precision(build_reference_strokes(ref_shape, ref_params)):
+				return false
 	if not b.get("active_actions") is Array or b["active_actions"].size() > MAX_ACTIONS_PER_DRAWING:
 		return false
 	for act in b["active_actions"]:
@@ -730,9 +993,18 @@ static func valid_board(b: Variant, max_tick: int, next_world_id: int) -> bool:
 		return false
 	if not b.get("artifacts") is Array or b["artifacts"].size() > BOARD_ARTIFACT_LIMIT:
 		return false
+	if not unique_artifacts(b["artifacts"]): return false
 	for art in b["artifacts"]:
 		if not valid_artifact(art, max_tick, next_world_id) or int(art["board_id"]) != int(b["id"]):
 			return false
+	return true
+
+static func unique_artifacts(collection: Array) -> bool:
+	var seen := {}
+	for art in collection:
+		if not art is Dictionary or not Data.integer(art.get("id"), 1) or seen.has(int(art.id)):
+			return false
+		seen[int(art.id)] = true
 	return true
 
 static func valid_active(act: Variant, max_tick: int, next_attempt_id: int, next_world_id: int) -> bool:
@@ -746,11 +1018,11 @@ static func valid_active(act: Variant, max_tick: int, next_attempt_id: int, next
 		return false
 	if not Data.integer(act.get("board_id"), 1) or int(act["board_id"]) >= next_world_id:
 		return false
-	if act.get("target_shape") not in SHAPES + [""]:
+	if act.get("target_shape") not in KNOWN_SHAPES + [""]:
 		return false
 	if not Data.integer(act.get("start_tick")) or int(act["start_tick"]) > max_tick:
 		return false
-	if not Data.integer(act.get("total_segments"), 1) or int(act["total_segments"]) > 16:
+	if not Data.integer(act.get("total_segments"), 1) or int(act["total_segments"]) != MAX_MEMORY_SEGMENTS:
 		return false
 	if not Data.integer(act.get("step_index")) or int(act["step_index"]) > int(act["total_segments"]):
 		return false
@@ -763,6 +1035,15 @@ static func valid_active(act: Variant, max_tick: int, next_attempt_id: int, next
 	for item in act["actions"]:
 		if not valid_action(item):
 			return false
+	var done: bool = act["status"] == "completed"
+	var step_index: int = int(act["step_index"])
+	if (done and step_index != int(act["total_segments"])) or (not done and step_index >= int(act["total_segments"])):
+		return false
+	if act["actions"].size() != 2 + step_index + (1 if done else 0): return false
+	if act["actions"][0].op != "move_pen" or act["actions"][1].op != "pen_down": return false
+	for i in range(step_index):
+		if act["actions"][i + 2].op != "segment": return false
+	if done and act["actions"].back().op != "pen_up": return false
 	if not act.get("trace") is Array or act["trace"].size() > int(act["total_segments"]):
 		return false
 	for step in act["trace"]:
@@ -776,12 +1057,93 @@ static func valid_active(act: Variant, max_tick: int, next_attempt_id: int, next
 			return false
 	return true
 
+static func migrate_v1(data: Variant) -> Dictionary:
+	if not data is Dictionary or not Data.json_data(data):
+		return {}
+	if not Data.integer(data.get("version"), 1):
+		return {}
+	if int(data.get("version", 0)) == VERSION and data.size() == 21:
+		return data.duplicate(true)
+	if int(data.get("version", 0)) != 1 or data.size() != 12:
+		return {}
+	if not Data.integer(data.get("next_id"), 1) or not data.get("learning") is bool or data.get("policy_mode") not in ["trained", "naive", "random", "frozen"] or not Data.integer(data.get("updates")):
+		return {}
+	if not data.get("offset_weights") is Array or data["offset_weights"].size() != DIRECTIONS:
+		return {}
+	for v in data["offset_weights"]:
+		if not Data.number(v) or absf(float(v)) > 1.0:
+			return {}
+	if not data.get("dir_weights") is Array or data["dir_weights"].size() != DIRECTIONS * DIRECTIONS:
+		return {}
+	for v in data["dir_weights"]:
+		if not Data.number(v) or absf(float(v)) > 1.0:
+			return {}
+	if not data.get("len_weights") is Array or data["len_weights"].size() != MAG_BUCKETS * LENGTHS.size():
+		return {}
+	for v in data["len_weights"]:
+		if not Data.number(v) or absf(float(v)) > 1.0:
+			return {}
+	if not data.get("last_error") is Dictionary:
+		return {}
+	if not valid_active(data.get("active"), 2147483647, int(data.next_id), 2147483647):
+		return {}
+	var migrated: Dictionary = data.duplicate(true)
+	migrated["version"] = VERSION
+	migrated["observation_enabled"] = true
+	# X4 calibrated a different actuator: never invent X5 motor experience.
+	var init_p := INITIAL_DECODER_PARAMS.duplicate()
+	migrated["decoder_params"] = init_p.duplicate()
+	migrated["best_params"] = init_p.duplicate()
+	migrated["search_dirs"] = INITIAL_SEARCH_DIRS.duplicate()
+	migrated["step_sizes"] = INITIAL_STEP_SIZES.duplicate()
+	migrated["active_probe_axis"] = -1
+	migrated["probe_shape"] = ""
+	migrated["best_error"] = {}
+	migrated["shape_memory"] = {}
+	# A live X4 servo session cannot resume as an X5 memory plan.
+	migrated["active"] = {}
+	return migrated
+
 static func from_dict(data: Variant, max_tick: int = 2147483647, next_world_id: int = 2147483647):
-	if not data is Dictionary or data.size() != 12 or not Data.json_data(data):
+	if not data is Dictionary or not Data.json_data(data):
+		return null
+	if not Data.integer(data.get("version"), 1):
+		return null
+	if data.size() != 21:
 		return null
 	if not Data.integer(data.get("version"), 1) or int(data["version"]) != VERSION or not Data.integer(data.get("next_id"), 1):
 		return null
-	if not data.get("learning") is bool or data.get("policy_mode") not in ["trained", "naive", "random", "frozen"] or not Data.integer(data.get("updates")):
+	if not data.get("learning") is bool or not data.get("observation_enabled") is bool or data.get("policy_mode") not in POLICY_MODES or not Data.integer(data.get("updates")):
+		return null
+	for p_field in ["decoder_params", "best_params"]:
+		var arr: Variant = data.get(p_field)
+		if not arr is Array or arr.size() != 3:
+			return null
+		for idx in range(3):
+			if not Data.number(arr[idx]):
+				return null
+			var val := float(arr[idx])
+			if idx < 2 and absf(val) > 1.0:
+				return null
+			if idx == 2 and (val < 0.0 or val > 1.0):
+				return null
+	var s_dirs: Variant = data.get("search_dirs")
+	if not s_dirs is Array or s_dirs.size() != 3:
+		return null
+	for d_val in s_dirs:
+		if not Data.number(d_val) or absf(float(d_val)) > 1.0 or float(d_val) == 0.0:
+			return null
+	var s_sizes: Variant = data.get("step_sizes")
+	if not s_sizes is Array or s_sizes.size() != 3:
+		return null
+	for sz_val in s_sizes:
+		if not Data.number(sz_val) or float(sz_val) <= 0.0 or float(sz_val) > 1.0:
+			return null
+	if not Data.integer(data.get("active_probe_axis"), -1) or int(data["active_probe_axis"]) > 2:
+		return null
+	if not data.get("probe_shape") is String or data["probe_shape"] not in KNOWN_SHAPES + [""]:
+		return null
+	if not valid_shape_memory(data.get("shape_memory"), max_tick):
 		return null
 	if not data.get("offset_weights") is Array or data["offset_weights"].size() != DIRECTIONS:
 		return null
@@ -798,11 +1160,13 @@ static func from_dict(data: Variant, max_tick: int = 2147483647, next_world_id: 
 	for v in data["len_weights"]:
 		if not Data.number(v) or absf(float(v)) > 1.0:
 			return null
-	if not data.get("last_error") is Dictionary or data["last_error"].size() > SHAPES.size():
-		return null
-	for k in data["last_error"]:
-		if k not in SHAPES or not Data.number(data["last_error"][k]) or float(data["last_error"][k]) < 0.0 or float(data["last_error"][k]) > 1.0:
+	for err_field in ["last_error", "best_error"]:
+		var err_dict: Variant = data.get(err_field)
+		if not err_dict is Dictionary or err_dict.size() > KNOWN_SHAPES.size():
 			return null
+		for k in err_dict:
+			if k not in KNOWN_SHAPES or not Data.number(err_dict[k]) or float(err_dict[k]) < 0.0 or float(err_dict[k]) > 1.0:
+				return null
 	if not data.get("attempts") is Array or data["attempts"].size() > ATTEMPT_LIMIT:
 		return null
 	var prev_id := 0
@@ -822,6 +1186,7 @@ static func from_dict(data: Variant, max_tick: int = 2147483647, next_world_id: 
 			return null
 	if not data.get("artifacts") is Array or data["artifacts"].size() > BOARD_ARTIFACT_LIMIT:
 		return null
+	if not unique_artifacts(data["artifacts"]): return null
 	for art in data["artifacts"]:
 		if not valid_artifact(art, max_tick, next_world_id):
 			return null
@@ -832,7 +1197,16 @@ static func from_dict(data: Variant, max_tick: int = 2147483647, next_world_id: 
 	result.next_id = int(data["next_id"])
 	result.learning = bool(data["learning"])
 	result.policy_mode = str(data["policy_mode"])
+	result.observation_enabled = bool(data["observation_enabled"])
 	result.updates = int(data["updates"])
+	result.decoder_params = Data.restore_precision(data["decoder_params"])
+	result.best_params = Data.restore_precision(data["best_params"])
+	result.search_dirs = Data.restore_precision(data["search_dirs"])
+	result.step_sizes = Data.restore_precision(data["step_sizes"])
+	result.active_probe_axis = int(data["active_probe_axis"])
+	result.probe_shape = str(data["probe_shape"])
+	result.best_error = Data.restore_precision(data["best_error"])
+	result.shape_memory = Data.restore_precision(data["shape_memory"])
 	result.offset_weights = Data.restore_precision(data["offset_weights"])
 	result.dir_weights = Data.restore_precision(data["dir_weights"])
 	result.len_weights = Data.restore_precision(data["len_weights"])

@@ -909,10 +909,10 @@ func _verify_m3(main, folder: String) -> void:
 	main.world.demonstrar_forma(board_id, "quadrado", {"scale": 1.0, "center": [32.0, 32.0]})
 	main._refresh()
 	main._show_lab(true)
-	_expect(main.lab.atelier_warning.text.contains("Ainda não copia de memória"), "M3 Laboratório exibe aviso honesto de limites (ainda não copia de memória)")
-	_expect(main.lab.atelier_competence.text.contains("demonstrado") and main.lab.atelier_competence.text.contains("praticado") and main.lab.atelier_competence.text.contains("aprendeu calibração guiada (ainda não copia de memória)"), "M3 competência distingue demonstrado, praticado e aprendeu com texto honesto")
+	_expect(main.lab.atelier_warning.text.contains("Superar controles sem treino") and main.lab.atelier_warning.text.contains("apenas o erro final"), "M3b Laboratório explicita retorno escalar e limites experimentais")
+	_expect(main.lab.atelier_competence.text.contains("demonstrado") and main.lab.atelier_competence.text.contains("praticado") and not main.lab.atelier_competence.text.contains("aprendeu calibração guiada"), "M3b competência distingue demonstração e prática sem alegar domínio geral")
 	_expect(main.lab.atelier_chart.total_points >= 4 and not main.lab.atelier_attempts.text.is_empty(), "M3 curva de erro e histórico de tentativas alimentados por dados reais")
-	_expect(main.lab.atelier_status.text.contains("Treino do ateliê: ativo") and main.lab.atelier_status.text.contains("ainda não copia de memória"), "M3 status mostra se treino/política está ativo e limite honesto")
+	_expect(main.lab.atelier_status.text.contains("Treino do ateliê: ativo") and main.lab.atelier_status.text.contains("competência experimental"), "M3b status mostra treino ativo e competência experimental")
 	main.lab.atelier_learning_switch.button_pressed = false
 	main.lab._select_atelier_policy(2)
 	_expect(not creature.atelier.learning and creature.atelier.policy_mode == "naive", "M3 ablação de treino e política no Laboratório altera estado real")
@@ -920,9 +920,9 @@ func _verify_m3(main, folder: String) -> void:
 	var saved_m3: Dictionary = main.world.to_dict()
 	main._load("m3")
 	await process_frame
-	_expect(main.world.to_dict() == saved_m3 and main.gallery_list.get_child_count() >= 1, "M3 save/load v10 preserva quadros, galeria, ateliê e ablações")
+	_expect(main.world.to_dict() == saved_m3 and main.gallery_list.get_child_count() >= 1, "M3b save/load v11 preserva quadros, galeria, ateliê e ablações")
 	main._open_atelier_tutorial()
-	_expect(main.tutorial_dialog.visible and main.tutorial_step == 5 and main.tutorial_text.text.contains("6/6") and main.tutorial_text.text.contains("ainda não copia de memória"), "M3 roteiro de tutorial do ateliê acessível e honesto")
+	_expect(main.tutorial_dialog.visible and main.tutorial_step == 5 and main.tutorial_text.text.contains("6/6") and main.tutorial_text.text.contains("competência é experimental"), "M3b roteiro do ateliê acessível e honesto")
 	main.tutorial_dialog.hide()
 	await process_frame
 	await process_frame

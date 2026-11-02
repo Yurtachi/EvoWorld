@@ -23,7 +23,7 @@ const QBrain = preload("res://scripts/behavior/q_brain.gd")
 const Social = preload("res://scripts/social/social_dynamics.gd")
 const Mind = preload("res://scripts/mind/creature_mind.gd")
 const Atelier = preload("res://scripts/atelier/atelier.gd")
-const SAVE_VERSION := 10 # M3 atelier boards, stroke-3 drawings, gallery and copying skill.
+const SAVE_VERSION := 11 # M3b bounded observation memory and learned motor decoder.
 const ObjectCatalog = preload("res://scripts/environment/object_catalog.gd")
 const NEW_WORLD_CREATURE_COUNT := 12
 const EVOLUTION_DEFAULTS := {
@@ -323,6 +323,8 @@ func demonstrar_forma(board_ref: Variant, forma: String, params: Dictionary = {}
 		if board_ref is Dictionary and board_ref != board:
 			board_ref.merge(board, true)
 		for creature in creatures.values():
+			if creature.mind != null:
+				observe_board(creature, board)
 			if creature.mind != null and not creature.mind.objects.is_empty():
 				var s: Dictionary = Mind.ObjectMemory.state(creature.mind)
 				var key := str(target_id)
@@ -331,6 +333,17 @@ func demonstrar_forma(board_ref: Variant, forma: String, params: Dictionary = {}
 					s.entries[key].retry_tick = 0
 		return true
 	return false
+
+func observe_board(creature: Creature, board: Dictionary) -> bool:
+	if not creature.alive or board.reference_strokes.is_empty() or not _visible(creature, board.pos) or _occluded(creature.pos, board.pos):
+		return false
+	if creature.atelier == null:
+		creature.atelier = Atelier.new()
+	var mem: Dictionary = creature.atelier.shape_memory.get(str(board.reference_shape), {})
+	if int(mem.get("last_tick", -1)) == tick:
+		return true
+	var obs_rng = creature.mind.rng if creature.mind != null else rng
+	return creature.atelier.observe_demonstration(str(board.reference_shape), board.reference_strokes, obs_rng, tick)
 
 func draw_on_board(creature: Creature, board_id: int) -> bool:
 	if not creature.alive:
@@ -342,7 +355,13 @@ func draw_on_board(creature: Creature, board_id: int) -> bool:
 			return false
 		if creature.atelier == null:
 			creature.atelier = Atelier.new()
+		var a = creature.atelier
+		var starting: bool = a.active.is_empty() or a.active.get("status") != "active" or int(a.active.get("board_id", 0)) != board_id or a.active.get("target_shape") != board.reference_shape
+		if starting and not board.reference_strokes.is_empty():
+			observe_board(creature, board)
 		var res: Dictionary = creature.atelier.step_drawing(self, creature, board)
+		if not bool(res.get("reproduced", false)):
+			return false
 		creature.last_action = "draw_stroke"
 		if creature.mind != null:
 			var evidence := {"energy": snappedf(-Atelier.DRAW_ENERGY_COST, 0.000001), "hydration": 0.0, "toxicity": 0.0, "surprise": 0.25}
@@ -892,7 +911,7 @@ static func from_dict(data: Dictionary) -> SimWorld:
 	# hostile data in fields introduced by later versions.
 	if not Data.json_data(data):
 		return null
-	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, SAVE_VERSION]:
+	if not Data.integer(data.get("save_version")) or int(data["save_version"]) not in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, SAVE_VERSION]:
 		return null
 	if int(data["save_version"]) == 1:
 		data = _migrate_v1(data)
@@ -923,6 +942,9 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		if data.is_empty(): return null
 	if int(data["save_version"]) == 9:
 		data = _migrate_v9(data)
+		if data.is_empty(): return null
+	if int(data["save_version"]) == 10:
+		data = _migrate_v10(data)
 		if data.is_empty(): return null
 	if not Data.integer(data.get("object_catalog_version"), 1) or int(data.object_catalog_version) != ObjectCatalog.VERSION or not data.get("objects") is Array or data.objects.size() > ObjectCatalog.LIMIT:
 		return null
@@ -1120,16 +1142,22 @@ static func from_dict(data: Dictionary) -> SimWorld:
 		var b_copy: Dictionary = Data.restore_precision(board)
 		b_copy["pos"] = b_pos
 		result.boards.append(b_copy)
+	var artifact_registry: Dictionary = {}
+	var artifact_collections: Array = []
 	for board in result.boards:
+		artifact_collections.append(board.artifacts)
 		for art in board.artifacts:
 			if int(art.board_id) != int(board.id) or used_ids.has(int(art.id)) or not ancestry.records.has(int(art.owner_id)):
 				return null
+	if not Atelier.unique_artifacts(raw_gallery): return null
+	artifact_collections.append(raw_gallery)
 	for art in raw_gallery:
 		if not Atelier.valid_artifact(art, result.tick, int(data["next_id"])) or used_ids.has(int(art.id)) or not ancestry.records.has(int(art.owner_id)) or not board_ids.has(int(art.board_id)):
 			return null
 		result.gallery.append(Data.restore_precision(art))
 	for creature in result.creatures.values():
 		if creature.atelier != null:
+			artifact_collections.append(creature.atelier.artifacts)
 			for art in creature.atelier.artifacts:
 				if used_ids.has(int(art.id)) or int(art.owner_id) != creature.id:
 					return null
@@ -1137,6 +1165,13 @@ static func from_dict(data: Dictionary) -> SimWorld:
 			if int(creature.mind.objects.target) >= int(data.next_id): return null
 			for key in creature.mind.objects.entries:
 				if int(key) >= int(data.next_id): return null
+	# Shared replicas across collections are intentional, but must agree.
+	for collection in artifact_collections:
+		for art in collection:
+			var aid: int = int(art.id)
+			var canonical: Dictionary = Data.restore_precision(art)
+			if artifact_registry.has(aid) and artifact_registry[aid] != canonical: return null
+			artifact_registry[aid] = canonical
 	for used_id in used_ids:
 		if used_id >= int(data["next_id"]):
 			return null
@@ -1234,7 +1269,7 @@ static func _migrate_v6(data: Dictionary) -> Dictionary:
 
 ## Idempotent migration never activates M1 or invents an acquired experience.
 static func _migrate_v7(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [8, 9, SAVE_VERSION]:
+	if data.get("save_version") in [8, 9, 10, SAVE_VERSION]:
 		return data.duplicate(true)
 	if not data.get("config") is Dictionary or not data.get("creatures") is Array:
 		return {}
@@ -1248,7 +1283,7 @@ static func _migrate_v7(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v8(data: Dictionary) -> Dictionary:
-	if data.get("save_version") in [9, SAVE_VERSION]: return data.duplicate(true)
+	if data.get("save_version") in [9, 10, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 8 or not data.get("creatures") is Array: return {}
 	# Legacy fixtures may retain empty modern metadata; never discard acquired data.
 	if data.has("objects") and (not data.objects is Array or not data.objects.is_empty()): return {}
@@ -1263,13 +1298,26 @@ static func _migrate_v8(data: Dictionary) -> Dictionary:
 	return migrated
 
 static func _migrate_v9(data: Dictionary) -> Dictionary:
-	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") in [10, SAVE_VERSION]: return data.duplicate(true)
 	if data.get("save_version") != 9 or not data.get("creatures") is Array: return {}
 	if data.has("boards") and (not data.boards is Array or not data.boards.is_empty()): return {}
 	if data.has("gallery") and (not data.gallery is Array or not data.gallery.is_empty()): return {}
 	for c in data.creatures:
 		if not c is Dictionary or c.has("atelier"): return {}
 	var migrated := data.duplicate(true)
+	migrated["save_version"] = SAVE_VERSION
+	return migrated
+
+static func _migrate_v10(data: Dictionary) -> Dictionary:
+	if data.get("save_version") == SAVE_VERSION: return data.duplicate(true)
+	if data.get("save_version") != 10 or not data.get("creatures") is Array: return {}
+	var migrated := data.duplicate(true)
+	for c in migrated.creatures:
+		if not c is Dictionary: return {}
+		if c.has("atelier"):
+			if not c.atelier is Dictionary or c.atelier.get("version") != 1: return {}
+			c["atelier"] = Atelier.migrate_v1(c.atelier)
+			if c.atelier.is_empty(): return {}
 	migrated["save_version"] = SAVE_VERSION
 	return migrated
 
